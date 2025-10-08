@@ -1,47 +1,95 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+    <title>Login - Titan Marketing</title>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    @vite(['public/css/app.css', 'public/css/login-custom.css', 'public/js/app.js'])
+
+    
+    
+
+
+</head>
+<body class="font-sans antialiased">
+    <div class="login-container">
+        <div class="left-panel">
+            <div class="glass-header">
+                <span class="titan-marketing-text">TITAN MARKETING</span>
+            </div>
+            
+           <div class="proverb-text">
+                <p>
+                    "SE TE MOSTRARES FRACO NO DIA DA ANGÚSTIA,
+                    <span class="proverb-highlight">A TUA FORÇA É PEQUENA.</span>"
+                </p>
+            </div>
         </div>
+        <div class="right-panel">
+            <div class="login-form-wrapper">
+                <h2 class="welcome-text">Prazer em te ver!</h2>
+                <p class="subtitle-text">Digite seu e-mail e senha para entrar</p>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+                <form method="POST" action="{{ route('login') }}" class="login-form">
+                    @csrf
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+                    <div class="form-group">
+                        <label for="email" class="input-label">Email</label>
+                        <input id="email" class="input-field" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Seu endereço de email" />
+                        @error('email')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    <div class="form-group">
+                        <label for="password" class="input-label">Senha</label>
+                        <input id="password" class="input-field" type="password" name="password" required autocomplete="current-password" placeholder="Sua senha" />
+                        @error('password')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="remember-me-group">
+                        <label for="remember_me" class="remember-me-label">
+                            <input id="remember_me" type="checkbox" name="remember" class="remember-me-checkbox">
+                            <span class="remember-me-text">Lembre-se de mim</span>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="login-button">
+                            ENTRAR
+                        </button>
+                    </div>
+                </form>
+
+                <div class="register-link">
+                    Não tem uma conta? <a href="{{ route('register') }}" class="register-text">Cadastre-se</a>
+                </div>
+
+                @if (Route::has('password.request'))
+                    <div class="forgot-password-link">
+                        <a href="{{ route('password.request') }}" class="forgot-password-text">Esqueceu sua senha?</a>
+                    </div>
+                @endif
+            </div>
         </div>
+    </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+
+
+
+
+
+    
+</body>
+</html>

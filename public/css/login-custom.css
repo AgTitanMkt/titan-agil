@@ -1,0 +1,549 @@
+/* Cores */
+:root {
+    /* cores do degradê de fundo */
+    --color-bg-left-start: #0E2635; /* 0% */
+    --color-bg-middle: #15242B; /* 59% */
+    --color-bg-right-end: #7B241C; /* 100% */
+    
+    /* cores do painel direito */
+    --color-panel-right-bg: #111e25; 
+    
+    /* cores de todos os texto */
+    --color-text-light: #E0E0E0;
+    --color-text-dark: #A0A0A0; 
+    --color-text-proverb: #FFFFFF; 
+    
+    /* conteiner */
+    --color-glass-bg: rgba(255, 255, 255, 0.1); /* fundo transparente/vidro */
+    --color-glass-border: rgba(255, 255, 255, 0.2);
+    --color-input-bg: rgba(255, 255, 255, 0.08); 
+    --color-input-border: rgba(255, 255, 255, 0.15);
+    
+    /* cores do cta  */
+    --color-primary-button: #007bff; 
+    --color-primary-button-hover: #0056b3; 
+    
+    /* cores dos links */
+    --color-link: #498ffc; 
+    --color-link-hover: #357ae8;
+}
+
+/* base reset e fontes */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif; 
+    color: var(--color-text-light);
+    overflow: hidden; 
+}
+
+/* degrade de fundo */
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(90deg, 
+        var(--color-bg-left-start) 0%, 
+        var(--color-bg-middle) 50%, 
+        var(--color-bg-right-end) 100%);
+}
+
+
+/* painel esquerdo (background e proverbio) */
+
+.left-panel {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 30px;
+    position: relative;
+    text-align: center;
+    
+    background-image: url('/public/img/Titan Background Dash Login.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* OPACIDADE DO BACKGROUND PARA FACILITAR LEITURA */
+.left-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3); /* escurece 30% */
+    z-index: 0; /* atras do conteudo */
+}
+
+
+.left-panel > * {
+    position: relative; 
+    z-index: 1;
+}
+
+/* cabecalho de vidro TITAN MARKETING */
+.glass-header {
+    background: var(--color-glass-bg); 
+    border: 1px solid var(--color-glass-border);
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px); 
+    border-radius: 8px; 
+    padding: 10px 20px;
+    width: 70%; 
+    max-width: 600px;
+    margin-top: 20px; 
+    text-align: left;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    align-self: center;
+}
+
+.titan-marketing-text {
+    font-size: 1.2rem;
+    font-weight: 300; /* FONTE MAIS LIGHT */
+    letter-spacing: 2px;
+    color: var(--color-text-light);
+    display: block; 
+}
+
+/* (Proverbio 24:10) */
+.proverb-text {
+    position: absolute;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    
+    font-size: 1.2rem;
+    line-height: 1.5;
+    font-weight: 400; 
+    text-align: center;
+    color: var(--color-text-proverb);
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); 
+    max-width: 500px;
+    padding: 0 20px;
+    letter-spacing: 0.5px;
+}
+
+.proverb-text p {
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 300; 
+}
+
+/* DESTAQUE PARA "A TUA FORÇA É PEQUENA" */
+.proverb-highlight {
+    font-size: 2.1rem;
+    font-weight: 600; /* DESTAQUE MAIS GROSSO */
+    color: var(--color-text-proverb); 
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2); 
+}
+
+
+
+/* painel direito LOGIN */
+
+.right-panel {
+    flex: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    background: var(--color-panel-right-bg); 
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 350px; 
+    text-align: center;
+}
+
+.welcome-text {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--color-text-light);
+    text-align: left;
+}
+
+.subtitle-text {
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+}
+
+.form-group {
+    text-align: left;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-input-border);
+    border-radius: 25px; 
+    color: var(--color-text-light);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box; 
+}
+
+.input-field::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--color-primary-button);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
+/* lembre-se de mim */
+
+.remember-me-group {
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    margin-top: 10px;
+}
+
+.remember-me-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative; 
+}
+
+.remember-me-checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.remember-me-text {
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+    
+    
+    position: relative; 
+    padding-left: 50px; 
+    
+    transition: color 0.3s ease;
+}
+
+/* visual do botão NO SPAN */
+.remember-me-text::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-block;
+    width: 40px; 
+    height: 20px; 
+    background-color: var(--color-input-border); 
+    border-radius: 10px;
+    transition: background-color 0.3s;
+    z-index: 0; 
+}
+
+/* o pino NO SPAN */
+.remember-me-text::after {
+    content: '';
+    position: absolute;
+    left: 2px; /* posicao inicial do pino */
+    top: 50%;
+    transform: translateY(-50%);
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-text-light); /* cor do pino */
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    z-index: 1; 
+}
+
+/* ANIMACAO PARA ATIVO E NAO ATIVO */
+
+.remember-me-checkbox:checked + .remember-me-text {
+    /* o texto do span em si fica mais claro */
+    color: var(--color-text-light); 
+}
+
+.remember-me-checkbox:checked + .remember-me-text::before {
+    /* 1 troca o fundo para AZUL */
+    background-color: var(--color-primary-button); 
+}
+
+.remember-me-checkbox:checked + .remember-me-text::after { 
+    /* 2 move o pino para a direita */
+    transform: translate(20px, -50%); 
+}
+
+
+/* CTA ENTRAR */
+
+.login-button {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--color-primary-button);
+    color: white;
+    border: none;
+    border-radius: 25px; 
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-top: 30px; 
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.login-button:hover {
+    background-color: var(--color-primary-button-hover);
+    transform: translateY(-3px); 
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4); 
+}
+
+.login-button:active {
+    transform: translateY(0); 
+    background-color: #004a99;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+
+/* links adicionais para passoword */
+
+.register-link, .forgot-password-link {
+    margin-top: 30px;
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+    text-align: center;
+}
+
+.register-text, .forgot-password-text {
+    color: var(--color-link);
+    text-decoration: none;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 2px;
+    transition: color 0.3s ease;
+}
+
+/* animacao para cadastre-se e esqueceu sua senha */
+.register-text::after, .forgot-password-text::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    display: block;
+    bottom: 0;
+    left: 50%; 
+    background: var(--color-link-hover);
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.register-text:hover::after, .forgot-password-text:hover::after {
+    width: 100%;
+    left: 0; 
+}
+
+.register-text:hover, .forgot-password-text:hover {
+    color: var(--color-link-hover);
+}
+
+/* link adicional para esqueceu sua senha */
+.forgot-password-link {
+    margin-top: 15px;
+}
+
+
+
+/* RESPONSIVIDADE TOTAL AJUSTADA PARA TODOS OS DISPOSITIVOS */
+
+/* Desktop/Laptop (Max 1280px e 1024px) */
+/* as regras anteriores ja sao utilizadas por telas maiores que 1024px com 50/50 */
+@media (max-width: 1024px) {
+    .login-container {
+        flex-direction: column; 
+    }
+    
+    .left-panel {
+        width: 100%;
+        min-height: 40vh; 
+        padding: 20px;
+        justify-content: flex-start; 
+        position: relative; 
+        
+        background-color: rgba(0, 0, 0, 0.2); 
+    }
+    
+    .left-panel::before {
+        content: none; 
+    }
+
+    .glass-header {
+        position: static; 
+        transform: none;
+        width: 90%;
+        max-width: 400px;
+        margin-bottom: 20px; 
+        align-self: center; 
+        text-align: left; 
+    }
+    
+    .proverb-text {
+        position: static;
+        transform: none;
+        font-size: 1.1rem;
+        line-height: 1.4;
+        text-align: center;
+        max-width: 90%;
+        margin: 20px auto 0 auto; 
+    }
+    
+    .proverb-highlight {
+        font-size: 1.8rem;
+    }
+
+    .right-panel {
+        width: 100%;
+        min-height: 60vh;
+        padding: 40px 20px;
+    }
+
+    .login-form-wrapper {
+        max-width: 400px; 
+    }
+}
+
+/* Tablet (Max 768px) */
+@media (max-width: 768px) {
+    .left-panel {
+        min-height: 30vh; 
+        background-color: rgba(0, 0, 0, 0.35); 
+    }
+    
+    .proverb-text {
+        font-size: 1rem;
+        
+        margin-top: 10px; 
+    }
+
+    .proverb-highlight {
+        font-size: 1.6rem; 
+    }
+    
+    .right-panel {
+        min-height: 70vh;
+        padding: 30px 15px; 
+    }
+    .welcome-text {
+        font-size: 2rem;
+    }
+    
+    .login-form {
+        gap: 15px; 
+    }
+}
+
+/* 3. Celulares (Max 480px) */
+@media (max-width: 480px) {
+    .left-panel {
+        min-height: 25vh;
+        padding: 15px;
+        background-color: rgba(0, 0, 0, 0.5); 
+    }
+    
+    .glass-header {
+        padding: 8px 15px;
+        width: 95%;
+        margin-top: 10px;
+        /* CENTRALIZA O TITAN MARKETING */
+        text-align: center; 
+    }
+    
+    .titan-marketing-text {
+        font-size: 0.9rem; 
+    }
+    
+    .proverb-text {
+        font-size: 0.9rem;
+        max-width: 95%;
+        text-align: center;
+        
+        margin-top: 0; 
+    }
+    .proverb-highlight {
+        font-size: 1.3rem; 
+    }
+    
+    .right-panel {
+        min-height: 75vh;
+        padding: 25px 15px;
+    }
+    
+    .welcome-text {
+        font-size: 1.8rem;
+        margin-bottom: 25px; 
+    }
+
+    .input-field {
+        padding: 10px 15px;
+    }
+    
+    .login-button {
+        padding: 12px;
+        font-size: 1rem;
+        margin-top: 25px;
+    }
+    
+    
+    .register-link, .forgot-password-link {
+        font-size: 0.9rem;
+    }
+}
+
+/* 4. Celulares pequenos antigos (Max 360px) */
+@media (max-width: 360px) {
+    .left-panel {
+        min-height: 20vh;
+    }
+    .proverb-text {
+        font-size: 0.8rem;
+    }
+    .proverb-highlight {
+        font-size: 1.1rem;
+    }
+    .right-panel {
+        padding: 20px 10px;
+    }
+    .welcome-text {
+        font-size: 1.6rem;
+    }
+    
+    .login-form {
+        gap: 10px; 
+    }
+}
+
+

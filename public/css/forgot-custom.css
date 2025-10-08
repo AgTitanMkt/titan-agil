@@ -1,0 +1,182 @@
+
+/* RESET GERAL PARA TIRAR BORDAS BEGES NO CELULAR/MOBILE */
+
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+
+/* BACKGROUND */
+
+
+.forgot-page-container {
+    background-image: url('/public/img/Esqueceu\ a\ senha\ image\ Titan.png'); 
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    
+    padding: 20px; 
+}
+
+/* OPACIDADE */
+.forgot-page-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 45% */
+    background-color: rgba(0, 0, 0, 0.45); 
+    z-index: -1;
+}
+
+
+/* CARD DO FORMULÁRIO EM VIDRO/TRANSPARENTE */
+
+
+.forgot-form-card {
+    width: 100%;
+    max-width: 450px; 
+    padding: 40px 35px;
+    border-radius: 12px;
+    
+    /* VIDRO */
+    background-color: rgba(0, 0, 0, 0.25); 
+    backdrop-filter: blur(8px); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    color: white;
+    z-index: 10;
+}
+
+
+/* TITULOS E SUB TITULOS */
+
+
+.form-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: white;
+    text-align: center;
+}
+
+.form-subtitle {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+
+/* CAMPO DO FORMULARIO */
+
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.text-input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    transition: border-color 0.3s;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.text-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.text-input:focus {
+    border-color: #007bff; 
+}
+
+
+
+/* CTA BOTAO */
+
+
+.submit-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    background-color: #007bff; 
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-transform: uppercase;
+    margin-top: 15px;
+    font-family: 'Inter', sans-serif;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+
+
+/* RESPONSIVIDADE BEM TRANQUILA POR TER POUCOS ELEMENTOS*/
+
+
+/* Celular */
+@media (max-width: 600px) {
+    .forgot-form-card {
+        max-width: 100%; 
+        padding: 30px 20px;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .text-input {
+        padding: 10px 12px;
+    }
+    
+    .submit-button {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
