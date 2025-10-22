@@ -34,5 +34,13 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'clickup' => [
+        'client_id' => env('CLICKUP_CLIENT_ID'),
+        'secret' => env('CLICKUP_SECRET'),
+        'base_url' => env('CLICKUP_BASE_URL'),
+        'url' => [
+            'access_token' => '/oauth/token',
+            'token_url' => 'https://api.clickup.com/api/v2/oauth/token',
+        ]
+    ],
 ];
