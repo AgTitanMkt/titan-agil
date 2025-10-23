@@ -34,13 +34,28 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
     'clickup' => [
         'client_id' => env('CLICKUP_CLIENT_ID'),
-        'secret' => env('CLICKUP_SECRET'),
-        'base_url' => env('CLICKUP_BASE_URL'),
+        'secret'    => env('CLICKUP_SECRET'),
+        'base_url'  => env('CLICKUP_BASE_URL'),
         'url' => [
             'access_token' => '/oauth/token',
-            'token_url' => 'https://api.clickup.com/api/v2/oauth/token',
+            'token_url'    => 'https://api.clickup.com/api/v2/oauth/token',
         ]
     ],
+
+    /**
+     * ======================
+     *      REDTRACK
+     * ======================
+     */
+    'redtrack' => [
+        // A sua API Key vai no .env
+        'api_key'  => env('REDTRACK_API_KEY'),
+
+        // Normalmente esse é o endpoint padrão para reports
+        'base_url' => env('REDTRACK_BASE_URL', 'https://api.redtrack.io/report'),
+    ],
+
 ];
