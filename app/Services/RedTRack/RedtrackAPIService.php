@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Redtrack; // <-- ajuste se mudar a pasta
+namespace App\Services\RedTRack;
 
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -22,13 +22,12 @@ class RedtrackAPIService
      * retorna tudo paginado, já com CTR e CPM calculados.
      */
     public function fetchReport(
-        string $group = 'rt_ad',
         string $dateFrom,
         string $dateTo,
-        int $per = 1000,
-        array $extra = []
-    ): array
-    {
+        ?string $group = 'rt_ad',
+        ?int $per = 1000,
+        ?array $extra = []
+    ): array {
         $page = 1;
         $rows = [];
 
@@ -51,7 +50,7 @@ class RedtrackAPIService
                     'status' => $response->status(),
                     'body'   => $response->body(),
                 ]);
-                throw new Exception('Erro ao consultar RedTrack: '.$response->body());
+                throw new Exception('Erro ao consultar RedTrack: ' . $response->body());
             }
 
             $data  = $response->json();
