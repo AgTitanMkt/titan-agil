@@ -12,11 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['public/css/app.css', 'public/css/login-custom.css', 'public/js/app.js'])
-
-    
-    
-
-
 </head>
 <body class="font-sans antialiased">
     <div class="login-container">
@@ -39,7 +34,7 @@
 
                 <form method="POST" action="{{ route('login') }}" class="login-form">
                     @csrf
-
+                    
                     <div class="form-group">
                         <label for="email" class="input-label">Email</label>
                         <input id="email" class="input-field" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Seu endereço de email" />
@@ -82,14 +77,5 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-    
 </body>
 </html>

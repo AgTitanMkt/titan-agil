@@ -1,0 +1,231 @@
+
+/* CORES */
+
+:root {
+    --bg-card-dark: rgba(255, 255, 255, 0.05); /* FUNDO */
+    --bg-card-darker: rgba(0, 0, 0, 0.15); /* FUNDO DA TABELA */
+    --input-border: rgba(255, 255, 255, 0.2);
+    --text-white: #FFFFFF;
+    --text-light: #C0C0C0;
+    --text-dark: #333333;
+    --accent-blue: #007bff;
+    --table-header-color: rgba(255, 255, 255, 0.7);
+    --table-line-separator: rgba(255, 255, 255, 0.05);
+}
+
+/* TITULOS */
+.dashboard-page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 5px;
+}
+
+.dashboard-page-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 30px;
+}
+
+/* Glassmorphism DE VIDRO */
+.glass-card {
+    background-color: var(--bg-card-dark);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--input-border);
+    padding-bottom: 15px;
+}
+
+
+
+/* META ADS (FILTROS) */
+
+
+.filters-grid {
+    display: grid;
+    /* 4 colunas em telas grandes */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px;
+}
+
+.filter-group {
+    --text-light: #C0C0C0;
+    
+}
+
+/* (fundo escuro e borda) */
+.custom-select {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: var(--text-white);
+    background-color: var(--bg-card-darker);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    outline: none;
+    appearance: none; /* esconde a seta padrao do navegador */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    
+    /* icone de seta BIBLIOTECA (Font Awesome - Chevron Down) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1) Copyright 2023 Fonticons, Inc. --%3E%3Cpath fill='%23C0C0C0' d='M207 435c9.4 9.4 24.6 9.4 33.9 0L439 249c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L224 373.1 42.1 215.1c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l168 186.1z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+.custom-select:focus {
+    border-color: var(--accent-blue);
+}
+
+.filter-submit-area {
+    grid-column: 4 / 5; /* garante que o botão fique na 4ª coluna */
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end; /* alinha o botão com o fundo do select */
+}
+
+.btn-filter {
+    padding: 10px 20px;
+    background-color: var(--accent-blue);
+    color: var(--text-white);
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-filter:hover {
+    background-color: #0056b3;
+}
+
+
+
+/* TABELA MELHORES CRIATIVOS */
+
+
+.table-responsive {
+    overflow-x: auto; 
+}
+
+.creatives-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-white);
+    font-size: 0.9rem;
+}
+
+.creatives-table thead th {
+    /* CABECALHO */
+    text-align: left;
+    padding: 10px 15px;
+    color: var(--table-header-color);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    border-bottom: 2px solid var(--input-border);
+}
+
+.creatives-table tbody tr {
+    /* linhas da tabela */
+    border-bottom: 1px solid var(--table-line-separator);
+}
+
+.creatives-table tbody td {
+    padding: 10px 15px;
+    height: 60px; 
+    vertical-align: top;
+}
+
+/* AD1,AD2 E ETC */
+.ad-name {
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-white);
+    line-height: 1.2;
+}
+
+.ad-link {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+/* ROAS */
+.col-roas {
+    color: #4CAF50; 
+    font-weight: 700;
+}
+
+
+
+/* RESPONSIVIDADE */
+
+
+@media (max-width: 1200px) {
+    /* 3 colunas */
+    .filters-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .filter-submit-area {
+        grid-column: 3 / 4; /* move o botao para a 3ª coluna */
+    }
+}
+
+@media (max-width: 768px) {
+    /* tablets verticais/grandes celulares 2 colunas */
+    .filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-submit-area {
+        grid-column: 2 / 3; /* move o botao para a 2ª coluna */
+    }
+    
+    .glass-card {
+        padding: 20px 15px;
+        border-radius: 10px;
+    }
+    
+    .dashboard-page-title {
+        font-size: 1.5rem;
+    }
+
+    /* tabelas em telas pequenas que tera o scroll horizontall */
+    .creatives-table {
+        min-width: 600px; /* garante que a tabela não se quebre */
+    }
+}
+
+@media (max-width: 480px) {
+    /* celulares 1 coluna */
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-submit-area {
+        grid-column: 1 / 2; /* ocupa a coluna inteira */
+        justify-content: center;
+        margin-top: 10px;
+    }
+    
+    .btn-filter {
+        width: 100%;
+        max-width: 250px;
+    }
+}

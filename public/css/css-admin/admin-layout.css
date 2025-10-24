@@ -1,0 +1,274 @@
+
+/* CORES */
+
+:root {
+    --sidebar-width: 250px;
+    --header-height: 70px;
+    --primary-dark: #060B26; /* cor do sidebar */
+    --hover-active-color: #0d1538;
+    --accent-blue: #007bff;
+    --text-light: #C0C0C0; 
+    --text-white: #FFFFFF;
+    --border-subtle: rgba(255, 255, 255, 0.08); 
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-light);
+}
+
+.admin-page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    
+    
+    background-image: url('/public/img/img-admin/Main\ Dashboard.png');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    
+    
+    position: relative;
+}
+
+.admin-page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background-color: rgba(0, 0, 0, 0.3); 
+    z-index: 0;
+}
+
+
+
+/* SIDEBAR */
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background-color: var(--primary-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    height: 100vh;
+    position: fixed; 
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding-top: 20px;
+    box-shadow: 6px 0 15px rgba(0, 0, 0, 0.5);
+    z-index: 10; 
+    
+}
+
+/* header da sidebar */
+.sidebar-header {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    padding: 0 20px 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); 
+}
+
+.sidebar-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-white);
+    letter-spacing: 1px;
+}
+
+/* navegacao dos navs */
+.sidebar-nav {
+    flex-grow: 1; 
+    padding: 0 10px;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin-bottom: 8px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* ativo/hover */
+.nav-link:hover {
+    background-color: var(--hover-active-color);
+    color: var(--text-white);
+}
+
+.nav-item.active .nav-link {
+    background-color: var(--accent-blue); 
+    color: var(--text-white);
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+/* icons dos navs */
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+    color: var(--text-light); /* cor branca */
+    /* icon ATIVO/HOVER fique branco apos clicar ou passar mouse */
+    .nav-item.active & {
+        color: var(--text-white);
+    }
+}
+
+.nav-divider {
+    border-top: 1px solid var(--border-subtle);
+    margin: 25px 0 15px;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 5px 15px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* sidebar logo rodape */
+.sidebar-footer {
+    padding: 40px 40px 40px;
+    text-align: center;
+}
+
+.footer-image {
+    width: 100%;
+    max-width: 150px; 
+    height: auto;
+    opacity: 0.7; 
+}
+
+
+
+/* MAIN/HEADER */
+
+
+.main-content-area {
+    flex-grow: 1;
+    margin-left: var(--sidebar-width); 
+    position: relative;
+    z-index: 1; 
+}
+
+/* HEADER BAR */
+.header-bar {
+    height: var(--header-height);
+    background-color: rgba(6, 11, 38, 0.6); 
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-subtle);
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width); 
+    right: 0;
+    z-index: 500;
+    
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    padding: 0 30px;
+}
+
+/* PERFIL COM USER */
+.header-user {
+    display: flex;
+    align-items: center;
+    color: var(--text-white);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50px;
+    transition: background-color 0.2s;
+}
+
+.header-user:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ICONE DE AVATAR BONECO */
+.user-avatar-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem; 
+    color: var(--accent-blue); 
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.user-name {
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* AREA DO CONTENT */
+.page-content {
+    padding: calc(var(--header-height) + 30px) 30px 30px 30px; 
+    min-height: 100vh;
+}
+
+
+
+/* RESPONSIVIDADE */
+
+
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 0;
+        min-width: 0;
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+
+    .main-content-area {
+        margin-left: 0; 
+    }
+    
+    .header-bar {
+        left: 0; 
+        padding: 0 15px;
+    }
+    
+    .page-content {
+        padding: calc(var(--header-height) + 20px) 15px 15px 15px;
+    }
+}
