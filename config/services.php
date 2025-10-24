@@ -35,4 +35,25 @@ return [
         ],
     ],
 
+    'clickup' => [
+        'api_key' => env('CLICKUP_API_KEY'),
+        'base_url' => env('CLICKUP_BASE_URL'),
+        'endpoints' => [
+            
+        ]
+    ],
+
+    /**
+     * ======================
+     *      REDTRACK
+     * ======================
+     */
+    'redtrack' => [
+        // A sua API Key vai no .env
+        'api_key'  => env('REDTRACK_API_KEY'),
+
+        // Normalmente esse é o endpoint padrão para reports
+        'base_url' => env('REDTRACK_BASE_URL', 'https://api.redtrack.io/report'),
+    ],
+
 ];
