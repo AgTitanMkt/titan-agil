@@ -52,32 +52,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
-    // 🔹 Usuário que criou as tarefas (criador)
-    public function createdTasks(): HasMany
+    
+    public function tasks(): BelongsToMany
     {
-        return $this->hasMany(Task::class, 'created_by');
+        return $this->belongsToMany(SubTask::class, 'user_tasks','user_id','sub_task_id');
     }
 
-    // 🔹 Usuário que executa as subtarefas
-    public function executedSubTasks(): HasMany
-    {
-        return $this->hasMany(SubTask::class, 'executed_by');
-    }
 
-    // 🔹 Usuário que revisa as subtarefas
-    public function revisedSubTasks(): HasMany
-    {
-        return $this->hasMany(SubTask::class, 'revised_by');
-    }
-    public function allRelatedTasks()
-    {
-        $tasks = $this->createdTasks()->get();
-
-        $subTasks = SubTask::where(function ($query) {
-            $query->where('executed_by', $this->id)
-                ->orWhere('revised_by', $this->id);
-        })->get();
-
-        return $tasks->merge($subTasks);
-    }
 }

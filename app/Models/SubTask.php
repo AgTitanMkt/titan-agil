@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SubTask extends Model
@@ -18,28 +20,34 @@ class SubTask extends Model
     protected $fillable = [
         'task_id',
         'description',
-        'executed_by',
-        'revised_by',
         'status',
         'due_date',
-        'role_id',
+        'hook'
     ];
 
-    public function task(): HasOne
+    /**
+     * Sempre carregar a task associada
+     */
+    protected $with = ['task:id,code'];
+
+   /**
+     * Relação: SubTask pertence a uma Task
+     */
+    public function task(): BelongsTo
     {
-        return $this->hasOne(Task::class);
-    }
-    public function reviwer(): HasOne
-    {
-        return$this->hasOne(User::class,'id','revised_by');
-    }
-    public function executer(): HasOne
-    {
-        return$this->hasOne(User::class,'id','executed_by');
-    }
-    public function role(): HasOne
-    {
-        return $this->hasOne(Role::class);
+        return $this->belongsTo(Task::class, 'task_id', 'id');
     }
 
+    /**
+     * Atributo dinâmico: code
+     */
+    public function getCodeAttribute(): ?string
+    {
+        return $this->task->code ?? null;
+    }
+
+    public function agentes(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class,'user_tasks','sub_task_id','user_id');
+    }
 }

@@ -35,12 +35,10 @@ return [
         ],
     ],
     'clickup' => [
-        'client_id' => env('CLICKUP_CLIENT_ID'),
-        'secret' => env('CLICKUP_SECRET'),
+        'api_key' => env('CLICKUP_API_KEY'),
         'base_url' => env('CLICKUP_BASE_URL'),
-        'url' => [
-            'access_token' => '/oauth/token',
-            'token_url' => 'https://api.clickup.com/api/v2/oauth/token',
+        'endpoints' => [
+            
         ]
     ],
 ];
