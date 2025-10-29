@@ -52,6 +52,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
+
+    public function role($role) : bool
+    {
+        $roles = $this->roles->pluck('title')->toArray();
+        return in_array($role,$roles);
+    }
     
     public function tasks(): BelongsToMany
     {

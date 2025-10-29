@@ -11,6 +11,7 @@ class Task extends Model
         'created_by',
         'title',
         'code',
+        'normalized_code'
     ];
 
     public function subTasks(): HasMany
