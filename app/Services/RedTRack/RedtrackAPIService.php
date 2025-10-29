@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Services\RedTRack;
+namespace App\Services\RedTrack;
 
+use App\Models\RedtrackReport;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,21 +19,28 @@ class RedtrackAPIService
     }
 
     /**
-     * Mesmo comportamento do fetch_report() do Python,
-     * retorna tudo paginado, já com CTR e CPM calculados.
+     * Busca relatórios paginados da API RedTrack,
+     * mantém dados parciais mesmo em caso de erro.
      */
     public function fetchReport(
         string $dateFrom,
         string $dateTo,
-        ?string $group = 'rt_ad',
+        ?string $group = 'source,rt_campaign',
         ?int $per = 1000,
         ?array $extra = []
-    ): array {
+    ) {
         $page = 1;
-        $rows = [];
+        $maxRetries = 3;
+        $totalItems = 0;
+
+        Log::info('RedTrack → Iniciando fetchReport', [
+            'from' => $dateFrom,
+            'to'   => $dateTo,
+            'group' => $group,
+            'per' => $per,
+        ]);
 
         while (true) {
-
             $params = array_merge([
                 'api_key'   => $this->apiKey,
                 'group'     => $group,
@@ -43,47 +51,103 @@ class RedtrackAPIService
                 'total'     => 'false',
             ], $extra);
 
-            $response = Http::timeout(60)->get($this->baseUrl, $params);
+            try {
+                $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
 
-            if ($response->failed()) {
-                Log::error('Erro RedTrack API', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
+                // Se falhar, tenta algumas vezes antes de desistir
+                $retryCount = 0;
+                while ($response->failed() && $retryCount < $maxRetries) {
+                    $retryCount++;
+                    Log::warning("RedTrack → Tentando novamente ({$retryCount}/{$maxRetries})", [
+                        'page' => $page,
+                        'status' => $response->status(),
+                    ]);
+                    sleep(2);
+                    $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
+                }
+
+                // Se ainda falhou após retries
+                if ($response->failed()) {
+                    Log::error('RedTrack → Falha persistente', [
+                        'page'   => $page,
+                        'status' => $response->status(),
+                        'body'   => $response->body(),
+                    ]);
+
+                    // Se for 404, encerra o loop; caso contrário, segue pro próximo
+                    if ($response->status() === 404) {
+                        break;
+                    }
+                    continue;
+                }
+
+                // Decodifica de forma mais leve que ->json()
+                $data = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
+                $items = $data['items'] ?? $data ?? [];
+
+                if (empty($items)) {
+                    Log::info("RedTrack → Nenhum item encontrado na página {$page}");
+                    break;
+                }
+                return $items;
+                foreach ($items as $item) {
+                    try {
+                        RedtrackReport::updateOrCreate(
+                            [
+                                'name'   => $item['rt_ad'],
+                                'source' => $item['source'],
+                                'alias' => $item['source_alias']
+                            ],
+                            [
+                                'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
+                                'clicks'       => $item['clicks'] ?? 0,
+                                'conversions'  => $item['conversions'] ?? 0,
+                                'cost'         => $item['cost'] ?? 0,
+                                'profit'       => $item['profit'] ?? 0,
+                                'roi'          => $item['roi'] ?? 0,
+                            ]
+                        );
+                        $totalItems++;
+                    } catch (Exception $innerEx) {
+                        Log::warning('RedTrack → Falha ao salvar item', [
+                            'page' => $page,
+                            'item' => $item['rt_campaign'],
+                            'erro' => $innerEx->getMessage(),
+                        ]);
+                    }
+                }
+
+                Log::info("RedTrack → Página {$page} processada", [
+                    'itens_processados' => count($items),
                 ]);
-                throw new Exception('Erro ao consultar RedTrack: ' . $response->body());
+
+                // Se retornou menos que o limite, acabou
+                if (count($items) < $per) {
+                    break;
+                }
+
+                $page++;
+                unset($items, $data); // libera memória
+                usleep(300000); // 0.3s entre chamadas
+
+            } catch (Exception $e) {
+                Log::error('RedTrack → Exceção geral', [
+                    'page'  => $page,
+                    'erro'  => $e->getMessage(),
+                ]);
+                break; // mantém dados processados e encerra
             }
-
-            $data  = $response->json();
-            $items = is_array($data)
-                ? $data
-                : ($data['items'] ?? []);
-
-            if (empty($items)) break;
-
-            $rows = array_merge($rows, $items);
-
-            if (count($items) < $per) break;
-            $page++;
         }
 
-        /**
-         * ---> CALCULA CTR & CPM <---
-         */
-        foreach ($rows as &$r) {
-            $impr   = $r['impressions']  ?? 0;
-            $clicks = $r['clicks']        ?? 0;
-            $cost   = $r['cost']          ?? 0;
+        Log::info('RedTrack → Coleta finalizada', [
+            'total_itens_processados' => $totalItems,
+            'última_página' => $page,
+        ]);
 
-            $r['CTR'] = ($impr > 0)
-                ? round(($clicks / $impr) * 100, 2)
-                : null;
-
-            $r['CPM'] = ($impr > 0)
-                ? round(($cost / $impr) * 1000, 2)
-                : null;
-        }
-        unset($r);
-
-        return $rows;
+        return response()->json([
+            'msg' => 'Fetch de dados concluído',
+            'total_itens' => $totalItems,
+            'ultima_pagina' => $page
+        ], 200);
     }
 }

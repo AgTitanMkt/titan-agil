@@ -30,7 +30,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li class="nav-item active">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link">
                             <i class="fas fa-chart-line nav-icon"></i> Dashboard
                         </a>
                     </li>
@@ -45,7 +45,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
                             <i class="fas fa-tachometer-alt nav-icon"></i> Métricas
                         </a>
                     </li>

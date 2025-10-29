@@ -233,6 +233,7 @@ class ClickUpAPIService
                     [
                         'title' => data_get($task, 'tags.0.name', 'Tarefa'),
                         'code'  => $task['name'] ?? ('VAZIO' . rand(1111, 9999)),
+                        'normalized_code' => strtolower(str_replace(' ', '', $task['name']))
                     ]
                 );
 
