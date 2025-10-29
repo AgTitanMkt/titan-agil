@@ -4,8 +4,15 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        if (auth()->user()->role('ADMIN')) {
+            return redirect('/admin/dashboard');
+        }
+        return redirect('/dashboard');
+    }
+    return redirect('/login');
 });
 
 Route::get('/dashboard', function () {

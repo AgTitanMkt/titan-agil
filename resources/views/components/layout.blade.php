@@ -66,7 +66,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="/logout" class="nav-link">
                             <i class="fas fa-rocket nav-icon"></i> Sign Up
                         </a>
                     </li>
@@ -84,14 +84,14 @@
             <header class="header-bar">
                 <div class="header-user">
                     <i class="fas fa-user-tie user-avatar-icon"></i> 
-                    <span class="user-name">Nicole Cassiano</span>
+                    <span class="user-name">{{ auth()->user()->name }}</span>
                 </div>
             </header>
 
             <main class="page-content">
                 {{ $slot }}
             </main>
-
+            @stack('scripts')
         </div>
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />

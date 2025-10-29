@@ -2,49 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $totalClicks = DB::table('vw_creatives_performance')->sum('clicks');
-        $totalConversions = DB::table('vw_creatives_performance')->sum('conversions');
-        $totalCost = DB::table('vw_creatives_performance')->sum('cost');
-        $totalProfit = DB::table('vw_creatives_performance')->sum('profit');
-        $avgRoi = DB::table('vw_creatives_performance')->avg('roi');
+        // 🔹 Listas para os selects
+        $allCreatives = DB::table('vw_creatives_performance')
+            ->select('creative_code')
+            ->distinct()
+            ->pluck('creative_code')
+            ->toArray();
 
-        $performanceByAgent = DB::table('vw_creatives_performance')
-            ->select(
-                'agent_name',
-                DB::raw('SUM(clicks) as clicks'),
-                DB::raw('SUM(conversions) as conversions'),
-                DB::raw('SUM(cost) as cost'),
-                DB::raw('SUM(profit) as profit'),
-                DB::raw('ROUND(SUM(profit)/NULLIF(SUM(cost),0), 2) as roas'),
-                DB::raw('ROUND(AVG(roi), 2) as roi')
-            )
-            ->groupBy('agent_name')
-            ->orderByDesc('profit')
-            ->get();
+        $allSources = DB::table('vw_creatives_performance')
+            ->select('source')
+            ->distinct()
+            ->pluck('source')
+            ->toArray();
 
-        $performanceBySource = DB::table('vw_creatives_performance')
-            ->select(
-                'source',
-                DB::raw('SUM(clicks) as clicks'),
-                DB::raw('SUM(conversions) as conversions'),
-                DB::raw('SUM(cost) as cost'),
-                DB::raw('SUM(profit) as profit'),
-                DB::raw('ROUND(SUM(profit)/NULLIF(SUM(cost),0), 2) as roas'),
-                DB::raw('ROUND(AVG(roi), 2) as roi')
-            )
-            ->groupBy('source')
-            ->orderByDesc('profit')
-            ->get();
-
-        $topCreatives = DB::table('vw_creatives_performance')
+        // 🔹 Base da query (sem executar ainda)
+        $query = DB::table('vw_creatives_performance')
             ->select(
                 'creative_code',
                 'source',
@@ -56,20 +35,25 @@ class AdminController extends Controller
                 DB::raw('SUM(profit) AS profit'),
                 DB::raw('ROUND(AVG(roi), 4) AS roi')
             )
-            ->groupBy('creative_code','source')
-            ->orderByDesc('profit')
-            ->limit(10)
-            ->get();
+            ->groupBy('creative_code', 'source')
+            ->orderByDesc('profit');
+
+        // 🔹 Filtros cumulativos
+        if ($request->filled('sources')) {
+            $query->where('source', $request->sources);
+        }
+
+        if ($request->filled('creatives')) {
+            $query->whereIn('creative_code', $request->creatives);
+        }
+
+        // 🔹 Executa a query (com filtros ou sem)
+        $topCreatives = $query->limit(10)->get();
 
         return view('admin.dashboard', compact(
-            'totalClicks',
-            'totalConversions',
-            'totalCost',
-            'totalProfit',
-            'avgRoi',
-            'performanceByAgent',
-            'performanceBySource',
-            'topCreatives'
+            'topCreatives',
+            'allCreatives',
+            'allSources'
         ));
     }
 
