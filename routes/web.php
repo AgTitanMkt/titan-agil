@@ -18,5 +18,8 @@ Route::middleware('auth')->group(function () {
 });
 Route::get("teste",function(){return view("admin.dashboard");});
 Route::get("copy",function(){return view("admin.copy");});
+Route::get("faturamento",function(){return view("admin.faturamento");});
+Route::get("time",function(){return view("admin.time");});
+Route::get("perfil",function(){return view("admin.perfil");});
 
 require __DIR__.'/auth.php';

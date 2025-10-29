@@ -15,6 +15,9 @@
         'public/css/css-admin/admin-layout.css',    // CSS DO COMPONENTE //
         'public/css/css-admin/admin-dashboard.css', // CSS DO DASH //
         'public/css/css-admin/admin-copy.css', // CSS DO COPY //
+        'public/css/css-admin/admin-faturamento.css', // CSS DO FATURAMENTO //
+        'public/css/css-admin/admin-time.css', // CSS DO TIME //
+        'public/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
         'public/js/app.js'
     ])
 </head>
