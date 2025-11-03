@@ -85,39 +85,98 @@
 
 
 
-    <div class="table-filters-section glass-card">
-        <h3 class="section-title">Filtros</h3>
-        
-        <form class="filters-grid filters-grid-table">
-            
-            <div class="filter-group">
-                <label for="date_range">Data</label>
-                <input type="date" id="date_range" class="custom-input-date" value="2025-10-27">
-            </div>
-            
-            <div class="filter-group">
-                <label for="title_search">Título</label>
-                <input type="text" id="title_search" class="custom-input-text" placeholder="Buscar por título...">
-            </div>
-            
-            <div class="filter-group">
-                <label for="traffic_channels">Canais de Tráfego</label>
-                <select id="traffic_channels" class="custom-select">
-                    <option>YT Shenlong</option>
-                    <option>YT Fenix</option>
-                    <option>Facebook Ads</option>
-                    <option>Native Ads</option>
-                    <option>TikTok Ads</option>
-                </select>
-            </div>
-            
-            <div class="filter-submit-area">
-                <button type="button" class="btn-filter btn-clear">LIMPAR</button>
-                <button type="submit" class="btn-filter">APLICAR</button>
-            </div>
-        </form>
-    </div>
+<div class="glass-card meta-ads-section" style="z-index: 20;"> 
+    <div class="filters-grid" style="grid-template-columns: 1fr 1fr 1fr auto;"> 
+        {{-- filtro de data --}}
+        <div class="filter-group">
+            <label for="date-filter">Data</label>
+            <input type="date" id="date-filter" value="2025-10-27"> 
+        </div>
 
+        {{-- filtro de titulo --}}
+        <div class="filter-group">
+            <label for="title-filter">Título</label>
+            <input type="text" id="title-filter" placeholder="Buscar por Título"> 
+        </div>
+
+        {{-- FILTRO CANAIS DE TRAFEGO --}}
+        <div class="filter-group">
+            <label for="traffic-channels-filter">Canais de Tráfego</label>
+            <div id="traffic-channels-filter" class="custom-dropdown-filter" tabindex="0">
+                <div class="dropdown-header">
+                    <span class="selected-items-display">Canais (0)</span> 
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </div>
+                <div class="dropdown-list">
+                    <label class="dropdown-item"><input type="checkbox" name="channels[]" value="yt_shenlong">YT Shenlong</label>
+                    <label class="dropdown-item"><input type="checkbox" name="channels[]" value="facebook_ads">Facebook Ads</label>
+                    <label class="dropdown-item"><input type="checkbox" name="channels[]" value="google_ads">Google Ads</label>
+                    <label class="dropdown-item"><input type="checkbox" name="channels[]" value="native_ads">Native Ads</label>
+                    <label class="dropdown-item"><input type="checkbox" name="channels[]" value="tiktok_ads">TikTok Ads</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filter-submit-area" style="grid-column: 4 / 5;">
+            <button type="button" class="btn-filter" style="background-color: transparent; border: 1px solid var(--input-border); margin-right: 10px;">LIMPAR</button>
+            <button type="submit" class="btn-filter">APLICAR</button>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropdowns = document.querySelectorAll('.custom-dropdown-filter');
+
+        dropdowns.forEach(dropdown => {
+            const header = dropdown.querySelector('.dropdown-header');
+            const display = dropdown.querySelector('.selected-items-display');
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+            // pega o texto base ('Canais' 'Canais de Tráfego')
+            const baseText = dropdown.querySelector('label')?.textContent || display.textContent.split('(')[0].trim(); 
+
+            // atualiza o texto de selecao
+            const updateDisplay = () => {
+                const checked = Array.from(checkboxes).filter(c => c.checked);
+                if (checked.length === 0) {
+                    // mantem a primeira palavra e adiciona (0)
+                    display.textContent = `${baseText.split(' ')[0]} (0)`;
+                } else if (checked.length === 1) {
+                    display.textContent = `${baseText.split(' ')[0]} (1)`; 
+                } else {
+                    display.textContent = `${baseText.split(' ')[0]} (${checked.length})`;
+                }
+            };
+
+            // inicia o display
+            updateDisplay(); 
+            
+            // tiggle do dropdown
+            header.addEventListener('click', () => {
+                // fecha outros dropdowns abertos antes de abrir este
+                document.querySelectorAll('.custom-dropdown-filter.open').forEach(openDropdown => {
+                    if (openDropdown !== dropdown) {
+                        openDropdown.classList.remove('open');
+                    }
+                });
+                dropdown.classList.toggle('open');
+            });
+
+            // atualiza o display ao marcar/desmarcar
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateDisplay);
+            });
+
+            // fecha o dropdown ao clicar fora
+            document.addEventListener('click', (event) => {
+                if (!dropdown.contains(event.target)) {
+                    dropdown.classList.remove('open');
+                }
+            });
+        });
+    });
+</script>
 
     <div class="metrics-table-section glass-card">
         <h3 class="section-title">Métricas de Campanha</h3>

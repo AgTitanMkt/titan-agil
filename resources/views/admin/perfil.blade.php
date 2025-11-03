@@ -2,25 +2,25 @@
     <h2 class="dashboard-page-title">Perfil</h2>
     <p class="dashboard-page-subtitle">Gerencie suas informações e veja seu status na equipe</p>
 
-    {{-- 1. CONTAINER PRINCIPAL DO HEADER (APENAS BACKGROUND) --}}
+    {{--  CONTAINER PRINCIPAL DO HEADER (APENAS BACKGROUND) --}}
     <div class="profile-header-container" style="background-image: url('{{ asset('img/img-admin/profile-header-bg.png') }}');">
         
-        {{-- 2. NOVO CONTAINER GLASS CARD SOBRE O BACKGROUND --}}
+        {{-- CONTAINER GLASS CARD SOBRE O BACKGROUND --}}
         <div class="profile-header-card-wrapper glass-card">
             
             <div class="profile-meta-info">
-                {{-- AVATAR: ALTERADO DE "placeholder" para "new" para aplicar estilo retangular --}}
+                {{-- AVATAR --}}
                 <div class="profile-picture-new" style="background-image: url('{{ asset('img/img-admin/Titan-Avatar.png') }}');"></div>
                 <div class="profile-text-group">
-                    <span class="profile-subtitle"></span> {{-- Subtítulo acima do nome --}}
+                    <span class="profile-subtitle">Perfil de:</span> {{-- subtitulo acima do nome --}}
                     <h3 class="profile-name">Nicolle Cassiano</h3>
                     <span class="profile-email">nicolle.cassiano@agencia-titan.com</span>
                 </div>
             </div>
             
-            {{-- BADGES: MOVIDOS PARA DENTRO DO NOVO GLASS-CARD E ALINHADOS À DIREITA --}}
+            {{-- BADGES DENTRO DO GLASS CARD --}}
             <div class="profile-badges-aligned">
-                <div class="badge-item"><i class="fas fa-user"></i> Perfil</div>
+                <div class="badge-item"><i class="fas fa-user"></i> Perfil - O Squad</div>
                 <div class="badge-item"><i class="fas fa-briefcase"></i> Gestor Junior</div>
                 <div class="badge-item"><i class="fab fa-facebook"></i> Facebook</div>
             </div>
@@ -29,7 +29,7 @@
     
     <div class="profile-main-grid">
         
-        {{-- Card Bem-vindo --}}
+        {{-- bem vindo --}}
         <div class="welcome-card glass-card">
             <h3 class="section-title">Bem-vindo de volta!</h3>
             <p class="welcome-message">Prazer em ver você, Nicolle Cassiano!</p>
@@ -37,7 +37,7 @@
             <a href="#" class="btn-visualizar-perfil"><i class="fas fa-arrow-right"></i> Visualize seu Perfil</a>
         </div>
         
-        {{-- Card Informações do Perfil --}}
+        {{-- informacoes do perfil --}}
         <div class="info-card glass-card">
             <h3 class="section-title">Informações do Perfil</h3>
             <div class="info-text-block">
@@ -53,7 +53,7 @@
             </div>
         </div>
         
-        {{-- Card Time Online (Adicionado mais membros) --}}
+        {{-- time online --}}
         <div class="time-online-card glass-card">
             <div class="time-online-header">
                 <h3 class="section-title">Time Online</h3>
@@ -71,39 +71,39 @@
                  <div class="member-online-item">
                     <div class="member-thumb-blue"></div>
                     <div>
-                        <p class="member-name-sm">Fernando Souza</p>
-                        <span class="member-email-sm">fernando.souza@titan.com</span>
+                        <p class="member-name-sm">Rodrigo Macedo</p>
+                        <span class="member-email-sm">rodrigomacedo@titan.com</span>
                     </div>
                 </div>
                  <div class="member-online-item">
                     <div class="member-thumb-blue"></div>
                     <div>
-                        <p class="member-name-sm">Juliana Silva</p>
-                        <span class="member-email-sm">juliana.silva@titan.com</span>
+                        <p class="member-name-sm">Otávio Almeida</p>
+                        <span class="member-email-sm">otavioalmeida@titan.com</span>
                     </div>
                 </div>
-                 <div class="member-online-item"> {{-- Membro Extra 1 --}}
+                 <div class="member-online-item"> 
                     <div class="member-thumb-blue"></div>
                     <div>
-                        <p class="member-name-sm">Marcos Almeida</p>
-                        <span class="member-email-sm">marcos.almeida@titan.com</span>
+                        <p class="member-name-sm">Matheus Dias</p>
+                        <span class="member-email-sm">matheusdias@titan.com</span>
                     </div>
                 </div>
-                 <div class="member-online-item"> {{-- Membro Extra 2 --}}
+                 <div class="member-online-item"> 
                     <div class="member-thumb-blue"></div>
                     <div>
-                        <p class="member-name-sm">Carla Pires</p>
-                        <span class="member-email-sm">carla.pires@titan.com</span>
+                        <p class="member-name-sm">Ary Neto</p>
+                        <span class="member-email-sm">aryneto@titan.com</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- LAYOUT INFERIOR: GRÁFICO E PROVÉRBIO LADO A LADO --}}
+    {{-- GRAFICO/PROVERBIO LADO A LADO --}}
     <div class="profile-bottom-grid-fixed">
         
-        {{-- Card Projetos Ativos --}}
+        {{-- projetos ativos --}}
         <div class="projects-chart-card glass-card">
             <h3 class="section-title-time">Projetos Ativos</h3>
 
@@ -144,28 +144,28 @@
             const paths = chart.querySelectorAll('.chart-line');
             const labelsX = document.querySelectorAll('.chart-axis-x-projects span');
             
-            // Simulação de 12 pontos de dados
+            
             const dataPoints = [
                 { Jan: [10, 5, 2], Fev: [25, 15, 5], Mar: [40, 30, 10], Abr: [50, 35, 15], Mai: [35, 45, 20], Jun: [20, 55, 25], Jul: [30, 50, 30], Ago: [10, 60, 35], Set: [15, 45, 40], Out: [5, 50, 45], Nov: [10, 40, 50], Dez: [20, 30, 60] }
             ];
 
-            // (O restante do JS para calcular a posição e o valor do tooltip
-            // é complexo em SVG puro. Faremos a simulação do mouse-over
-            // na área do gráfico e mostraremos um tooltip genérico no CSS/HTML
-            // para manter a estrutura e o requisito de "passar o mouse na linha",
-            // já que a integração dinâmica de dados está fora do escopo.)
             
-            // Apenas para simular a interação de passagem do mouse:
+
+
+
+
+            
+            // apenas simular a interacao de passagem do mouse
             chart.addEventListener('mousemove', (e) => {
                 const rect = chart.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 
-                // Simulação simples de detecção de mês
+                // simulacao simples de deteccao de mes
                 const monthIndex = Math.floor((x / rect.width) * 12);
                 
                 if (monthIndex >= 0 && monthIndex < 12) {
                     const monthName = labelsX[monthIndex].textContent;
-                    // Valores mockados para o tooltip
+                    // valores mockados para o tooltip
                     tooltip.innerHTML = `Mês: ${monthName}<br>Ativos: 40<br>Pausados: 30<br>Zerados: 10`;
                     tooltip.style.left = `${x}px`;
                     tooltip.style.top = `${e.clientY - rect.top}px`;
@@ -181,7 +181,7 @@
 
 
 
-        {{-- Card Proverbio --}}
+        {{-- card proverbio --}}
         <div class="proverb-card glass-card">
             <div class="proverb-image-container" style="background-image: url('{{ asset('img/img-admin/Cover.png') }}');">
                 <div class="proverb-logo-sm"></div> 
@@ -192,4 +192,9 @@
             </div>
         </div>
     </div>
+
+
+
+
+
 </x-layout>

@@ -1,18 +1,19 @@
 /* CORES */
 
 :root {
-    --bg-card-dark: rgba(255, 255, 255, 0.05); /* FUNDO */
-    --bg-card-darker: rgba(0, 0, 0, 0.15); /* FUNDO DA TABELA */
+    --bg-card-dark: rgba(255, 255, 255, 0.05); /* FUNDO CARD */
+    --bg-card-darker: rgba(0, 0, 0, 0.15); /* FUNDO INPUT/TABELA */
     --input-border: rgba(255, 255, 255, 0.2);
     --text-white: #FFFFFF;
     --text-light: #C0C0C0;
     --text-dark: #333333;
-    --accent-blue: #007bff;
+    --profit-color: #4CAF50; /* manter se for usar em algum lugar */
+    --accent-blue: #007bff; /* COR PRINCIPAL DE DESTAQUE */
     --table-header-color: rgba(255, 255, 255, 0.7);
     --table-line-separator: rgba(255, 255, 255, 0.05);
 }
 
-/* TITULOS */
+/* TITULOS E BASE */
 .dashboard-page-title {
     font-size: 1.8rem;
     font-weight: 700;
@@ -45,8 +46,8 @@
     padding-bottom: 15px;
 }
 
+/* FILTROS E GRID */
 
-/* FILTROS PADRÃO (4 COLUNAS) */
 .filters-grid {
     display: grid;
     /* 4 colunas em telas grandes */
@@ -54,58 +55,209 @@
     gap: 15px;
 }
 
-/* SECAO DOS PRODUTOS  */
 .filters-grid-production {
-    /* Mantém as 4 colunas */
+    /* mantem as 4 colunas e o layout de 2 linhas */
     grid-template-columns: repeat(4, 1fr);
 }
 
-/* GARANTE QUE O BOTAO VA PARA A ULTIMA LINHA */
-.filter-submit-area-production {
-    
-    grid-row: 2 / 3;
-    grid-column: 4 / 5;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end; /* alinha o botao com o fundo do select */
+/* Z-INDEX AJUSTE PARA O CARD DE FILTROS */
+.production-filters-section {
+    position: relative;
+    overflow: visible !important; /* permite que o dropdown saia do limite do card */
+    z-index: 30; /* sobrepoe o card de baixo */
 }
 
-
-.filter-group {
-    --text-light: #C0C0C0;
-    
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left; 
 }
 
-/* (fundo escuro e borda) */
-.custom-select {
+/* SCROLL PERSONALIZADO PARA O COPY */
+
+.production-filters-section .dropdown-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.production-filters-section .dropdown-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.production-filters-section .dropdown-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.production-filters-section .dropdown-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Firefox ADICIONADO */
+/* Firefox ADICIONADO .production-filters-section .dropdown-list {
+    * scrollbar-width: thin;
+    *  scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.05);
+} */ 
+
+/* */
+
+/* MULTISELECT CUSTOM (DROPDOWN) */
+
+.custom-dropdown-filter {
+    position: relative;
     width: 100%;
+    cursor: pointer;
+    outline: none;
+    height: 40px; 
+    
+    z-index: 10; 
+}
+
+
+.custom-dropdown-filter.open {
+    
+    z-index: 100;
+}
+
+.dropdown-header {
     padding: 10px 15px;
     font-size: 0.95rem;
     color: var(--text-white);
     background-color: var(--bg-card-darker);
     border: 1px solid var(--input-border);
-    border-radius: 6px;
-    outline: none;
-    appearance: none; /* esconde a seta padrao do navegador */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    
-    /* icone de seta BIBLIOTECA (Font Awesome - Chevron Down) */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1) Copyright 2023 Fonticons, Inc. --%3E%3Cpath fill='%23C0C0C0' d='M207 435c9.4 9.4 24.6 9.4 33.9 0L439 249c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L224 373.1 42.1 215.1c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l168 186.1z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 10px;
+    border-radius: 8px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px; 
+    transition: border-color 0.2s;
 }
 
-.custom-select:focus {
-    border-color: var(--accent-blue);
+.selected-items-display {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
 }
+
+.custom-dropdown-filter:focus-within .dropdown-header,
+.custom-dropdown-filter.open .dropdown-header {
+    border-color: var(--accent-blue);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-icon {
+    transition: transform 0.2s;
+    color: var(--text-light);
+    font-size: 0.8em;
+}
+
+.custom-dropdown-filter.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    right: 0;
+    
+    
+    z-index: 50; 
+    
+    background-color: rgba(0, 0, 0, 0.8); 
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--accent-blue);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    
+    /* rolagem para visualizar as opcoes */
+    max-height: 200px; 
+    overflow-y: auto; 
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+}
+
+.custom-dropdown-filter.open .dropdown-list {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    transition: background-color 0.1s;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--input-border);
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer;
+    background-color: transparent;
+    transition: border-color 0.2s, background-color 0.2s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dropdown-item input[type="checkbox"]:checked {
+    border-color: var(--accent-blue);
+    background-color: var(--accent-blue);
+}
+
+.dropdown-item input[type="checkbox"]:checked::after {
+    content: '\2713'; 
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    color: var(--text-white);
+}
+
+.dropdown-item input[type="checkbox"]:focus {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
 
 /* AREA DO BOTAO  */
+
 .filter-submit-area {
+    /* padrdo para 4 colunas */
     grid-column: 4 / 5; 
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end; 
+}
+
+/*  (2ª linha, 4ª coluna) */
+.filter-submit-area-production {
+    grid-row: 2 / 3;
+    grid-column: 4 / 5;
     display: flex;
     justify-content: flex-end;
     align-items: flex-end; 
@@ -117,16 +269,16 @@
     background-color: var(--accent-blue);
     color: var(--text-white);
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s;
+    height: 40px; 
 }
 
 .btn-filter:hover {
     background-color: #0056b3;
 }
-
 
 
 /* TABELA PRODUÇÃO COPYWRITER */
@@ -165,7 +317,7 @@
     vertical-align: top;
 }
 
-/* copywriter (Rogério Berenco, etc.) */
+/* copywriter (Ary, etc.) */
 .ad-name {
     font-weight: 700;
     margin: 0;
@@ -173,6 +325,7 @@
     line-height: 1.2;
 }
 
+/* email do copywriter */
 .ad-link {
     display: block;
     font-size: 0.75rem;
@@ -186,24 +339,21 @@
 
 @media (max-width: 1200px) {
     /* 3 colunas para o grid geral */
-    .filters-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    
-    .filters-grid-production {
+    .filters-grid, .filters-grid-production {
         grid-template-columns: repeat(3, 1fr);
     }
     
+    /* reposicionamento para 3 colunas */
     .filter-submit-area {
-        grid-column: 3 / 4; /* move o botao para a 3ª coluna */
+        grid-column: 3 / 4; 
         grid-row: auto; 
     }
     
-    /* reposiciona o botao na grade de producao */
+    /* reposicionamento para 3 colunas na tela  */
     .filter-submit-area-production {
         grid-column: 3 / 4;
-        grid-row: 3 / 4;
+        /* 7 filtros + 1 botao, eles ocuparão 3 linhas de 3 colunas. O botao vai para a 3ª linha. */
+        grid-row: 3 / 4; 
     }
 }
 
@@ -213,9 +363,13 @@
         grid-template-columns: repeat(2, 1fr);
     }
     
+    
     .filter-submit-area, .filter-submit-area-production {
-        grid-column: 2 / 3; /* move o botao para a 2ª coluna */
-        grid-row: auto; 
+        grid-column: 2 / 3; 
+        /* 7 filtros + 1 botão. 7/2 = 3.5. O botão vai para a 4ª linha. */
+        grid-row: 4 / 5; 
+        justify-content: flex-end;
+        margin-top: 0;
     }
     
     .glass-card {
@@ -240,7 +394,8 @@
     }
     
     .filter-submit-area, .filter-submit-area-production {
-        grid-column: 1 / 2; /* ocupa a coluna inteira */
+        grid-column: 1 / 2; 
+        grid-row: auto; 
         justify-content: center;
         margin-top: 10px;
     }

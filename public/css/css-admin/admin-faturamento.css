@@ -11,11 +11,11 @@
     --table-line-separator: rgba(255, 255, 255, 0.05);
 
     /* CORES PARA FATURAMENTO */
-    --profit-color: #4CAF50; /* Verde para positivo/ROI */
-    --negative-color: #ff4d4d; /* Vermelho para negativo */
-    --chart-bar-color: #91B2FF; /* Cor da barra de gráfico */
-    --chart-highlight-color: #E26895; /* Cor da barra em destaque */
-    --table-details-bg: rgba(0, 0, 0, 0.2); /* Fundo dos detalhes */
+    --profit-color: #4CAF50; /* verde para positivo/ROI */
+    --negative-color: #ff4d4d; /* vermelho para negativo */
+    --chart-bar-color: #91B2FF; /* cor da barra de gráfico */
+    --chart-highlight-color: #E26895; /* cor da barra em destaque */
+    --table-details-bg: rgba(0, 0, 0, 0.2); /* fundo dos detalhes */
 }
 
 /* BASE ANTIGA */
@@ -194,7 +194,275 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* FILTRO ANTIGO JA UTILIZADO */
+/* FILTRO DE TITULO COM NOVA COR DESTACADA */
+
+/* inputs de Faturamento Titulo e a data */
+.filters-grid input[type="date"],
+.filters-grid input[type="text"] {
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: var(--text-white);
+    background-color: var(--bg-card-darker);
+    border: 1px solid var(--input-border); 
+    border-radius: 8px;
+    height: 40px; 
+    width: 100%;
+    outline: none; 
+    box-sizing: border-box;
+    transition: border-color 0.2s, background-color 0.2s; 
+}
+
+
+/* seletor especifico para o campo titulo (pelo ID) */
+.filters-grid #title-filter {
+     border: 1px solid rgba(135, 206, 250, 0.4); /* LightSkyBlue com transparencia */
+    background-color: rgba(135, 206, 250, 0.1); 
+}
+
+/* quando clicado */
+.filters-grid input[type="text"]:focus,
+.filters-grid input[type="date"]:focus {
+    border-color: var(--accent-blue); /* borda azul igual a todos */
+    background-color: rgba(0, 0, 0, 0.3); 
+}
+
+/* garante que o placeholder e o texto continuem visiveis */
+.filters-grid input[type="text"]::placeholder {
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+/* seta do input[type="date"] corrigida para a cor fiel */
+.filters-grid input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1); 
+    cursor: pointer;
+}
+
+
+
+/* CORRECAO DO Dropdown do card de filtros Meta Ads */
+.filters-meta-section {
+    position: relative;
+    overflow: visible !important;
+    z-index: 30;
+}
+
+.filters-meta-section .custom-dropdown-filter {
+    position: relative;
+    z-index: 40;
+}
+
+.filters-meta-section .custom-dropdown-filter .dropdown-list {
+    position: absolute !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+
+/* garante que o card não esconda o dropdown */
+.filters-meta-section.glass-card {
+    overflow: visible !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* FILTOS  */
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left; 
+}
+
+/* Z-INDEX AJUSTE DO CONTAINER DE FILTROS */
+.meta-ads-section {
+    position: relative;
+    z-index: 30; 
+    overflow: visible !important;
+}
+
+/* MULTISELECT CUSTOM  */
+.custom-dropdown-filter {
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    height: 40px; 
+    z-index: 10; 
+}
+
+.custom-dropdown-filter.open {
+    z-index: 100;
+}
+
+.dropdown-header {
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: var(--text-white);
+    background-color: var(--bg-card-darker);
+    border: 1px solid var(--input-border);
+    border-radius: 8px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px; 
+    transition: border-color 0.2s;
+}
+
+.selected-items-display {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+}
+
+.custom-dropdown-filter:focus-within .dropdown-header,
+.custom-dropdown-filter.open .dropdown-header {
+    border-color: var(--accent-blue);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-icon {
+    transition: transform 0.2s;
+    color: var(--text-light);
+    font-size: 0.8em;
+}
+
+.custom-dropdown-filter.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    right: 0;
+    z-index: 50; 
+    background-color: rgba(0, 0, 0, 0.8); 
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--accent-blue);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px; 
+    overflow-y: auto; 
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+}
+
+.custom-dropdown-filter.open .dropdown-list {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* SCROLL NOVO MAIS ELEGANTE PERSONALIZADO  */
+.meta-ads-section .custom-dropdown-filter .dropdown-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.meta-ads-section .custom-dropdown-filter .dropdown-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.meta-ads-section .custom-dropdown-filter .dropdown-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+}
+
+.meta-ads-section .custom-dropdown-filter .dropdown-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+/*  */
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    transition: background-color 0.1s;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--input-border);
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer;
+    background-color: transparent;
+    transition: border-color 0.2s, background-color 0.2s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dropdown-item input[type="checkbox"]:checked {
+    border-color: var(--accent-blue);
+    background-color: var(--accent-blue);
+}
+
+.dropdown-item input[type="checkbox"]:checked::after {
+    content: '\2713'; 
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    color: var(--text-white);
+}
+
+.dropdown-item input[type="checkbox"]:focus {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
+.filter-submit-area {
+    grid-column: 4 / 5; 
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end; 
+}
+
+.btn-filter {
+    padding: 10px 20px;
+    background-color: var(--accent-blue);
+    color: var(--text-white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    height: 40px; 
+}
+
+.btn-filter:hover {
+    background-color: #0056b3;
+}
+
+/*  */
+
+/* FILTRO ANTIGO (NAO UTLIZIZDO) TROQUEI ELE PARA O DROPDOWN */
 .custom-select {
     width: 100%;
     padding: 10px 15px;
@@ -240,6 +508,7 @@
     background-color: var(--bg-card-darker);
 }
 
+/*  */
 
 /* TABELA DE METRICAS */
 .metrics-main-table {
@@ -290,8 +559,9 @@
 .item-id, .item-source {
     display: block;
     font-size: 0.75rem;
-    color: var(--text-light);
-    opacity: 0.8;
+    color: #012c99 !important; /* AZUL FORTE */
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.062);
+    opacity: 1 !important;
 }
 
 .col-roi-value {
@@ -336,7 +606,7 @@
 
 
 
-/* Ocultar/Exibir por clique em cima  */
+/* ocultar/exibir por clique em cima  */
 .details-row {
     display: none; 
 }
@@ -372,7 +642,7 @@
     border-radius: 8px; 
     margin-right: 15px;
     flex-shrink: 0;
-    /* IMAGEM */
+    /* IMAGEM DO TIME OU PESSOA */
 }
 
 .creative-text .item-name {

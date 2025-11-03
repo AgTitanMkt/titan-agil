@@ -74,7 +74,7 @@
                         <i class="fas fa-users icon-time"></i>
                         <div class="text-group">
                             <span class="card-title-lg">Time</span>
-                            <h4 class="card-value-lg">53</h4>
+                            <h4 class="card-value-lg">57</h4>
                             <span class="card-subtitle-sm">Este mês</span>
                         </div>
                     </div>
@@ -205,6 +205,40 @@
                             <td><span class="status-badge status-online">Online</span></td>
                             <td>14/06/25</td>
                             <td><button class="btn-edit">Edit</button></td>
+                           </tr>
+                        <tr>
+                            <td class="col-main-data">
+                                <p class="member-name">Elvis Rodrigues</p>
+                                <span class="member-email">elvisrodrigues@titan.com</span>
+                            </td>
+                            <td>Função</td>
+                            <td><span class="status-badge status-online">Online</span></td>
+                            <td>14/06/25</td>
+                            <td><button class="btn-edit">Edit</button></td>
+                            </tr>
+                        <tr>
+                            <td class="col-main-data">
+                                <p class="member-name">Elvis Rodrigues</p>
+                                <span class="member-email">elvisrodrigues@titan.com</span>
+                            </td>
+                            <td>Função</td>
+                            <td><span class="status-badge status-online">Online</span></td>
+                            <td>14/06/25</td>
+                            <td><button class="btn-edit">Edit</button></td>
+                            </tr>
+                        <tr>
+                            <td class="col-main-data">
+                                <p class="member-name">Elvis Rodrigues</p>
+                                <span class="member-email">elvisrodrigues@titan.com</span>
+                            </td>
+                            <td>Função</td>
+                            <td><span class="status-badge status-offline">Online</span></td>
+                            <td>14/06/25</td>
+                            <td><button class="btn-edit">Edit</button></td>
+                           </tr>
+                        <tr>
+                           </tr>
+                        <tr>    
                          </tr>
                         <tr>
                     </tbody>
@@ -327,21 +361,21 @@
                 bar.addEventListener('mouseenter', (e) => {
                     const profitValue = e.target.getAttribute('data-profit');
                     
-                    // Atualiza o conteúdo e a posição
+                    // atualiza o conteudo e a posição
                     tooltip.innerHTML = profitValue;
                     tooltip.style.opacity = '1';
                     
-                    // Calcula a posição (baseada no mouse)
+                    // calcula a posicao do mouse que esta apontado
                     const rect = e.target.getBoundingClientRect();
                     const containerRect = document.querySelector('.top-nichos-card').getBoundingClientRect();
                     
-                    // Posição ajustada dentro do card
+                    // mostrar o tooltip em cima
                     tooltip.style.left = `${e.clientX - containerRect.left}px`;
                     tooltip.style.top = `${e.clientY - containerRect.top - 10}px`; // -10px para flutuar acima
                 });
 
                 bar.addEventListener('mousemove', (e) => {
-                    // Atualiza a posição constantemente
+                    // atualiza a posicao constantemente
                     const containerRect = document.querySelector('.top-nichos-card').getBoundingClientRect();
                     tooltip.style.left = `${e.clientX - containerRect.left}px`;
                     tooltip.style.top = `${e.clientY - containerRect.top - 10}px`;
@@ -363,28 +397,28 @@
             const paths = chart.querySelectorAll('.chart-line');
             const labelsX = document.querySelectorAll('.chart-axis-x-projects span');
             
-            // Simulação de 12 pontos de dados
+            
             const dataPoints = [
                 { Jan: [10, 5, 2], Fev: [25, 15, 5], Mar: [40, 30, 10], Abr: [50, 35, 15], Mai: [35, 45, 20], Jun: [20, 55, 25], Jul: [30, 50, 30], Ago: [10, 60, 35], Set: [15, 45, 40], Out: [5, 50, 45], Nov: [10, 40, 50], Dez: [20, 30, 60] }
             ];
 
-            // (O restante do JS para calcular a posição e o valor do tooltip
-            // é complexo em SVG puro. Faremos a simulação do mouse-over
-            // na área do gráfico e mostraremos um tooltip genérico no CSS/HTML
-            // para manter a estrutura e o requisito de "passar o mouse na linha",
-            // já que a integração dinâmica de dados está fora do escopo.)
+
+
+
+
+
             
-            // Apenas para simular a interação de passagem do mouse:
+            // apenas simular a interacao de passagem do mouse
             chart.addEventListener('mousemove', (e) => {
                 const rect = chart.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 
-                // Simulação simples de detecção de mês
+                 // simulacao simples de deteccao de mes
                 const monthIndex = Math.floor((x / rect.width) * 12);
                 
                 if (monthIndex >= 0 && monthIndex < 12) {
                     const monthName = labelsX[monthIndex].textContent;
-                    // Valores mockados para o tooltip
+                    // valores mockados para o tooltip
                     tooltip.innerHTML = `Mês: ${monthName}<br>Ativos: 40<br>Pausados: 30<br>Zerados: 10`;
                     tooltip.style.left = `${x}px`;
                     tooltip.style.top = `${e.clientY - rect.top}px`;
