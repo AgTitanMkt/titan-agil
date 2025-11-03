@@ -23,6 +23,8 @@ class RefreshCreativesViewCommand extends Command
                 creative_code,
                 origem,
                 user_id,
+                role_id,
+                role_name,
                 agent_name,
                 redtrack_id,
                 rt_ad,
@@ -45,6 +47,8 @@ class RefreshCreativesViewCommand extends Command
                 t.code AS creative_code,
                 t.title AS task_name,
                 u.id AS user_id,
+                ur.role_id,
+                ur.role_name,
                 u.name AS agent_name,
                 r.id AS redtrack_id,
                 r.name AS rt_ad,
@@ -70,6 +74,8 @@ class RefreshCreativesViewCommand extends Command
                 ON ut.sub_task_id = st.id
             INNER JOIN users u 
                 ON u.id = ut.user_id
+            INNER JOIN user_roles ur
+                ON u.id = ur.user_id
             GROUP BY
                 t.id, u.id, r.id
         ');
