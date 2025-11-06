@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    @vite(['public/css/app.css', 'public/css/login-custom.css', 'public/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/login-custom.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
     <div class="login-container">

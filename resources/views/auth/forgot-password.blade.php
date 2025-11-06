@@ -8,7 +8,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,700" rel="stylesheet" />
     <link rel="stylesheet" href="forgot-custom.css"> 
 
-    @vite(['public/css/app.css', 'public/css/forgot-custom.css'])
+    @vite(['resources/css/app.css', 'resources/css/forgot-custom.css'])
 
 </head>
 <body>
