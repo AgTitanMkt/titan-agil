@@ -10,43 +10,26 @@
 
             {{-- FILTROS --}}
             <div class="filter-group">
-                <label for="creatives-filter">Criativos</label>
-                <div id="creatives-filter" class="custom-dropdown-filter" tabindex="0">
-                    <div class="dropdown-header">
-                        <span class="selected-items-display">Criativos (0)</span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </div>
-                    <div class="dropdown-list">
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_01">Creative [Código 01]</label>
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_02">Creative [Código 02]</label>
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_03">Creative [Código 03]</label>
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_01">Creative [Código 01]</label>
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_02">Creative [Código 02]</label>
-                        <label class="dropdown-item"><input type="checkbox" name="creatives[]" value="creative_03">Creative [Código 03]</label>
-                        {{-- @foreach ($allCreatives as $creative) ... @endforeach --}}
-                    </div>
-                </div>
+                <x-multiselect
+                    name="creatives" 
+                    label="Criativos" 
+                    :options="$allCreatives" 
+                    :selected="request('creatives', [])" 
+                    placeholder="Selecione um ou mais criativos">
+                </x-multiselect>
             </div>
 
             
-            <div class="filter-group">
-                <label for="editor-filter">Editor</label>
-                <div id="editor-filter" class="custom-dropdown-filter" tabindex="0">
-                    <div class="dropdown-header">
-                        <span class="selected-items-display">Editor (0)</span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </div>
-                    <div class="dropdown-list">
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_a">Editor A</label>
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_b">Editor B</label>
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_a">Editor A</label>
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_b">Editor B</label>
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_a">Editor A</label>
-                        <label class="dropdown-item"><input type="checkbox" name="editor[]" value="editor_b">Editor B</label>
-                        {{-- @foreach ($allEditors as $editor) ... @endforeach --}}
-                    </div>
-                </div>
-            </div>
+            {{--- FILTRO DE EDITOR ---}}
+        <div class="filter-group">
+            <x-multiselect
+                name="editors" 
+                label="Editor" 
+                :options="$allEditors" 
+                :selected="request('editors', [])" 
+                placeholder="Selecione o Editor (ou use a busca)">
+            </x-multiselect>
+        </div>
 
             
             <div class="filter-group">

@@ -1,0 +1,301 @@
+/* MULTISELECT CUSTOMIZADO */
+
+
+/* CORES */
+
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    position: relative; 
+    z-index: 20;
+}
+
+.filter-group label {
+    margin-bottom: 6px;
+    color: var(--text-white, #FFFFFF);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.original-select.hidden {
+    display: none !important;
+}
+
+
+/* COMPONENTE PRINCIPAL */
+.custom-multiselect {
+    position: relative;
+    width: 100%;
+    z-index: 10; 
+}
+
+.custom-multiselect.open {
+    z-index: 100;
+}
+
+
+/* HEADER/CAMPO DE DISPLAY (tags visiveis) */
+.multiselect-header {
+    background-color: var(--bg-card-darker, rgba(0, 0, 0, 0.15));
+    border: 1px solid var(--input-border, rgba(226, 226, 226, 0.2));
+    border-radius: 8px;
+    min-height: 40px; 
+    padding: 5px 15px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-light, #C0C0C0);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-multiselect.open .multiselect-header,
+.multiselect-header:focus {
+    border-color: var(--accent-blue, #007bff);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
+
+/* conteiner flexivel para tags*/
+.selected-summary-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-grow: 1; /* permite que o wrapper ocupe o espaço */
+    padding-top: 2px; 
+    padding-bottom: 2px; 
+}
+
+/* container das tags */
+.selected-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px; /* ESPACO ENTRE AS TAGS */
+    max-width: 100%;
+}
+
+/* tags de itens selecionados */
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent-blue, #007bff); 
+    color: var(--text-white, #FFFFFF);
+    padding: 3px 6px 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1; /* alinhamento vertical da tag */
+    max-width: 150px; /* LIMITE DO TAMANHO DA TAG  */
+}
+
+/* CTA PARA REMOVER A TAG */
+.btn-remove-tag {
+    background: none;
+    border: none;
+    color: var(--text-white, #FFFFFF);
+    cursor: pointer;
+    font-size: 0.7rem;
+    margin-left: 5px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+}
+.btn-remove-tag:hover {
+    color: var(--negative-color, #ff4d4d);
+}
+
+/* "VER MAIS" */
+.selected-overflow {
+    color: var(--text-light, #C0C0C0);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-left: 10px; /* espaco maior para o 'Ver Mais' */
+    cursor: default;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0; /* garante que o CTA BOTAO nao encolha */
+}
+
+/* CTA BOTAO DE LIMPAR INDIVIDUAL todos deste selecionados do filtro */
+.btn-clear-single-filter {
+    background: none;
+    border: none;
+    color: var(--text-light, #C0C0C0);
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+    height: 20px;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+.btn-clear-single-filter:hover {
+    color: var(--negative-color, #ff4d4d); 
+    opacity: 1;
+}
+
+
+/* DROPDOWN LIST E OPCOES */
+
+.multiselect-dropdown {
+    /*  */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.85); 
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--accent-blue, #007bff);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    z-index: 99;
+    padding: 10px 0 0 0; 
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.custom-multiselect.open .multiselect-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* input de busca */
+.search-box {
+    display: flex;
+    align-items: center;
+    padding: 0 15px 10px 15px;
+    border-bottom: 1px solid var(--input-border, rgba(226, 226, 226, 0.2));
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-white, #FFFFFF);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-icon {
+    position: relative;
+    left: -25px;
+    color: var(--text-light, #C0C0C0);
+    font-size: 0.8rem;
+}
+
+/* SCROLL - LISTA DAS OPCOES */
+.options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px; 
+    overflow-y: auto; 
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: var(--text-white, #FFFFFF);
+    font-size: 0.9rem;
+    transition: background-color 0.15s, border-left 0.15s;
+    border-left: 3px solid transparent;
+}
+
+.option-item:hover {
+    background-color: rgba(255, 255, 255, 0.08); 
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+/* DESTAQUE MAIOR AO item selecionado */
+.option-item.selected {
+    background-color: rgba(0, 123, 255, 0.15); 
+    border-left-color: var(--accent-blue, #007bff); 
+    font-weight: 600;
+}
+
+.check-icon {
+    font-size: 0.8em;
+    margin-right: 10px;
+    color: var(--text-light, #C0C0C0);
+    opacity: 0; 
+    transition: opacity 0.15s;
+}
+.option-item.selected .check-icon {
+    opacity: 1; 
+    color: var(--accent-blue, #007bff);
+}
+
+.no-results-item {
+    padding: 10px 15px;
+    color: var(--text-light, #C0C0C0);
+    font-style: italic;
+    text-align: center;
+}
+
+/* FOOTER COM CTA DE LIMPAR TUDO (MAIOR DESTAQUE - VERMELHAO) */
+
+.dropdown-footer {
+    padding: 10px 15px;
+    border-top: 1px solid var(--input-border, rgba(226, 226, 226, 0.2));
+    text-align: center;
+}
+
+.btn-clear-all-filters {
+    width: 100%;
+    padding: 8px 15px;
+    background-color: var(--negative-color, #ff4d4d); 
+    color: var(--text-white, #FFFFFF);
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4); 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.btn-clear-all-filters:hover {
+    background-color: #d13d3d; 
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(255, 77, 77, 0.6);
+}
+
+/* SCROLL ESTILO ANTIGO MULTISELECT */
+/* estilo de scroll que nao foi alterado */
+.options-list::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.options-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2); 
+    border-radius: 10px;
+    border: 2px solid transparent;
+}
+.options-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.4); 
+}
+.options-list {
+    scrollbar-width: thin; 
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}

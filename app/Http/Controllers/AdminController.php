@@ -11,8 +11,7 @@ class AdminController extends Controller
     {
         // 🔹 Listas para os selects
         $allCreatives = DB::table('vw_creatives_performance')
-            ->select('creative_code')
-            ->distinct()
+            ->select('creative_code','agent_name','user_id')
             ->pluck('creative_code')
             ->toArray();
 
@@ -20,6 +19,12 @@ class AdminController extends Controller
             ->select('source')
             ->distinct()
             ->pluck('source')
+            ->toArray();
+        
+        $allEditors = DB::table('vw_creatives_performance')
+            ->select('agent_name')
+            ->distinct()
+            ->pluck('agent_name')
             ->toArray();
 
         // 🔹 Base da query (sem executar ainda)
@@ -53,7 +58,8 @@ class AdminController extends Controller
         return view('admin.dashboard', compact(
             'topCreatives',
             'allCreatives',
-            'allSources'
+            'allSources',
+            'allEditors'
         ));
     }
 

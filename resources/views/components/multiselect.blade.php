@@ -1,100 +1,275 @@
 @php
     use Illuminate\Support\Str;
+    $uniqueId = 'multiselect-' . Str::random(8); 
 @endphp
 
 @props([
     'name',
-    'label' => '',
-    'options' => [],
-    'selected' => [],
-    'placeholder' => 'Selecione uma ou mais opções',
-    'id' => Str::slug($name),
+    'label' => 'Nome do Filtro (Ex: Criativo, Conta)',
+    'options' => [
+        'creative-1' => 'Creative WLAD546 H1',
+        'creative-2' => 'Creative WLAD541',
+        'creative-3' => 'Creative ED777',
+        'creative-4' => 'Creative WKL909',
+        'creative-5' => 'Creative ED3321',
+        'creative-6' => 'Creative MMMA04',
+        'creative-7' => 'Creative MMMB444',
+        'creative-8' => 'Creative WL2111',
+        'creative-9' => 'Creative MW1888',
+        'creative-10' => 'Creative MM999',
+        'creative-11' => 'Creative ED555',
+        'creative-12' => 'Creative ED3D407',
+    ],
+    'selected' => ['creative-1', 'creative-2', 'creative-12'], 
+    'placeholder' => 'Buscar ou Selecionar (digite para filtrar)',
+    'id' => $uniqueId,
+    'maxTags' => 2, 
 ])
 
-<div class="filter-group">
+{{-- HTML  --}}
+<div class="filter-group {{ $id }}-container">
+    
     @if ($label)
         <label for="{{ $id }}">{{ $label }}</label>
     @endif
 
-    <select id="{{ $id }}" name="{{ $name }}[]" class="custom-select select2" multiple>
-        @foreach ($options as $value)
-            <option value="{{ $value }}" @if (in_array($value, $selected)) selected @endif>
+    <select id="{{ $id }}" name="{{ $name }}[]" multiple class="original-select hidden">
+        @foreach ($options as $key => $value)
+            <option value="{{ $key }}" data-label="{{ $value }}" @if (in_array($key, $selected)) selected @endif>
                 {{ $value }}
             </option>
         @endforeach
     </select>
+
+    <div class="custom-multiselect" id="custom-{{ $id }}">
+        
+        <div class="multiselect-header" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+            <div class="selected-summary-wrapper">
+                <span class="selected-summary"></span> 
+            </div>
+            
+            <div class="header-actions">
+                <button type="button" class="btn-clear-single-filter" title="Limpar todos os selecionados deste filtro">
+                    <i class="fas fa-eraser"></i> 
+                </button>
+                <i class="fas fa-angle-down dropdown-icon"></i>
+            </div>
+        </div>
+
+        <div class="multiselect-dropdown">
+            
+            <div class="search-box">
+                <input type="text" placeholder="Buscar..." class="search-input" aria-label="Buscar opções de filtro">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <ul class="options-list" role="listbox" aria-multiselectable="true">
+                {{-- JS --}}
+            </ul>
+            
+            <div class="dropdown-footer">
+                <button type="button" class="btn-clear-all-filters" title="Limpar TODAS as seleções de TODOS os filtros na página">
+                    Limpe os Filtros
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
+
 @once
-    {{-- Select2 (somente uma vez) --}}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <style>
-        /* === Ajustes visuais do Select2 para o dashboard Titan === */
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .select2-container {
-            width: 100% !important;
-            max-width: 100%;
-        }
-
-        /* remove margens e sombras exageradas */
-        .select2-container--default .select2-selection--multiple {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            min-height: 42px;
-            padding: 4px 8px;
-            box-shadow: none;
-            color: #fff;
-        }
-
-        /* texto branco para temas escuros */
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: rgba(255, 255, 255, 0.25);
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
-
-        /* Corrige sobreposição do dropdown (z-index) */
-        .select2-container .select2-dropdown {
-            z-index: 9999;
-        }
-
-        /* Remove o fundo branco no dropdown se o tema for escuro */
-        .select2-container--default .select2-results>.select2-results__options {
-            background-color: rgba(20, 20, 20, 0.95);
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 @endonce
 
-@push('scripts')
-    <script>
-        $(function() {
-            const el = $('#{{ $id }}');
-            el.select2({
-                placeholder: '{{ $placeholder }}',
-                allowClear: true,
-                width: '100%'
-            });
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const multiselectContainer = document.getElementById('custom-{{ $id }}');
+        if (!multiselectContainer) return;
 
-            // contador dinâmico de selecionados (exemplo opcional)
-            el.on('change', function() {
-                const count = $(this).val()?.length || 0;
-                if (count > 0) {
-                    $(this).next('.select2').find('.select2-selection__rendered')
-                        .attr('title', `${count} selecionado${count > 1 ? 's' : ''}`);
+        const originalSelect = document.getElementById('{{ $id }}');
+        const header = multiselectContainer.querySelector('.multiselect-header');
+        const searchInput = multiselectContainer.querySelector('.search-input');
+        const optionsList = multiselectContainer.querySelector('.options-list');
+        const summarySpan = multiselectContainer.querySelector('.selected-summary');
+        const btnClearSingle = multiselectContainer.querySelector('.btn-clear-single-filter');
+        const btnClearAllGlobal = multiselectContainer.querySelector('.btn-clear-all-filters');
+        const maxTags = {{ $maxTags }};
+        const allOptions = Array.from(originalSelect.options).map(opt => ({
+            value: opt.value,
+            label: opt.dataset.label,
+            selected: opt.selected
+        }));
+        
+        let isOpen = false;
+        
+        // FUNCAO LOGICA PADRAO
+        
+        function updateOriginalSelect(value, isSelected) {
+            const option = originalSelect.querySelector(`option[value="${value}"]`);
+            if (option) {
+                option.selected = isSelected;
+            }
+            const localOption = allOptions.find(o => o.value === value);
+            if (localOption) {
+                localOption.selected = isSelected;
+            }
+        }
+
+        function updateSelection(value, isSelected) {
+            updateOriginalSelect(value, isSelected);
+            updateHeaderDisplay();
+            renderOptionsList(searchInput.value);
+        }
+
+        function clearSingleFilter() {
+            allOptions.filter(o => o.selected).forEach(o => updateSelection(o.value, false));
+            originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        function renderOptionsList(searchTerm = '') {
+            optionsList.innerHTML = '';
+            const lowerCaseTerm = searchTerm.toLowerCase();
+
+            const selected = allOptions.filter(o => o.selected);
+            const unselected = allOptions.filter(o => !o.selected);
+            
+            const listToRender = selected.concat(unselected);
+
+            listToRender.forEach(option => {
+                const label = option.label;
+                const value = option.value;
+                const isSelected = option.selected;
+
+                if (label.toLowerCase().includes(lowerCaseTerm)) {
+                    const listItem = document.createElement('li');
+                    listItem.className = `option-item ${isSelected ? 'selected' : ''}`;
+                    listItem.dataset.value = value;
+                    listItem.dataset.label = label;
+                    listItem.setAttribute('role', 'option');
+                    listItem.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                    
+                    listItem.innerHTML = `
+                        <i class="fas fa-check check-icon"></i>
+                        <span class="option-label">${label}</span>
+                    `;
+                    
+                    optionsList.appendChild(listItem);
                 }
             });
+            
+            if (optionsList.children.length === 0) {
+                 optionsList.innerHTML = `<li class="no-results-item">Nenhum resultado encontrado para "${searchTerm}"</li>`;
+            }
+        }
+        
+        function updateHeaderDisplay() {
+            const selectedOptions = allOptions.filter(o => o.selected);
+            const count = selectedOptions.length;
+            
+            summarySpan.innerHTML = '';
+            
+            if (count === 0) {
+                summarySpan.textContent = '{{ $placeholder }}';
+                header.classList.remove('has-selection');
+                btnClearSingle.style.display = 'none';
+            } else {
+                header.classList.add('has-selection');
+                btnClearSingle.style.display = 'flex'; 
+                
+                selectedOptions.slice(0, maxTags).forEach(option => {
+                    const tag = document.createElement('span');
+                    tag.className = 'selected-tag';
+                    tag.dataset.value = option.value;
+                    tag.innerHTML = `
+                        <span>${option.label}</span>
+                        <button type="button" class="btn-remove-tag" title="Remover ${option.label}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    summarySpan.appendChild(tag);
+                });
+                
+                if (count > maxTags) {
+                    const overflow = document.createElement('span');
+                    overflow.className = 'selected-overflow';
+                    overflow.textContent = `+${count - maxTags} mais`;
+                    summarySpan.appendChild(overflow);
+                }
+            }
+            header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+        
+        // EVENT LISTENERS 
+
+        // alternar o dropdown abre e fecha
+        header.addEventListener('click', () => {
+            isOpen = !isOpen;
+            multiselectContainer.classList.toggle('open', isOpen);
+            header.setAttribute('aria-expanded', isOpen);
+            if (isOpen) {
+                searchInput.focus();
+                renderOptionsList(searchInput.value); 
+            }
         });
-    </script>
-@endpush
+        
+        // selecao dos itens AGORA COM A PARADA DE PROPAGAÇÃO
+        optionsList.addEventListener('click', (e) => {
+            // 
+            e.stopPropagation(); 
+            
+            const item = e.target.closest('.option-item');
+            if (item && !item.classList.contains('no-results-item')) {
+                const value = item.getAttribute('data-value');
+                const isSelected = item.classList.contains('selected');
+                
+                updateSelection(value, !isSelected); 
+                originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // foco no campo de busca para selecao
+                searchInput.focus(); 
+            }
+        });
+        
+        // remover a tagg individual
+        summarySpan.addEventListener('click', (e) => {
+            const removeButton = e.target.closest('.btn-remove-tag');
+            if (removeButton) {
+                e.stopPropagation(); 
+                const tag = removeButton.closest('.selected-tag');
+                const value = tag.dataset.value;
+                updateSelection(value, false); 
+                originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
+        // buscar
+        searchInput.addEventListener('input', (e) => {
+            renderOptionsList(e.target.value); 
+        });
+
+        // limpa filtro unico selecao individual
+        btnClearSingle.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            clearSingleFilter();
+        });
+        
+        // limpa TODOS os filtros da pagina e RECEBE UM ALERTA
+        btnClearAllGlobal.addEventListener('click', (e) => {
+             alert("🚨 Atenção! Esta ação irá limpar todos os filtros aplicados. Deseja realmente continuar?");
+             e.stopPropagation();
+        });
+        
+        // fecha ao clicar fora (MANTEM O FECHAMENTO AO CLICAR FORA, NAO E ACIONADO APOS CLICAR EM UMA UNICA SELECAO)
+        document.addEventListener('click', (e) => {
+            if (isOpen && !multiselectContainer.contains(e.target)) {
+                multiselectContainer.classList.remove('open');
+                header.setAttribute('aria-expanded', 'false');
+                isOpen = false;
+            }
+        });
+
+        // inicia tudo
+        updateHeaderDisplay();
+        renderOptionsList(); 
+    });
+</script>

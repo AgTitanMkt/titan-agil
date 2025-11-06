@@ -18,6 +18,7 @@
         'public/css/css-admin/admin-faturamento.css', // CSS DO FATURAMENTO //
         'public/css/css-admin/admin-time.css', // CSS DO TIME //
         'public/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
+        'public/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
         'public/js/app.js'
     ])
 </head>
