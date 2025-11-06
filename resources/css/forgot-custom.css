@@ -19,7 +19,7 @@ body, html {
 
 
 .forgot-page-container {
-    background-image: url('/public/img/Esqueceu\ a\ senha\ image\ Titan.png'); 
+    background-image: url('/resources/img/Esqueceu\ a\ senha\ image\ Titan.png'); 
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;

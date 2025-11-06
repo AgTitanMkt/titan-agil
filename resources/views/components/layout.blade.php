@@ -18,7 +18,7 @@
         'resources/css/css-admin/admin-faturamento.css', // CSS DO FATURAMENTO //
         'resources/css/css-admin/admin-time.css', // CSS DO TIME //
         'resources/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
-        'public/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
+        'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
         'resources/js/app.js'
     ])
 </head>
@@ -50,10 +50,16 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon"></i> Métricas
+                            <i class="fas fa-tachometer-alt nav-icon"></i> CopyWriters
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt nav-icon"></i> CopyWriters
                         </a>
                     </li>
                 </ul>
+                
                 
                 <div class="nav-divider"></div>
                 <p class="nav-section-title">PÁGINAS DE CONTA</p>
