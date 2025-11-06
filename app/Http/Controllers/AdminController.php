@@ -11,7 +11,8 @@ class AdminController extends Controller
     {
         // 🔹 Listas para os selects
         $allCreatives = DB::table('vw_creatives_performance')
-            ->select('creative_code','agent_name','user_id')
+            ->select('creative_code', 'agent_name', 'user_id')
+            ->distinct()
             ->pluck('creative_code')
             ->toArray();
 
@@ -20,12 +21,15 @@ class AdminController extends Controller
             ->distinct()
             ->pluck('source')
             ->toArray();
-        
+
         $allEditors = DB::table('vw_creatives_performance')
             ->select('agent_name')
+            ->where('role_id', 3)
             ->distinct()
             ->pluck('agent_name')
             ->toArray();
+
+        $allCopywriters = $this->allCopywritersArray();
 
         // 🔹 Base da query (sem executar ainda)
         $query = DB::table('vw_creatives_performance')
@@ -53,18 +57,82 @@ class AdminController extends Controller
         }
 
         // 🔹 Executa a query (com filtros ou sem)
-        $topCreatives = $query->limit(10)->get();
+        $topCreatives = $query->paginate(15)->appends($request->query());
 
         return view('admin.dashboard', compact(
             'topCreatives',
             'allCreatives',
             'allSources',
-            'allEditors'
+            'allEditors',
+            'allCopywriters',
         ));
     }
 
-    public function copywriters()
+    public function copywriters(Request $request)
     {
-        return view('admin.copy');
+        // Subquery: consolida cada criativo (sem duplicar por source)
+        $sub = DB::table('vw_creatives_performance')
+            ->select(
+                'user_id',
+                'agent_name',
+                'creative_code',
+                DB::raw('SUM(clicks) AS clicks'),
+                DB::raw('SUM(conversions) AS conversions'),
+                DB::raw('SUM(cost) AS cost'),
+                DB::raw('SUM(profit) AS profit'),
+                DB::raw('SUM(revenue) AS revenue'),
+                DB::raw('AVG(roi) AS roi'),
+                DB::raw('AVG(roas) AS roas'),
+                DB::raw('AVG(ctr) AS ctr'),
+                DB::raw('AVG(cpm) AS cpm')
+            )
+            ->where('role_id', 2) // copywriters
+            ->groupBy('user_id', 'agent_name', 'creative_code');
+
+        // Query principal: agrupa por copywriter e gera totais
+        $baseQuery = DB::query()
+            ->fromSub($sub, 't')
+            ->select(
+                'user_id',
+                'agent_name',
+                DB::raw('COUNT(creative_code) AS total_creatives'),
+                DB::raw('SUM(clicks) AS total_clicks'),
+                DB::raw('SUM(conversions) AS total_conversions'),
+                DB::raw('SUM(cost) AS total_cost'),
+                DB::raw('SUM(profit) AS total_profit'),
+                DB::raw('SUM(revenue) AS total_revenue'),
+                // ROI médio real (média do profit / média do cost)
+                DB::raw('ROUND((AVG(profit) / NULLIF(AVG(cost), 0)), 4) AS avg_roi'),
+                // ROI total consolidado (soma total do profit / soma total do cost)
+                DB::raw('ROUND((SUM(profit) / NULLIF(SUM(cost), 0)), 4) AS total_roi'),
+                DB::raw('ROUND(AVG(roas), 4) AS avg_roas'),
+                DB::raw('ROUND(AVG(ctr), 4) AS avg_ctr'),
+                DB::raw('ROUND(AVG(cpm), 4) AS avg_cpm')
+            )
+            ->groupBy('user_id', 'agent_name');
+
+
+        $allCopywriters = $this->allCopywritersArray();
+
+        // 🔹 Filtros cumulativos
+        if ($request->filled('copywriters')) {
+            $baseQuery->where('agent_name', $request->copywriters);
+        }
+
+        $copies = $baseQuery->orderByDesc('total_profit')
+            ->paginate(20);
+
+        return view('admin.copy', compact('copies', 'allCopywriters'));
+    }
+
+
+    public function allCopywritersArray()
+    {
+        return  DB::table('vw_creatives_performance')
+            ->select('agent_name')
+            ->where('role_id', 2)
+            ->distinct()
+            ->pluck('agent_name')
+            ->toArray();
     }
 }

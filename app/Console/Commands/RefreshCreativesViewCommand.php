@@ -18,67 +18,70 @@ class RefreshCreativesViewCommand extends Command
         $this->info('🚀 Inserindo dados combinados (RedTrack + ClickUp + Responsáveis)...');
 
         DB::statement('
-            INSERT INTO vw_creatives_performance (
-                task_id,
-                creative_code,
-                origem,
-                user_id,
-                role_id,
-                role_name,
-                agent_name,
-                redtrack_id,
-                rt_ad,
-                source,
-                clicks,
-                conversions,
-                roi,
-                cost,
-                profit,
-                revenue,
-                roas,
-                ctr,
-                cpm,
-                redtrack_date,
-                created_at,
-                updated_at
-            )
-            SELECT
-                t.id AS task_id,
-                t.code AS creative_code,
-                t.title AS task_name,
-                u.id AS user_id,
-                ur.role_id,
-                ur.role_name,
-                u.name AS agent_name,
-                r.id AS redtrack_id,
-                r.name AS rt_ad,
-                r.source AS source,
-                r.clicks,
-                r.conversions,
-                r.roi,
-                r.cost,
-                r.profit,
-                (r.profit + r.cost) AS revenue,
-                CASE WHEN r.cost > 0 THEN (r.profit / r.cost) ELSE 0 END AS roas,
-                NULL AS ctr,
-                NULL AS cpm,
-                r.created_at AS redtrack_date,
-                NOW(),
-                NOW()
-            FROM redtrack_reports r
-            INNER JOIN tasks t 
-                ON r.normalized_rt_ad = t.normalized_code
-            INNER JOIN sub_tasks st 
-                ON st.task_id = t.id
-            INNER JOIN user_tasks ut 
-                ON ut.sub_task_id = st.id
-            INNER JOIN users u 
-                ON u.id = ut.user_id
-            INNER JOIN user_roles ur
-                ON u.id = ur.user_id
-            GROUP BY
-                t.id, u.id, r.id
-        ');
+    INSERT INTO vw_creatives_performance (
+        task_id,
+        creative_code,
+        origem,
+        user_id,
+        role_id,
+        role_name,
+        agent_name,
+        redtrack_id,
+        rt_ad,
+        source,
+        clicks,
+        conversions,
+        roi,
+        cost,
+        profit,
+        revenue,
+        roas,
+        ctr,
+        cpm,
+        redtrack_date,
+        created_at,
+        updated_at
+    )
+    SELECT
+        t.id AS task_id,
+        t.code AS creative_code,
+        t.title AS task_name,
+        u.id AS user_id,
+        ur.role_id,
+        CASE 
+            WHEN ur.role_id = 1 THEN "ADMIN"
+            WHEN ur.role_id = 2 THEN "COPYWRITER"
+            WHEN ur.role_id = 3 THEN "EDITOR"
+            WHEN ur.role_id = 4 THEN "DEVELOPER"
+            WHEN ur.role_id = 5 THEN "MANAGER"
+            WHEN ur.role_id = 6 THEN "HEAD"
+            WHEN ur.role_id = 7 THEN "ANALYST"
+            WHEN ur.role_id = 8 THEN "ASSISTANT"
+            ELSE "UNKNOWN"
+        END AS role_name,
+        u.name AS agent_name,
+        r.id AS redtrack_id,
+        r.name AS rt_ad,
+        r.source AS source,
+        r.clicks,
+        r.conversions,
+        r.roi,
+        r.cost,
+        r.profit,
+        (r.profit + r.cost) AS revenue,
+        CASE WHEN r.cost > 0 THEN (r.profit / r.cost) ELSE 0 END AS roas,
+        NULL AS ctr,
+        NULL AS cpm,
+        r.created_at AS redtrack_date,
+        NOW(),
+        NOW()
+    FROM redtrack_reports r
+    INNER JOIN tasks t ON r.normalized_rt_ad = t.normalized_code
+    INNER JOIN sub_tasks st ON st.task_id = t.id
+    INNER JOIN user_tasks ut ON ut.sub_task_id = st.id
+    INNER JOIN users u ON u.id = ut.user_id
+    INNER JOIN user_roles ur ON u.id = ur.user_id
+');
 
         $this->info('✅ Tabela vw_creatives_performance atualizada com sucesso!');
     }
