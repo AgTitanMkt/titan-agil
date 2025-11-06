@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->group(function(){
         Route::get('dashboard',[AdminController::class,'dashboard'])->name('admin.dashboard');
         Route::get('copywriters',[AdminController::class,'copywriters'])->name('admin.copywriters');
+        Route::get('time',[AdminController::class,'time'])->name('admin.time');
+        Route::get('faturamento',[AdminController::class,'faturamento'])->name('admin.faturamento');
     });
 });
 

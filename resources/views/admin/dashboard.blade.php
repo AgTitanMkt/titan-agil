@@ -19,63 +19,36 @@
                 </x-multiselect>
             </div>
 
-            
-            {{--- FILTRO DE EDITOR ---}}
-        <div class="filter-group">
-            <x-multiselect
-                name="editors" 
-                label="Editor" 
-                :options="$allEditors" 
-                :selected="request('editors', [])" 
-                placeholder="Selecione o Editor (ou use a busca)">
-            </x-multiselect>
-        </div>
-
-            
             <div class="filter-group">
-                <label for="copywriter-filter">Copywriter</label>
-                <div id="copywriter-filter" class="custom-dropdown-filter" tabindex="0">
-                    <div class="dropdown-header">
-                        <span class="selected-items-display">Copywriter (0)</span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </div>
-                    <div class="dropdown-list">
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_r">Copywriter R</label>
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_s">Copywriter S</label>
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_r">Copywriter R</label>
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_s">Copywriter S</label>
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_r">Copywriter R</label>
-                        <label class="dropdown-item"><input type="checkbox" name="copywriter[]" value="copy_s">Copywriter S</label>
-                        {{-- @foreach ($allCopywriters as $copywriter) ... @endforeach --}}
-                    </div>
-                </div>
+                <x-multiselect
+                    name="editors" 
+                    label="Editores" 
+                    :options="$allEditors" 
+                    :selected="request('editors', [])" 
+                    placeholder="Selecione um ou mais editores">
+                </x-multiselect>
             </div>
 
             
             <div class="filter-group">
-                <label for="sources-filter">Conta</label>
-                <div id="sources-filter" class="custom-dropdown-filter" tabindex="0">
-                    <div class="dropdown-header">
-                        <span class="selected-items-display">Conta (0)</span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
-                    </div>
-                    <div class="dropdown-list">
-                        {{-- SELECAO --}}
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s1">FACEBOOK | ED(LM) | RE</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s2">FACEBOOK | EMAG | TRAFFIC PADRÃO</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s3">GAADS - DAVID - CONTA POATAN</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s4">FACEBOOK | MEMORIAL(LM) | RE</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s5">GAADS - YT-ARY - OZOB</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s6">FACEBOOK | TRAFFIC PADRÃO - ED (new)</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s7">GAADS - DAVID - CONTA 02</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s8">FACEBOOK | WL(DAM)</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s9">GAADS - DAVID - CONTA AMONG US</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s10">FACEBOOK | TRÁFEGO KV</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s11">FACEBOOK | MEMÓRIA (NI)</label>
-                        <label class="dropdown-item"><input type="checkbox" name="sources[]" value="s12">FACEBOOK | WL(INT)</label>
-                        {{-- @foreach ($allSources as $source ) ... @endforeach --}}
-                    </div>
-                </div>
+                <x-multiselect
+                    name="copywriters" 
+                    label="Copywriters" 
+                    :options="$allCopywriters" 
+                    :selected="request('copywriters', [])" 
+                    placeholder="Selecione um ou mais copywriters">
+                </x-multiselect>
+            </div>
+
+            
+            <div class="filter-group">
+                <x-multiselect
+                    name="sources" 
+                    label="Contas" 
+                    :options="$allSources" 
+                    :selected="request('sources', [])" 
+                    placeholder="Selecione uma ou mais contas">
+                </x-multiselect>
             </div>
 
             <div class="filter-submit-area">
@@ -118,6 +91,7 @@
                 </tbody>
             </table>
         </div>
+        <div class="paginate">{{$topCreatives->links()}}</div>
 
     </div>
 

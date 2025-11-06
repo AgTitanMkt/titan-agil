@@ -131,14 +131,14 @@
 /* grafico de desempenho da equipe */
 .performance-chart-card {
     padding: 20px;
-    height: 100%;
+    height: fit-content;
 }
 
 .chart-time-container {
     display: grid;
     grid-template-columns: 30px 1fr;
     grid-template-rows: 1fr 20px;
-    height: 180px;
+    height: fit-content;
     align-items: end;
 }
 
