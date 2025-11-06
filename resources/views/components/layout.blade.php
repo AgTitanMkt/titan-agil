@@ -11,14 +11,14 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,700,900" rel="stylesheet" />
 
     @vite([
-        'public/css/app.css', 
-        'public/css/css-admin/admin-layout.css',    // CSS DO COMPONENTE //
-        'public/css/css-admin/admin-dashboard.css', // CSS DO DASH //
-        'public/css/css-admin/admin-copy.css', // CSS DO COPY //
-        'public/css/css-admin/admin-faturamento.css', // CSS DO FATURAMENTO //
-        'public/css/css-admin/admin-time.css', // CSS DO TIME //
-        'public/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
-        'public/js/app.js'
+        'resources/css/app.css', 
+        'resources/css/css-admin/admin-layout.css',    // CSS DO COMPONENTE //
+        'resources/css/css-admin/admin-dashboard.css', // CSS DO DASH //
+        'resources/css/css-admin/admin-copy.css', // CSS DO COPY //
+        'resources/css/css-admin/admin-faturamento.css', // CSS DO FATURAMENTO //
+        'resources/css/css-admin/admin-time.css', // CSS DO TIME //
+        'resources/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
+        'resources/js/app.js'
     ])
 </head>
 <body>
@@ -38,12 +38,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('admin.time') }}" class="nav-link">
                             <i class="fas fa-users nav-icon"></i> Time
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('admin.faturamento') }}" class="nav-link">
                             <i class="fas fa-wallet nav-icon"></i> Faturamento
                         </a>
                     </li>

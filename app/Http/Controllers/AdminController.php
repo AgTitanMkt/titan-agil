@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -134,5 +135,75 @@ class AdminController extends Controller
             ->distinct()
             ->pluck('agent_name')
             ->toArray();
+    }
+
+    public function time(Request $request)
+    {
+        // Subquery consolidando criativos (sem duplicar por source)
+        $sub = DB::table('vw_creatives_performance')
+            ->select(
+                'role_id',
+                'role_name',
+                'user_id',
+                'agent_name',
+                'creative_code',
+                DB::raw('SUM(clicks) AS clicks'),
+                DB::raw('SUM(conversions) AS conversions'),
+                DB::raw('SUM(cost) AS cost'),
+                DB::raw('SUM(profit) AS profit'),
+                DB::raw('SUM(revenue) AS revenue'),
+                DB::raw('AVG(roi) AS roi'),
+                DB::raw('AVG(roas) AS roas'),
+                DB::raw('AVG(ctr) AS ctr'),
+                DB::raw('AVG(cpm) AS cpm')
+            )
+            ->groupBy('role_id', 'role_name', 'user_id', 'agent_name', 'creative_code');
+
+        // Query principal: consolida por pessoa dentro do time
+        $query = DB::query()
+            ->fromSub($sub, 't')
+            ->select(
+                'role_id',
+                'role_name',
+                'user_id',
+                'agent_name',
+                DB::raw('COUNT(creative_code) AS total_creatives'),
+                DB::raw('SUM(clicks) AS total_clicks'),
+                DB::raw('SUM(conversions) AS total_conversions'),
+                DB::raw('SUM(cost) AS total_cost'),
+                DB::raw('SUM(profit) AS total_profit'),
+                DB::raw('SUM(revenue) AS total_revenue'),
+                DB::raw('ROUND((AVG(profit) / NULLIF(AVG(cost), 0)), 4) AS avg_roi'),
+                DB::raw('ROUND((SUM(profit) / NULLIF(SUM(cost), 0)), 4) AS total_roi'),
+                DB::raw('ROUND(AVG(roas), 4) AS avg_roas'),
+                DB::raw('ROUND(AVG(ctr), 4) AS avg_ctr'),
+                DB::raw('ROUND(AVG(cpm), 4) AS avg_cpm')
+            )
+            ->groupBy('role_id', 'role_name', 'user_id', 'agent_name');
+
+        // 🔹 Filtros (opcionais)
+        if ($request->filled('role_id')) {
+            $query->where('role_id', $request->role_id);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Executa a query e pagina
+        $teamPerformance = $query
+            ->orderByDesc('total_profit')
+            ->paginate(30);
+
+        // 🔹 Para dropdowns e filtros
+        $roles = DB::table('roles')->select('id', 'title')->get();
+        $users = User::select('id', 'name','email')->get();
+
+        return view('admin.time', compact('teamPerformance', 'roles', 'users'));
+    }
+
+    public function faturamento(Request $request)
+    {
+        return view('admin.faturamento');
     }
 }
