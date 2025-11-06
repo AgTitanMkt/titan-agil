@@ -21,8 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Diretiva personalizada para valores em reais
-        Blade::directive('real', function ($amount) {
-            return "<?php echo 'R$ ' . number_format($amount, 2, ',', '.'); ?>";
+        Blade::directive('dollar', function ($amount) {
+            return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
         });
     }
 }

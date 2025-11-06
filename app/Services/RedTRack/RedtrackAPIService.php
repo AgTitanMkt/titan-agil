@@ -25,7 +25,7 @@ class RedtrackAPIService
     public function fetchReport(
         string $dateFrom,
         string $dateTo,
-        ?string $group = 'source,rt_campaign',
+        ?string $group = 'source,rt_ad',
         ?int $per = 1000,
         ?array $extra = []
     ) {
@@ -84,12 +84,10 @@ class RedtrackAPIService
                 // Decodifica de forma mais leve que ->json()
                 $data = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
                 $items = $data['items'] ?? $data ?? [];
-
                 if (empty($items)) {
                     Log::info("RedTrack → Nenhum item encontrado na página {$page}");
                     break;
                 }
-                return $items;
                 foreach ($items as $item) {
                     try {
                         RedtrackReport::updateOrCreate(

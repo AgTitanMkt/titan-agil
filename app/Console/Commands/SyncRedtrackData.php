@@ -32,7 +32,7 @@ class SyncRedtrackData extends Command
         $this->info("📡 Iniciando sincronização RedTrack de {$dateFrom} até {$dateTo}...");
 
         try {
-            $service->fetchAndPersistReport($dateFrom, $dateTo);
+            $service->fetchReport($dateFrom, $dateTo);
             $this->info('✅ Sincronização concluída com sucesso!');
         } catch (\Throwable $e) {
             $this->error('❌ Erro ao sincronizar: ' . $e->getMessage());
