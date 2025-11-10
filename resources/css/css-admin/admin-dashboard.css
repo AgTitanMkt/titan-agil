@@ -351,25 +351,80 @@
 }
 
 
+
+
+
+
+/* METRICAS GRID */
+.metrics-grid {
+    display: grid;
+    /* 4 colunas */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/*  metrica individual */
+.metric-card {
+    background-color: var(--bg-card-dark);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card-title {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.metric-card-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-white);
+    line-height: 1.1;
+}
+
+.metric-card-change {
+    font-size: 0.8rem;
+    color: var(--profit-color); 
+    margin-top: 5px;
+}
+
+/*  */
+
 /* RESPONSIVIDADE */
 
 @media (max-width: 1200px) {
-    .filters-grid {
+    /* 4 -> 3 colunas */
+    .filters-grid, .metrics-grid {
         grid-template-columns: repeat(3, 1fr);
     }
     
     .filter-submit-area {
         grid-column: 3 / 4; 
+        /*  3 + CTA na linha 1 / 1 filtro + CTA na linha 2 */
+        grid-row: 2 / 3; 
+        align-items: flex-end; /* mantem no canto inferior */
     }
 }
 
 @media (max-width: 768px) {
-    .filters-grid {
+    /* 3 -> 2 colunas */
+    .filters-grid, .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     
     .filter-submit-area {
         grid-column: 2 / 3; 
+        /* 2 filtros na linha 1 / 2 filtros na linha 2 / CTA na linha 3 */
+        grid-row: 3 / 4; 
+        justify-content: flex-end;
+        align-items: flex-end; 
     }
     
     .glass-card {
@@ -381,19 +436,22 @@
         font-size: 1.5rem;
     }
 
+    /* min-width e scroll */
     .creatives-table {
         min-width: 600px; 
     }
 }
 
 @media (max-width: 480px) {
-    .filters-grid {
+    /* 2 -> 1 coluna */
+    .filters-grid, .metrics-grid {
         grid-template-columns: 1fr;
     }
     
     .filter-submit-area {
         grid-column: 1 / 2; 
-        justify-content: center;
+        grid-row: auto; /* volta ao fluxo normal */
+        justify-content: center; /* centraliza no mobile */
         margin-top: 10px;
     }
     
@@ -402,3 +460,55 @@
         max-width: 250px;
     }
 }
+
+/* RESPONSIVO TOTAL  */
+
+/* max 1200px */
+@media (max-width: 1200px) {
+    .filter-submit-area {
+        display: flex !important;
+        justify-content: flex-end !important; /* empurra o CTA para a direita */
+        align-items: flex-end !important;
+        grid-column: 1 / -1 !important; /* ocupa toda a linha, CTA fica a direita */
+    }
+
+    .btn-filter {
+        margin-right: 10px; /* espaco da borda */
+    }
+}
+
+/* max 768px  */
+@media (max-width: 768px) {
+    .filter-submit-area {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: flex-end !important;
+        grid-column: 1 / -1 !important;
+    }
+
+    .btn-filter {
+        width: auto !important;
+        margin-right: 10px;
+    }
+}
+
+/* max 480px */
+@media (max-width: 480px) {
+    .filter-submit-area {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: flex-end !important;
+        grid-column: 1 / -1 !important;
+        margin-top: 10px;
+    }
+
+    .btn-filter {
+        width: 100%; 
+        max-width: 200px;
+        margin-right: 0;
+    }
+}
+
+
+
+

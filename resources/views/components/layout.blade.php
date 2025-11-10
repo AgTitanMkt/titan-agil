@@ -19,7 +19,7 @@
         'resources/css/css-admin/admin-time.css', // CSS DO TIME //
         'resources/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
         'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
-        'resources/js/app.js'
+        'resources/js/app.js' // JS //
     ])
 </head>
 <body>
@@ -50,7 +50,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon"></i> CopyWriters
+                            <i class="fas fa-tachometer-alt nav-icon"></i> Métricas 
                         </a>
                     </li>
                     <li class="nav-item">
@@ -105,6 +105,60 @@
         </div>
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+
+        
+        <header class="header-bar">
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i> 
+    </button>
+    
+    <div class="header-user">
+        <div class="user-avatar-icon">
+            <i class="fas fa-user"></i>
+        </div>
+        <span class="user-name">{{ auth()->user()->name }}</span>
+    </div>
+</header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const adminWrapper = document.querySelector('.admin-page-wrapper');
+        const mainContentArea = document.querySelector('.main-content-area');
+
+        if (menuToggle && adminWrapper && mainContentArea) {
+            
+            // abrir/fechar o menu ao clicar no botao
+            menuToggle.addEventListener('click', function() {
+                adminWrapper.classList.toggle('sidebar-open');
+            });
+
+            // 
+            mainContentArea.addEventListener('click', function(event) {
+                // verifica se o sidebar esta aberto e se o clique foi fora do menu
+                if (adminWrapper.classList.contains('sidebar-open')) {
+                    // impede o clique em elementos internos do conteudo de fechar o menu
+                    if (event.target.closest('.page-content')) {
+                        adminWrapper.classList.remove('sidebar-open');
+                    }
+                }
+            });
+            
+            // menu fechado em desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024) {
+                    adminWrapper.classList.remove('sidebar-open');
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
 
     </div>
 </body>

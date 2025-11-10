@@ -1,15 +1,15 @@
-
 /* CORES */
-
 :root {
     --sidebar-width: 250px;
     --header-height: 70px;
-    --primary-dark: #060B26; /* cor do sidebar */
+    --primary-dark: #060B26;
     --hover-active-color: #0d1538;
     --accent-blue: #007bff;
-    --text-light: #C0C0C0; 
+    --text-light: #C0C0C0;
     --text-white: #FFFFFF;
-    --border-subtle: rgba(255, 255, 255, 0.08); 
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    /* TRANSICAO DE LARGURA */
+    --transition-speed: 0.3s; 
 }
 
 body, html {
@@ -17,20 +17,20 @@ body, html {
     padding: 0;
     font-family: 'Inter', sans-serif;
     color: var(--text-light);
+    
+    overflow-x: hidden; 
 }
 
 .admin-page-wrapper {
     display: flex;
-    min-height: 100vh;
-    
-    
+    /* ajustado para min-height: 100vh; */
+    min-height: 100vh; 
+    position: relative;
+    /* background-image, cover, position, outros... */
     background-image: url('/resources/img/img-admin/Main\ Dashboard.png');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
-    
-    
-    position: relative;
 }
 
 .admin-page-wrapper::before {
@@ -40,32 +40,32 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    
-    background-color: rgba(0, 0, 0, 0.3); 
+    background-color: rgba(0, 0, 0, 0.3);
     z-index: 0;
 }
 
 
-
-/* SIDEBAR */
-
+/* SIDEBAR  */
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
     background-color: var(--primary-dark);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; 
-    height: 100vh;
-    position: fixed; 
+    justify-content: space-between;
+    
+    height: 100vh; 
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
     padding-top: 20px;
     box-shadow: 6px 0 15px rgba(0, 0, 0, 0.5);
-    z-index: 10; 
-    
+    z-index: 10;
+    transition: transform var(--transition-speed); /* Adiciona tranicao para o mobile para abrir */
 }
+
+/*  */
 
 /* header da sidebar */
 .sidebar-header {
@@ -174,33 +174,76 @@ body, html {
 
 
 
+/*  */
+
 /* MAIN/HEADER */
 
-
 .main-content-area {
+    
     flex-grow: 1;
-    margin-left: var(--sidebar-width); 
+    margin-left: var(--sidebar-width);
     position: relative;
-    z-index: 1; 
+    z-index: 1;
+    width: calc(100% - var(--sidebar-width));
+    transition: transform var(--transition-speed); /* empurrar o main-header */
 }
 
-/* HEADER BAR */
+/* HEADER BAR  */
 .header-bar {
     height: var(--header-height);
-    background-color: rgba(6, 11, 38, 0.6); 
+    background-color: rgba(6, 11, 38, 0.6);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-subtle);
     position: fixed;
     top: 0;
     left: var(--sidebar-width); 
     right: 0;
+    width: calc(100% - var(--sidebar-width)); 
     z-index: 500;
     
     display: flex;
-    justify-content: flex-end; 
+    /* garante que o menu-toggle (se visivel) fique na esquerda e o user-header na direita */
+    justify-content: space-between; 
     align-items: center;
     padding: 0 30px;
+    transition: left var(--transition-speed), width var(--transition-speed), transform var(--transition-speed); 
 }
+
+/* CTA DE MENU (Hidden in Desktop) */
+.menu-toggle {
+    display: none; 
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 1.5rem;
+    cursor: pointer;
+    /* removido pois margin-right: auto; para usar justify-content: space-between; */
+    padding: 10px;
+    z-index: 600;
+    transition: color 0.2s;
+}
+
+/* GARANTIR QUE O USUARIO ADMIN FIQUE NO CANTO DIREITO */
+.header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* empurra tudo para a direita */
+    padding-right: 40px;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    color: var(--text-white);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50px;
+    transition: background-color 0.2s;
+    margin-left: auto; /* garante que fique no extremo direito */
+}
+
 
 /* PERFIL COM USER */
 .header-user {
@@ -242,29 +285,55 @@ body, html {
 
 /* AREA DO CONTENT */
 .page-content {
-    padding: calc(var(--header-height) + 30px) 30px 30px 30px; 
+    padding: calc(var(--header-height) + 30px) 30px 30px 30px;
     min-height: 100vh;
 }
 
 
 
-/* RESPONSIVIDADE */
+/* RESPONSIVIDADE  */
+
+
+/* LOGICA DE ANIMACAO (via JS) */
+
+
+.sidebar-open .sidebar {
+    transform: translateX(0);
+}
+
+.sidebar-open .main-content-area,
+.sidebar-open .header-bar {
+    transform: translateX(var(--sidebar-width)); 
+}
+
+
+
+/* MEDIA QUERY (max 1024px) */
 
 
 @media (max-width: 1024px) {
-    .sidebar {
-        width: 0;
-        min-width: 0;
-        transform: translateX(-100%);
-        box-shadow: none;
-    }
-
-    .main-content-area {
-        margin-left: 0; 
+    
+    /* REVELA O CTA de toggle em mobile */
+    .menu-toggle {
+        display: block; 
     }
     
+    /* SIDEBAR (esconde por padrao) */
+    .sidebar {
+        transform: translateX(calc(var(--sidebar-width) * -1)); 
+    }
+    
+    /* MAIN CONTENT (ocupa 100% da tela) */
+    .main-content-area {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    /* HEADER BAR (ocupa 100% da tela) */
     .header-bar {
         left: 0; 
+        right: 0;
+        width: 100%; 
         padding: 0 15px;
     }
     
@@ -272,3 +341,19 @@ body, html {
         padding: calc(var(--header-height) + 20px) 15px 15px 15px;
     }
 }
+
+@media (max-width: 768px) {
+    /* max 768 - tablets */
+    .page-content {
+        padding: calc(var(--header-height) + 15px) 10px 10px 10px;
+    }
+    .header-user .user-name {
+        /* esconde o user- em telas muito pequenas para economizar espaco */
+        display: none; 
+    }
+}
+
+
+
+
+
