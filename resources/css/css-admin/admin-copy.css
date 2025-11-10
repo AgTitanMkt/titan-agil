@@ -53,11 +53,14 @@
     /* 4 colunas em telas grandes */
     grid-template-columns: repeat(4, 1fr); 
     gap: 15px;
+    width: 100%;
+    min-width: 0; 
 }
 
+
 .filters-grid-production {
-    /* mantem as 4 colunas e o layout de 2 linhas */
     grid-template-columns: repeat(4, 1fr);
+    /* 7 filtros + CTA = 8 itens 2 linhas de 4 colunas */
 }
 
 /* Z-INDEX AJUSTE PARA O CARD DE FILTROS */
@@ -245,22 +248,24 @@
 
 
 /* AREA DO BOTAO  */
-
 .filter-submit-area {
-    /* padrdo para 4 colunas */
+    /* 4ª coluna */
     grid-column: 4 / 5; 
     display: flex;
-    justify-content: flex-end;
-    align-items: flex-end; 
+    justify-content: flex-end; /* alinha a direita */
+    align-items: flex-end;    
+    height: 100%;             
 }
 
-/*  (2ª linha, 4ª coluna) */
+/* AREA DO BOTAO */
 .filter-submit-area-production {
-    grid-row: 2 / 3;
     grid-column: 4 / 5;
+    /* SEGUNDA linha */
+    grid-row: 2 / 3;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; 
     align-items: flex-end; 
+    height: 100%;
 }
 
 
@@ -317,7 +322,7 @@
     vertical-align: top;
 }
 
-/* copywriter (Ary, etc.) */
+/* copywriter (Julia, etc.) */
 .ad-name {
     font-weight: 700;
     margin: 0;
@@ -334,41 +339,60 @@
 }
 
 
-/* RESPONSIVIDADE */
+/*   RESPONSIVIDADE           */
 
-
+/* DESKTOP/TELAS GRANDES Max 1200px */
 @media (max-width: 1200px) {
     /* 3 colunas para o grid geral */
     .filters-grid, .filters-grid-production {
         grid-template-columns: repeat(3, 1fr);
     }
     
-    /* reposicionamento para 3 colunas */
+    /*  3 colunas */
     .filter-submit-area {
         grid-column: 3 / 4; 
-        grid-row: auto; 
+        
+        grid-row: 2 / 3; 
+        align-items: flex-end;
     }
     
-    /* reposicionamento para 3 colunas na tela  */
+    
     .filter-submit-area-production {
         grid-column: 3 / 4;
-        /* 7 filtros + 1 botao, eles ocuparão 3 linhas de 3 colunas. O botao vai para a 3ª linha. */
+        
         grid-row: 3 / 4; 
+        align-items: flex-end;
+    }
+    
+    
+    .glass-card {
+        padding: 25px 20px;
     }
 }
 
+/* TABLETS/DESKTOPS Max 768px */
 @media (max-width: 768px) {
     /* tablets verticais/grandes celulares 2 colunas */
     .filters-grid, .filters-grid-production {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    
-    .filter-submit-area, .filter-submit-area-production {
+    /*  2 colunas  */
+    .filter-submit-area {
         grid-column: 2 / 3; 
-        /* 7 filtros + 1 botão. 7/2 = 3.5. O botão vai para a 4ª linha. */
+        
+        grid-row: 3 / 4; 
+        justify-content: flex-end;
+        align-items: flex-end;
+        margin-top: 0;
+    }
+    
+    .filter-submit-area-production {
+        grid-column: 2 / 3; 
+        
         grid-row: 4 / 5; 
         justify-content: flex-end;
+        align-items: flex-end;
         margin-top: 0;
     }
     
@@ -381,23 +405,30 @@
         font-size: 1.5rem;
     }
 
-    /* tabelas em telas pequenas que tera o scroll horizontall */
+    
+    .table-responsive {
+        overflow-x: auto; 
+    }
     .creatives-table {
-        min-width: 600px; /* garante que a tabela não se quebre */
+        
+        min-width: 700px; 
     }
 }
 
+/* CELULARES Max 480px */
 @media (max-width: 480px) {
-    /* celulares 1 coluna */
+    /* 1 coluna */
     .filters-grid, .filters-grid-production {
         grid-template-columns: 1fr;
     }
     
+    /*  1 coluna (centralizado) */
     .filter-submit-area, .filter-submit-area-production {
         grid-column: 1 / 2; 
         grid-row: auto; 
-        justify-content: center;
-        margin-top: 10px;
+        justify-content: center; 
+        align-items: center; 
+        margin-top: 15px; 
     }
     
     .btn-filter {
@@ -405,3 +436,4 @@
         max-width: 250px;
     }
 }
+

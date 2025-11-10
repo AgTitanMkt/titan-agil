@@ -15,7 +15,7 @@
     
     /* cores do grafico */
     --project-active-color: #64B5F6; /* azul claro */
-    --project-paused-color: #2196F3; /* azul médio */
+    --project-paused-color: #2196F3; /* azul medio */
     --project-zeroed-color: #FF5722; /* laranja/vermelho */
 }
 
@@ -459,48 +459,161 @@
 }
 
 
-/* RESPONSIVIDADE */
+/*  */
+
+/* RESPONSIVIDADE TOTAL */
 @media (max-width: 1200px) {
-    /* header ajustado para dispositivos menores */
+    /* HEADER flutuante vira um card na parte de baixo do banner */
     .profile-header-card-wrapper {
         flex-direction: column;
         align-items: flex-start;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        border-radius: 0 0 15px 15px;
+        /* move o card para baixo do banner no desktop menor/tablet */
+        bottom: -30px; 
+        left: 15px; /* ajusta o padding nas laterais */
+        right: 15px; 
+        border-radius: 15px; /* volta o border-radius completo */
+        padding: 20px 20px;
     }
     .profile-badges-aligned {
         margin-top: 15px;
         margin-left: 0;
     }
+    
+    /* 3 colunas e 2 colunas empilham */
     .profile-main-grid, .profile-bottom-grid-fixed {
-        grid-template-columns: 1fr; /* 3 colunas e 2 colunas empilham */
+        grid-template-columns: 1fr;
+        gap: 25px;
     }
+    
     .profile-header-container {
-        height: 150px;
+        /* reduz a altura do banner para o layout de coluna unica do header */
+        height: 150px; 
         margin-bottom: 0; 
     }
     .profile-main-grid {
+        /* aumenta o margin-top para compensar o card flutuante */
         margin-top: 80px; 
+    }
+    
+    /* chart - reduzido o gap do rodapé */
+    .chart-legend {
+        gap: 10px;
     }
 }
 
+
+/* Tablets max 768px */
+
 @media (max-width: 768px) {
-    .profile-header-container {
-        height: auto;
-        padding-bottom: 50px;
+    .glass-card {
+        padding: 20px 15px;
     }
-    .profile-meta-info {
-        position: static;
-        margin-top: 10px;
+
+    /* HEADER alinhamento */
+    .profile-header-container {
+        height: 120px; /* mais baixo */
     }
     
-    .profile-picture-new {
-        width: 60px;
-        height: 60px;
+    .profile-header-card-wrapper {
+        /* centraliza a imagem e o texto principal no centro do card */
+        align-items: center; 
+        left: 10px;
+        right: 10px;
+        padding: 15px;
     }
+    
+    /* alinhamento da foto e nome */
+    .profile-meta-info {
+        flex-direction: column; /* foto e texto em coluna para centralizar */
+        text-align: center;
+    }
+
+    .profile-picture-new {
+        margin-right: 0;
+        margin-bottom: 10px; /* espaco entre foto e nome */
+    }
+    
+    /* texto */
     .profile-name {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+    }
+    .profile-email, .profile-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    /* badges na linha de baixo e centralizada */
+    .profile-badges-aligned {
+        justify-content: center;
+        width: 100%; /* ocupa a largura total para centralizar */
+    }
+    .badge-item {
+        font-size: 0.75rem;
+    }
+
+    /* CHART REDUZIDO AS FONTES X/Y para caber */
+    .chart-axis-y-projects, .chart-axis-x-projects {
+        font-size: 0.65rem;
+    }
+    
+    /* proverbio */
+    .proverb-image-container {
+        height: 120px;
+    }
+    .proverb-text-content {
+        padding: 15px 20px;
     }
 }
+
+
+/* CELULARES max 480px */
+
+@media (max-width: 480px) {
+    .glass-card {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    /* header torna o cartao flutuante */
+    .profile-header-card-wrapper {
+        bottom: -20px; /* sobe um pouco */
+        left: 5px;
+        right: 5px;
+    }
+
+    .profile-meta-info {
+        /* teste para que foto e nome voltem a ser um ao lado do outro */
+        flex-direction: row; 
+        text-align: left;
+        margin-bottom: 10px; 
+    }
+    .profile-picture-new {
+        margin-right: 10px;
+        margin-bottom: 0;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .profile-name {
+        font-size: 1rem;
+    }
+    
+    /* badges se empilham ou reduz o tamanho */
+    .profile-badges-aligned {
+        flex-wrap: wrap; 
+        justify-content: center;
+        gap: 5px;
+    }
+
+    /* TIME ONLINE E REDUZIDO DE TAMANHO DA THUMB */
+    .member-thumb-blue {
+        width: 25px;
+        height: 25px;
+    }
+    .member-name-sm {
+        font-size: 0.85rem;
+    }
+}
+
+
+
+
