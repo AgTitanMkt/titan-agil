@@ -46,6 +46,7 @@ class RedtrackAPIService
                 'group'     => $group,
                 'date_from' => $dateFrom,
                 'date_to'   => $dateTo,
+                'timezone'  => 'America/Sao_Paulo',
                 'per'       => $per,
                 'page'      => $page,
                 'total'     => 'false',
@@ -94,7 +95,8 @@ class RedtrackAPIService
                             [
                                 'name'   => $item['rt_ad'],
                                 'source' => $item['source'],
-                                'alias' => $item['source_alias']
+                                'alias' => $item['source_alias'],
+                                'date' => $dateFrom
                             ],
                             [
                                 'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
@@ -103,6 +105,7 @@ class RedtrackAPIService
                                 'cost'         => $item['cost'] ?? 0,
                                 'profit'       => $item['profit'] ?? 0,
                                 'roi'          => $item['roi'] ?? 0,
+                                'date'         => $dateFrom 
                             ]
                         );
                         $totalItems++;
@@ -147,5 +150,49 @@ class RedtrackAPIService
             'total_itens' => $totalItems,
             'ultima_pagina' => $page
         ], 200);
+    }
+
+    public function fetchReportDailyRange(string $dateFrom, string $dateTo): array
+    {
+        $start = new \DateTime($dateFrom);
+        $end   = new \DateTime($dateTo);
+        $totalDays = 0;
+        $totalItems = 0;
+
+        Log::info("RedTrack → Iniciando fetch diário de {$dateFrom} até {$dateTo}");
+
+        while ($start <= $end) {
+            $currentDate = $start->format('Y-m-d');
+            $totalDays++;
+
+            try {
+                Log::info("RedTrack → Buscando dados do dia {$currentDate}");
+
+                // Chama o método já existente, mas passando o mesmo dia como range
+                $response = $this->fetchReport($currentDate, $currentDate, 'source,rt_ad');
+
+                // Se o método fetchReport retornar um Response JSON Laravel:
+                $responseData = $response->getData(true);
+                $itemsCount = $responseData['total_itens'] ?? 0;
+
+                $totalItems += $itemsCount;
+            } catch (Exception $e) {
+                Log::error("RedTrack → Falha ao processar dia {$currentDate}: {$e->getMessage()}");
+            }
+
+            $start->modify('+1 day');
+            sleep(1); // evita sobrecarga de requisições
+        }
+
+        Log::info('RedTrack → Coleta diária finalizada', [
+            'total_dias' => $totalDays,
+            'total_itens_processados' => $totalItems,
+        ]);
+
+        return [
+            'msg' => 'Coleta diária concluída',
+            'total_dias' => $totalDays,
+            'total_itens' => $totalItems,
+        ];
     }
 }

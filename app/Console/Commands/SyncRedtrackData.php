@@ -3,7 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Services\RedTRack\RedtrackAPIService;
+use Carbon\CarbonPeriod;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+
+use function Laravel\Prompts\progress;
 
 class SyncRedtrackData extends Command
 {
@@ -12,7 +17,7 @@ class SyncRedtrackData extends Command
      *
      * @var string
      */
-    protected $signature = 'sync:redtrack {--from=} {--to=}';
+    protected $signature = 'sync:redtrack {--from=} {--to=}'; //Y-m-d
 
     /**
      * The console command description.
@@ -24,18 +29,66 @@ class SyncRedtrackData extends Command
     /**
      * Execute the console command.
      */
-    public function handle(RedtrackAPIService $service)
+    public function handle(RedtrackAPIService $service): int
     {
-        $dateTo = $this->option('to') ?? now()->format('Y-m-d');
-        $dateFrom = $this->option('from') ?? now()->subMonths(6)->format('Y-m-d');
+        $dateFrom = $this->option('from') ?? now()->subDays(7)->toDateString();
+        $dateTo   = $this->option('to')   ?? now()->toDateString();
 
-        $this->info("📡 Iniciando sincronização RedTrack de {$dateFrom} até {$dateTo}...");
+        $this->info("🔄 Iniciando sincronização diária do RedTrack");
+        $this->line("📅 Período: {$dateFrom} → {$dateTo}");
 
         try {
-            $service->fetchReport($dateFrom, $dateTo);
-            $this->info('✅ Sincronização concluída com sucesso!');
-        } catch (\Throwable $e) {
-            $this->error('❌ Erro ao sincronizar: ' . $e->getMessage());
+            $period = CarbonPeriod::create($dateFrom, $dateTo);
+            $totalDays = iterator_count($period);
+            $processed = 0;
+            $totalItems = 0;
+
+            // Progress bar moderna (Laravel 12)
+            $bar = progress(label: 'Baixando relatórios...', steps: $totalDays);
+
+            foreach ($period as $day) {
+                $date = $day->format('Y-m-d');
+
+                $bar->advance(); // avança 1 passo na barra
+                $this->line("📅 Processando {$date}");
+
+                try {
+                    $result = $service->fetchReport($date, $date);
+                    $data = $result->getData(true);
+                    $items = $data['total_itens'] ?? 0;
+                    $totalItems += $items;
+                    $processed++;
+                } catch (Exception $e) {
+                    Log::error("RedTrack → Erro ao processar {$date}: " . $e->getMessage());
+                    $this->warn("⚠️  Falha em {$date}: {$e->getMessage()}");
+                }
+
+                usleep(300000); // 0.3s entre chamadas
+            }
+
+
+            $bar->finish();
+            $this->newLine(2);
+
+            $this->info("✅ Sincronização concluída com sucesso!");
+            $this->line("📊 Dias processados: {$processed}/{$totalDays}");
+            $this->line("📈 Itens processados: {$totalItems}");
+            $this->line("🕓 Início: {$dateFrom} — Fim: {$dateTo}");
+
+            Log::info('RedTrack → Sincronização finalizada', [
+                'periodo' => [$dateFrom, $dateTo],
+                'dias_processados' => $processed,
+                'total_itens' => $totalItems,
+            ]);
+
+            return self::SUCCESS;
+        } catch (Exception $e) {
+            Log::error('RedTrack → Erro geral na sincronização', [
+                'erro' => $e->getMessage(),
+            ]);
+
+            $this->error("❌ Erro geral: {$e->getMessage()}");
+            return self::FAILURE;
         }
     }
 }

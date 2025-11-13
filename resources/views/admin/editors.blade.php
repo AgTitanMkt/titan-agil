@@ -33,11 +33,11 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-    <h2 class="dashboard-page-title">Produção Copywriters</h2>
+    <h2 class="dashboard-page-title">Produção Editores</h2>
     <p class="dashboard-page-subtitle">Visão geral e filtros de performance</p>
 
     <div class="production-filters-section glass-card" style="z-index: 30;">
-        <h3 class="section-title">Produção Copywriters</h3>
+        <h3 class="section-title">Produção Editores</h3>
 
         <form class="filters-grid filters-grid-production">
 
@@ -45,8 +45,8 @@
                 <x-date-range name="date" :from="$startDate" :to="$endDate" label="Intervalo de Datas" />
             </div>
             <div class="filter-group">
-                <x-multiselect name="copywriters" label="Copywriters" :options="$allCopywriters" :selected="request('copywriters', [])"
-                    placeholder="Selecione um ou mais copywriters">
+                <x-multiselect name="editors" label="Editores" :options="$allEditors" :selected="request('editors', [])"
+                    placeholder="Selecione um ou mais editores">
                 </x-multiselect>
             </div>
 
@@ -58,13 +58,13 @@
 
 
     <div class="copy-production-section glass-card">
-        <h3 class="section-title">Copies Produzidas por Copywriter</h3>
+        <h3 class="section-title">Edições Produzidas</h3>
 
         <div class="table-responsive">
             <table class="metrics-main-table">
                 <thead>
                     <tr>
-                        <th>Copywriter</th>
+                        <th>Editor</th>
                         <th>Criativos</th>
                         <th>Cliques</th>
                         <th>Conversões</th>
@@ -75,21 +75,21 @@
                 </thead>
 
                 <tbody>
-                    @foreach ($copies as $copy)
+                    @foreach ($editors as $editor)
                         @php
-                            $key = 'copywriter-' . $copy->user_id;
-                            $creatives = $creativesByAgent[$copy->user_id] ?? collect();
+                            $key = 'editor-' . $editor->user_id;
+                            $creatives = $creativesByEditor[$editor->user_id] ?? collect();
                         @endphp
                         {{-- Linha principal --}}
                         <tr class="campaign-row" onclick="toggleDetails('{{ $key }}')">
-                            <td class="fw-bold">{{ $copy->agent_name }}</td>
-                            <td>{{ $copy->total_creatives }}</td>
-                            <td>{{ $copy->total_clicks }}</td>
-                            <td>{{ $copy->total_conversions }}</td>
-                            <td>@dollar($copy->total_cost)</td>
-                            <td>@dollar($copy->total_profit)</td>
-                            <td class="{{ $copy->total_roi >= 0 ? 'positive' : 'negative' }}">
-                                {{ number_format($copy->total_roi * 100, 2, ',', '.') }}%
+                            <td class="fw-bold">{{ $editor->editor_name }}</td>
+                            <td>{{ $editor->total_creatives }}</td>
+                            <td>{{ $editor->total_clicks }}</td>
+                            <td>{{ $editor->total_conversions }}</td>
+                            <td>@dollar($editor->total_cost)</td>
+                            <td>@dollar($editor->total_profit)</td>
+                            <td class="{{ $editor->total_roi >= 0 ? 'positive' : 'negative' }}">
+                                {{ number_format($editor->total_roi * 100, 2, ',', '.') }}%
                             </td>
                         </tr>
 

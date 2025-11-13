@@ -35,7 +35,7 @@
 
     <select id="{{ $id }}" name="{{ $name }}[]" multiple class="original-select hidden">
         @foreach ($options as $key => $value)
-            <option value="{{ $key }}" data-label="{{ $value }}" @if (in_array($key, $selected)) selected @endif>
+            <option value="{{ $value }}" data-label="{{ $value }}" @if (in_array($value, $selected)) selected @endif>
                 {{ $value }}
             </option>
         @endforeach
