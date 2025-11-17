@@ -173,7 +173,7 @@ class AdminController extends Controller
                 DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS roi')
             )
             ->groupBy('user_id', 'creative_code')
-            ->orderBy('profit','desc')
+            ->orderBy('profit', 'desc')
             ->get()
             ->groupBy('user_id');
         // -----------------------------------------
@@ -401,148 +401,175 @@ class AdminController extends Controller
 
     public function dashboard(Request $request)
     {
-        $startDate = $request->input('date_from') ? Carbon::create($request->input('date_from')) : Carbon::now()->startOfMonth();
-        $endDate = $request->input('date_to') ? Carbon::create($request->input('date_to')) : Carbon::now()->endOfMonth();
-        // ---------------------------------------------------------
-        // 🔹 Totais do mês atual
-        // ---------------------------------------------------------
-        $reports = RedtrackReport::whereBetween('date', [
-            $startDate,
-            $endDate,
-        ]);
+        $startDate = $request->input('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
 
-        if ($request->input('alias')) {
-            $reports->whereIn('alias', $request->input('alias'));
-        }
-        if ($request->input('sources')) {
-            $reports->whereIn('source', $request->input('sources'));
+        $endDate = $request->input('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        // filtros opcionais
+        $aliasFilter = $request->input('alias', []);
+
+        // =====================================================================
+        // 🔹 BUSCA DADOS GERAIS (totais no período)
+        // =====================================================================
+
+        $reports = RedtrackReport::whereBetween('date', [$startDate, $endDate]);
+
+        if (!empty($aliasFilter)) {
+            $reports = $reports->whereIn('alias', $aliasFilter);
         }
 
+        $totalCost = (clone $reports)->sum('cost');
         $totalProfit = (clone $reports)->sum('profit');
-        $totalCost   = (clone $reports)->sum('cost');
 
-        $roi = $totalCost > 0
-            ? round(($totalProfit / $totalCost), 4)
-            : 0;
+        $roi = $totalCost > 0 ? $totalProfit / $totalCost : 0;
 
         $totals = [
-            'clicks'      => (clone $reports)->sum('clicks'),
-            'conversions' => (clone $reports)->sum('conversions'),
-            'cost'        => $totalCost,
-            'profit'      => $totalProfit,
-            'roi'         => $roi,
+            'cost'   => $totalCost,
+            'profit' => $totalProfit,
+            'roi'    => $roi,
         ];
 
-        // ---------------------------------------------------------
-        // 🔹 Lucro mensal por mês
-        // ---------------------------------------------------------
-        $currentYear = Carbon::now()->year;
+        // =====================================================================
+        // 🔹 LISTA DE MESES FIXA (Jan–Dez)
+        // =====================================================================
+        $monthsList = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+        ];
 
-        $monthly = RedtrackReport::selectRaw("
-            MONTH(date) as mes,
-            SUM(profit) as total_profit
+        // =====================================================================
+        // 🔹 ALIASES FIXOS DO GRÁFICO
+        // =====================================================================
+
+        $aliases = ['facebook', 'tiktok', 'taboola', 'native'];
+
+        // =====================================================================
+        // 🔹 BUSCA LUCRO POR MÊS E POR ALIAS
+        // =====================================================================
+
+        $monthlyProfit = RedtrackReport::selectRaw("
+            MONTH(date) as month_number,
+            DATE_FORMAT(date, '%b') as month_name,
+            LOWER(alias) as alias,
+            SUM(profit) as profit
         ")
-            ->whereYear('date', $currentYear)
-            ->groupBy('mes')
-            ->orderBy('mes')
-            ->pluck('total_profit', 'mes')
-            ->toArray();
+            ->groupBy('month_number', 'month_name', 'alias')
+            ->orderBy('month_number');
 
-        $labels = [
-            1 => 'Jan',
-            2 => 'Fev',
-            3 => 'Mar',
-            4 => 'Abr',
-            5 => 'Mai',
-            6 => 'Jun',
-            7 => 'Jul',
-            8 => 'Ago',
-            9 => 'Set',
-            10 => 'Out',
-            11 => 'Nov',
-            12 => 'Dez'
-        ];
+        if($aliasFilter){
+            $monthlyProfit->whereIn('alias',$aliasFilter);
+        }
+        $monthlyProfit = $monthlyProfit->get();
+        // =====================================================================
+        // 🔹 INICIA CHARTDATA: todos meses com valores zerados
+        // =====================================================================
 
-        $profits = [];
-        foreach ($labels as $num => $label) {
-            $profits[$label] = $monthly[$num] ?? 0;
+        $chartData = [];
+        foreach ($monthsList as $m) {
+            $chartData[$m] = [
+                'facebook' => 0,
+                'tiktok'   => 0,
+                'taboola'  => 0,
+                'native'   => 0,
+            ];
+        }
+        // =====================================================================
+        // 🔹 PREENCHER OS DADOS (agrupando NATIVE)
+        // =====================================================================
+
+        foreach ($monthlyProfit as $row) {
+            $monthName = $row->month_name;        // Jan / Fev / Mar
+            $alias     = strtolower($row->alias); // facebook / tiktok / ...
+            $profit    = (float) $row->profit;
+            if (in_array($alias, ['facebook', 'tiktok', 'taboola'])) {
+                // plataforma conhecida
+                $chartData[$monthName][$alias] += $profit;
+            } else {
+                // qualquer outra entra em NATIVE
+                $chartData[$monthName]['native'] += $profit;
+            }
+        }
+        // =====================================================================
+        // 🔹 CALCULA MAIOR VALOR PARA ESCALA DO GRAFICO
+        // =====================================================================
+        $maxValue = 0;
+        foreach ($chartData as $month => $platforms) {
+            foreach ($platforms as $value) {
+                if ($value > $maxValue) {
+                    $maxValue = $value;
+                }
+            }
+        }
+        if ($maxValue <= 0) {
+            $maxValue = 1; // evita divisão por zero
         }
 
-        $allSources = RedtrackReport::distinct()
-            ->orderBy('source')
-            ->pluck('source')
-            ->toArray();
+        // =====================================================================
+        // 🔹 BUSCA OUTRAS MÉTRICAS (SUAS TABELAS DE FONTE)
+        // =====================================================================
 
-
-        // ---------------------------------------------------------
-        // 🔹 Métricas gerais por alias (FUNCIONA CERTO)
-        // ---------------------------------------------------------
-        $sources = RedtrackReport::select('alias')
-            ->selectRaw('
-            SUM(clicks) as total_clicks,
-            SUM(conversions) as total_conversions,
+        $sources = RedtrackReport::selectRaw("
+            alias,
             SUM(cost) as total_cost,
             SUM(profit) as total_profit,
-            CASE WHEN SUM(cost) > 0 THEN ROUND(SUM(profit)/SUM(cost), 4) ELSE 0 END as roi
-        ')
-            ->whereBetween('date', [
-                $startDate,
-                $endDate,
-            ])
+            SUM(clicks) as total_clicks,
+            SUM(conversions) as total_conversions,
+            (SUM(profit)/NULLIF(SUM(cost),0)) as roi
+        ")
+            ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('alias')
-            ->orderByDesc('total_profit');
+            ->orderBy('alias')
+            ->get();
 
-        if ($request->input('alias')) {
-            $sources->whereIn('alias', $request->input('alias'));
-        }
+        // agrupamento das contas por alias
+        $accountsByAlias = RedtrackReport::selectRaw("
+            alias,
+            source,
+            SUM(cost) as total_cost,
+            SUM(profit) as total_profit,
+            SUM(conversions) as total_conversions,
+            SUM(clicks) as total_clicks,
+            (SUM(profit)/NULLIF(SUM(cost),0)) as roi
+        ")
+            ->whereBetween('date', [$startDate, $endDate])
+            ->groupBy('alias', 'source')
+            ->orderBy('alias')
+            ->orderBy('roi', 'desc')
+            ->get()
+            ->groupBy('alias');
 
-        $sources = $sources->get();
+        // =====================================================================
+        // 🔹 RETORNO FINAL PARA A VIEW
+        // =====================================================================
 
-        // ---------------------------------------------------------
-        // 🔹 Métricas detalhadas por conta (source) DENTRO de cada alias
-        //     → CORRIGIDO: agora bate exatamente com o alias
-        // ---------------------------------------------------------
-
-        $aliases = $sources->pluck('alias');  // pega só aliases válidos
-
-        $accountsByAlias = [];
-
-        foreach ($aliases as $alias) {
-            $query = RedtrackReport::select('source')
-                ->selectRaw('
-                SUM(clicks) as total_clicks,
-                SUM(conversions) as total_conversions,
-                SUM(cost) as total_cost,
-                SUM(profit) as total_profit,
-                CASE WHEN SUM(cost) > 0 THEN ROUND(SUM(profit) / SUM(cost), 4) ELSE 0 END as roi
-            ')
-                ->where('alias', $alias)
-                ->whereBetween('date', [
-                    $startDate,
-                    $endDate,
-                ])
-                ->groupBy('source')
-                ->orderByDesc('total_profit');
-
-            if ($request->input('sources')) {
-                $query->whereIn('source', $request->input('sources'));
-            }
-            $accountsByAlias[$alias] = $query->get();
-        }
-
-        // ---------------------------------------------------------
-        // 🔹 View
-        // ---------------------------------------------------------
-        return view('admin.dashboard', compact(
+        return view("admin.dashboard", compact(
             'totals',
-            'profits',
-            'sources',
-            'accountsByAlias',
-            'allSources',
             'startDate',
             'endDate',
+            'chartData',
+            'aliases',
+            'maxValue',
+            'sources',
+            'accountsByAlias'
         ));
     }
+
+
+
     public function creativeHistory(Request $request)
     {
         $creative = $request->input('creative');

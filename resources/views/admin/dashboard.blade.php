@@ -4,6 +4,11 @@
         /* -------------------------
    Seta animada
 -------------------------- */
+        :root {
+            --bar-width: 60px;
+            /* tamanho inicial */
+        }
+
         .alias-cell {
             display: flex;
             align-items: center;
@@ -212,6 +217,97 @@
             color: white;
             font-size: 0.85rem;
         }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: end;
+        }
+
+        .revenue-chart-placeholder {
+            width: 136rem;
+            overflow-x: auto;
+            overflow-y: unset;
+        }
+
+        .bar {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .bar-label {
+            position: absolute;
+            top: -18px;
+            /* distância acima da barra */
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 10px;
+            justify-content: end;
+            flex-wrap: wrap;
+        }
+
+        .chart-legend div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* cores de cada plataforma */
+        .legend-color.facebook {
+            background: #1877f2;
+        }
+
+        .legend-color.tiktok {
+            background: #000;
+        }
+
+        .legend-color.taboola {
+            background: #1b75bc;
+        }
+
+        .legend-color.google {
+            background: #009ed3;
+        }
+
+        .legend-color.native {
+            background: #8b5cf6;
+        }
     </style>
 
     <h2 class="dashboard-page-title">Faturamento</h2>
@@ -284,9 +380,9 @@
                 placeholder="Selecione uma ou mais plataformas">
             </x-multiselect>
             {{-- Contas (source) --}}
-            <x-multiselect name="sources" label="Contas" :options="$allSources" :selected="request('sources', [])"
+            {{-- <x-multiselect name="sources" label="Contas" :options="$allSources" :selected="request('sources', [])"
                 placeholder="Selecione uma ou mais contas">
-            </x-multiselect>
+            </x-multiselect> --}}
 
             <div class="filter-actions">
                 <button type="submit" class="btn-filter">Aplicar</button>
@@ -299,32 +395,48 @@
 
     <div class="chart-section glass-card">
         <h3 class="section-title">Gráfico de Faturamento</h3>
-        <p class="chart-subtitle">Visualização completa do faturamento mensal ao longo do ano</p>
+        <div class="zoom-controls">
+            <button id="zoomOut" class="zoom-btn">−</button>
+            <span style="color:white; opacity:.8;">Zoom</span>
+            <button id="zoomIn" class="zoom-btn">+</button>
+        </div>
+        <div class="chart-legend">
+            <div><span class="legend-color facebook"></span> Facebook</div>
+            <div><span class="legend-color tiktok"></span> TikTok</div>
+            <div><span class="legend-color taboola"></span> Taboola</div>
+            <div><span class="legend-color native"></span> Native</div>
+        </div>
 
-        @php
-            $maxProfit = max($profits);
-        @endphp
+        <p class="chart-subtitle">Visualização completa do faturamento mensal ao longo do ano</p>
 
         <div class="revenue-chart-placeholder">
             <div class="chart-bar-grid">
-                @foreach ($profits as $month => $value)
-                    @php
-                        $height = $maxProfit > 0 ? ($value / $maxProfit) * 100 : 0;
-                        $isCurrentMonth = $month === now()->translatedFormat('M');
-                    @endphp
 
-                    <div class="chart-bar {{ $isCurrentMonth ? 'chart-bar-highlight' : '' }}"
-                        style="--bar-height: {{ number_format($height, 2) }}%;"
-                        title="{{ $month }} — @dollar($value)">
-                        <span class="chart-tooltip">@dollar($value)</span>
+                @foreach ($chartData as $month => $platforms)
+                    <div class="month-group">
+
+                        <div class="bars">
+                            @foreach ($aliases as $alias)
+                                @php
+                                    $value = $platforms[$alias];
+                                    $height = ($value / $maxValue) * 18.6; // rem
+                                @endphp
+
+                                @if ($height > 0)
+                                    <div class="bar {{ strtolower($alias) }}-bar"
+                                        style="height: {{ $height }}rem">
+                                        <span class="bar-label">@dollar($value)</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        <span class="month-label">{{ $month }}</span>
+
                     </div>
                 @endforeach
-            </div>
 
-            <div class="chart-labels">
-                @foreach (array_keys($profits) as $month)
-                    <span>{{ $month }}</span>
-                @endforeach
+
             </div>
         </div>
     </div>
@@ -332,60 +444,69 @@
     {{-- CSS inline ou no seu arquivo de estilos --}}
     <style>
         .chart-bar-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            /* 12 meses fixos */
+            align-items: end;
+            height: 22rem;
+            padding: 20px;
+            gap: 0;
+            column-gap: 3rem;
+        }
+
+
+        .month-group {
             display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .month-group .bar {
+            width: var(--bar-width);
+            border-radius: 4px 4px 0 0;
+            transition: transform .2s ease, width .2s ease;
+        }
+
+
+        .month-group .bars {
+            display: flex;
+            gap: 6px;
             align-items: flex-end;
-            gap: 0.75rem;
-            height: 200px;
-            position: relative;
         }
 
-        .chart-bar {
-            width: 35px;
-            border-radius: 6px 6px 0 0;
-            position: relative;
-            height: 0;
-            animation: grow-bar 1s ease forwards;
-            animation-delay: calc(var(--bar-index, 0) * 0.05s);
-            transition: transform 0.2s ease;
+        .month-group .bar:hover {
+            transform: scale(1.1);
         }
 
-        .chart-bar:hover {
-            transform: scale(1.05);
+        /* cores por plataforma */
+        .facebook-bar {
+            background: #1877f2;
         }
 
-        /* animação de crescimento */
-        @keyframes grow-bar {
-            from {
-                height: 0;
-            }
-
-            to {
-                height: var(--bar-height);
-            }
+        .google-bar {
+            background: #009ed3;
         }
 
-        /* tooltip */
-        .chart-bar .chart-tooltip {
-            position: absolute;
-            bottom: calc(var(--bar-height) + 5px);
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: black;
-            opacity: 0;
-            color: #fff;
-            padding: 3px 6px;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
+        .tiktok-bar {
+            background: #000000;
         }
 
-        .chart-bar:hover .chart-tooltip {
-            opacity: 1;
+        .taboola-bar {
+            background: #1b75bc;
+        }
+
+        .native-bar {
+            background: #8b5cf6;
+        }
+
+        .month-label {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            opacity: 0.8;
         }
     </style>
-
 
 
 
@@ -578,5 +699,97 @@
             }
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const minWidth = 20;
+            const maxWidth = 300;
+
+            let currentWidth = 60; // largura inicial
+
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+
+            function updateZoom() {
+                document.documentElement.style.setProperty('--bar-width', currentWidth + "px");
+            }
+
+            zoomInBtn.addEventListener('click', function() {
+                if (currentWidth < maxWidth) {
+                    currentWidth += 10;
+                    updateZoom();
+                }
+            });
+
+            zoomOutBtn.addEventListener('click', function() {
+                if (currentWidth > minWidth) {
+                    currentWidth -= 10;
+                    updateZoom();
+                }
+            });
+
+            updateZoom(); // aplica estado inicial
+
+        });
+    </script>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const minWidth = 20;
+    const maxWidth = 300;
+
+    let currentWidth = 60; // largura inicial
+
+    const chartWrapper = document.querySelector(".revenue-chart-placeholder");
+
+    function updateZoom() {
+        document.documentElement.style.setProperty('--bar-width', currentWidth + "px");
+    }
+
+    // -----------------------------
+    //  ZOOM VIA BOTÕES + e -
+    // -----------------------------
+    document.getElementById('zoomIn').addEventListener('click', function() {
+        if (currentWidth < maxWidth) {
+            currentWidth += 10;
+            updateZoom();
+        }
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', function() {
+        if (currentWidth > minWidth) {
+            currentWidth -= 10;
+            updateZoom();
+        }
+    });
+
+    // -----------------------------
+    //  ZOOM VIA SCROLL DO MOUSE
+    // -----------------------------
+    chartWrapper.addEventListener("wheel", function(e) {
+
+        // impede o scroll vertical tradicional
+        e.preventDefault();
+
+        const delta = Math.sign(e.deltaY); // 1 = scroll down, -1 = scroll up
+
+        if (delta < 0) { 
+            // scroll pra cima → zoom in
+            if (currentWidth < maxWidth) currentWidth += 10;
+        } else {
+            // scroll pra baixo → zoom out
+            if (currentWidth > minWidth) currentWidth -= 10;
+        }
+
+        updateZoom();
+    }, { passive: false });
+
+    updateZoom(); // aplica estado inicial
+});
+</script>
+
+
+
+
 
 </x-layout>
