@@ -326,13 +326,14 @@ class AdminController extends Controller
 
     public function allCopywritersArray()
     {
-        return  DB::table('vw_creatives_performance')
-            ->select('agent_name')
-            ->where('role_id', 2)
-            ->distinct()
-            ->pluck('agent_name')
+        return DB::table('users AS u')
+            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
+            ->where('ur.role_id', 2) // COPYWRITER
+            ->orderBy('u.name')
+            ->pluck('u.name')
             ->toArray();
     }
+
 
     public function time(Request $request)
     {
@@ -470,8 +471,8 @@ class AdminController extends Controller
             ->groupBy('month_number', 'month_name', 'alias')
             ->orderBy('month_number');
 
-        if($aliasFilter){
-            $monthlyProfit->whereIn('alias',$aliasFilter);
+        if ($aliasFilter) {
+            $monthlyProfit->whereIn('alias', $aliasFilter);
         }
         $monthlyProfit = $monthlyProfit->get();
         // =====================================================================

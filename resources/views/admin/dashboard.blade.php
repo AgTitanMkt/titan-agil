@@ -357,7 +357,7 @@
 
         <div class="metric-card glass-card">
             <p class="metric-title">ROI (%)</p>
-            <h3 class="metric-value">{{ $totals['roi'] * 100 }}</h3>
+            <h3 class="metric-value">{{ number_format($totals['roi'] * 100,2,',','.') }}</h3>
             {{-- <div class="metric-footer">
                 <span class="metric-change positive">10,1%</span>
                 <span class="metric-period">Na última semana</span>

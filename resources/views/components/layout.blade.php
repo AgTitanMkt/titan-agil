@@ -66,6 +66,11 @@
                             <i class="fas fa-tachometer-alt nav-icon"></i> Editores
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.import.index') }}" class="nav-link">
+                            <i class="fas fa-file-excel nav-icon"></i> Importar CSV Criativos
+                        </a>
+                    </li>
                 </ul>
 
 
@@ -107,6 +112,22 @@
             </header>
 
             <main class="page-content">
+
+                @if (session('success'))
+                    <x-alert type="success" :message="session('success')" />
+                @endif
+
+                @if (session('error'))
+                    <x-alert type="error" :message="session('error')" />
+                @endif
+
+                @if (session('warning'))
+                    <x-alert type="warning" :message="session('warning')" />
+                @endif
+
+                @if (session('info'))
+                    <x-alert type="info" :message="session('info')" />
+                @endif
                 {{ $slot }}
             </main>
             @stack('scripts')
