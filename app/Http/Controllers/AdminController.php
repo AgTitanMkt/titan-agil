@@ -555,6 +555,8 @@ class AdminController extends Controller
             ->get()
             ->groupBy('alias');
 
+        $expectedMonthlyProfit = 1000000;
+
         // =====================================================================
         // 🔹 RETORNO FINAL PARA A VIEW
         // =====================================================================
@@ -569,6 +571,7 @@ class AdminController extends Controller
             'sources',
             'accountsByAlias',
             'lastUpdate',
+            'expectedMonthlyProfit'
         ));
     }
 
