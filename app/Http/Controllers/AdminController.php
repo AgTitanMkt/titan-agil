@@ -402,6 +402,8 @@ class AdminController extends Controller
 
     public function dashboard(Request $request)
     {
+        $lastTask = RedtrackReport::orderBy('updated_at', 'desc')->first()->updated_at;
+        $lastUpdate = Carbon::create($lastTask)->format('d/m/Y H:i:s');
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
             : Carbon::now()->startOfMonth();
@@ -565,7 +567,8 @@ class AdminController extends Controller
             'aliases',
             'maxValue',
             'sources',
-            'accountsByAlias'
+            'accountsByAlias',
+            'lastUpdate',
         ));
     }
 

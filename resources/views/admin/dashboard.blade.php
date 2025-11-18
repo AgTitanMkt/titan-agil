@@ -312,7 +312,9 @@
 
     <h2 class="dashboard-page-title">Faturamento</h2>
     <p class="dashboard-page-subtitle">Monitoramento completo da saúde financeira da Titan de
-        <b>{{ $startDate->format('d/m/Y') }} à {{ $endDate->format('d/m/Y') }}</b>
+        <b>{{ $startDate->format('d/m/Y') }} à {{ $endDate->format('d/m/Y') }}</b>. 
+        Ultima atualização em: {{ $lastUpdate }}
+
     </p>
 
     <div class="metrics-top-grid">
