@@ -139,7 +139,9 @@
 
         <header class="header-bar">
             <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
+                <div id="burger-toggle" class="burger-btn">
+                    <i class="fa fa-bars"></i>
+                </div>
             </button>
 
             <div class="header-user">
@@ -181,6 +183,30 @@
                         }
                     });
                 }
+            });
+        </script>
+        {{-- script do burger --}}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const burger = document.getElementById("burger-toggle");
+                const sidebar = document.querySelector(".sidebar");
+                const mainContent = document.querySelector(".main-content-area");
+
+                burger.addEventListener("click", () => {
+                    sidebar.classList.toggle("sidebar-open");
+                    mainContent.classList.toggle("sidebar-open");
+                });
+
+                // Fechar clicando fora da sidebar (mobile)
+                document.addEventListener("click", (e) => {
+                    const clickedInsideSidebar = sidebar.contains(e.target);
+                    const clickedBurger = burger.contains(e.target);
+
+                    if (!clickedInsideSidebar && !clickedBurger) {
+                        sidebar.classList.remove("sidebar-open");
+                        mainContent.classList.remove("sidebar-open");
+                    }
+                });
             });
         </script>
 

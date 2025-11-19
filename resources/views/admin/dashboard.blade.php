@@ -161,7 +161,7 @@
 
         .filters-grid-dataset {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 18px;
         }
 
@@ -489,7 +489,6 @@
         <div class="revenue-chart-placeholder">
             <div id="chart-tooltip" class="chart-tooltip"></div>
             <div class="chart-bar-grid">
-                <div class="trendline" id="trendline"></div>
                 <div class="expected-trendline" id="expectedTrendline"></div>
                 @foreach ($chartData as $month => $platforms)
                     @php
@@ -532,14 +531,11 @@
         }
 
         .revenue-chart-placeholder {
-            width: 130rem;
-            overflow-x: auto;
-            overflow-y: visible;
+            height: 27rem;
             padding-bottom: 10px;
             position: relative;
             overflow-x: auto;
-            overflow-y: visible !important;
-            /* impede o SVG de sumir */
+            overflow-y: visible !important; /* impede o SVG de sumir */
         }
 
         .chart-bar-grid {
@@ -547,27 +543,12 @@
             grid-template-columns: repeat(12, 1fr);
             /* 12 meses */
             align-items: end;
-            height: 22rem;
+            height: 24.5rem;
             padding: 20px 30px 10px 30px;
             column-gap: 2rem;
             /* menor espaçamento */
             position: relative;
             z-index: 10;
-        }
-
-        /* leve “linha de base” */
-        .chart-bar-grid::before {
-            content: "";
-            position: absolute;
-            left: 20px;
-            right: 20px;
-            bottom: 18px;
-            height: 1px;
-            background: linear-gradient(to right,
-                    rgba(255, 255, 255, 0.12),
-                    rgba(255, 255, 255, 0.02),
-                    rgba(255, 255, 255, 0.12));
-            pointer-events: none;
         }
 
         .month-group {
@@ -972,21 +953,6 @@
             zoomResetBtn.addEventListener('click', function() {
                 currentWidth = defaultWidth;
                 updateZoom();
-            });
-
-            // ZOOM scroll do mouse
-            chartWrapper.addEventListener("wheel", function(e) {
-                e.preventDefault();
-                const delta = Math.sign(e.deltaY);
-
-                if (delta < 0 && currentWidth < maxWidth) {
-                    currentWidth += 10;
-                } else if (delta > 0 && currentWidth > minWidth) {
-                    currentWidth -= 10;
-                }
-                updateZoom();
-            }, {
-                passive: false
             });
 
             updateZoom(); // estado inicial

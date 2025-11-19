@@ -1,15 +1,19 @@
 /* CORES */
 
 :root {
-    --bg-card-dark: rgba(255, 255, 255, 0.05); /* FUNDO CARD */
-    --bg-card-darker: rgba(0, 0, 0, 0.15); /* FUNDO INPUT/TABELA */
+    --bg-card-dark: rgba(255, 255, 255, 0.05);
+    /* FUNDO CARD */
+    --bg-card-darker: rgba(0, 0, 0, 0.15);
+    /* FUNDO INPUT/TABELA */
     --input-border: rgba(255, 255, 255, 0.2);
     --text-white: #FFFFFF;
     --text-light: #C0C0C0;
     --text-dark: #333333;
     --profit-color: #4CAF50;
-    --accent-blue: #007bff; /* COR PRINCIPAL DE DESTAQUE */
-    --welcome-highlight: #FF9800; /* destaque laranja do welcome */
+    --accent-blue: #007bff;
+    /* COR PRINCIPAL DE DESTAQUE */
+    --welcome-highlight: #FF9800;
+    /* destaque laranja do welcome */
     --table-header-color: rgba(255, 255, 255, 0.7);
     --table-line-separator: rgba(255, 255, 255, 0.05);
 }
@@ -61,25 +65,25 @@
 .section-title,
 .welcome-message {
     position: relative;
-    z-index: 11; 
+    z-index: 11;
 }
 
 .welcome-visual {
     position: absolute;
     top: 0;
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-size: cover;
     background-position: center;
-    opacity: 0.2; 
-    z-index: 0; 
-    background-color: rgba(0, 0, 0, 0.2); 
+    opacity: 0.2;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .btn-visualizar-perfil {
-    position: relative; 
-    z-index: 12; 
+    position: relative;
+    z-index: 12;
     background-color: var(--welcome-highlight);
     color: #000;
     padding: 8px 15px;
@@ -97,7 +101,7 @@
 
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); 
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
 }
 
@@ -107,16 +111,17 @@
     color: var(--text-white);
     font-size: 0.9rem;
     font-weight: 500;
-    
-    text-align: left; 
+
+    text-align: left;
 }
 
 /* Z-INDEX AJUSTE DO CONTAINER DE FILTROS */
 .meta-ads-section {
     position: relative;
     /*  z-index para garantir que os dropdowns não fiquem *abaixo* do conteiner de criativos */
-    z-index: 30; 
-    overflow: visible !important; /* garante que o dropdown possa aparecer fora do card */
+    z-index: 30;
+    overflow: visible !important;
+    /* garante que o dropdown possa aparecer fora do card */
 }
 
 /* .custom-dropdown-filter: 
@@ -129,10 +134,10 @@
     width: 100%;
     cursor: pointer;
     outline: none;
-    height: 40px; 
-    
+    height: 40px;
+
     /* Z-INDEX */
-    z-index: 10; 
+    z-index: 10;
 }
 
 
@@ -147,11 +152,11 @@
     color: var(--text-white);
     background-color: var(--bg-card-darker);
     border: 1px solid var(--input-border);
-    border-radius: 8px; 
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px; 
+    height: 40px;
     transition: border-color 0.2s;
 }
 
@@ -182,23 +187,23 @@
 
 .dropdown-list {
     position: absolute;
-    top: 100%; 
+    top: 100%;
     left: 0;
     right: 0;
-    
-    
-    z-index: 50; 
-    
-    background-color: rgba(0, 0, 0, 0.8); 
+
+
+    z-index: 50;
+
+    background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(8px);
     border: 1px solid var(--accent-blue);
     border-top: none;
     border-radius: 0 0 8px 8px;
-    
+
     /* rolagem para visualizar as ocpes */
-    max-height: 200px; 
-    overflow-y: auto; 
-    
+    max-height: 200px;
+    overflow-y: auto;
+
     opacity: 0;
     visibility: hidden;
     transform: translateY(-5px);
@@ -246,7 +251,7 @@
 }
 
 .dropdown-item input[type="checkbox"]:checked::after {
-    content: '\2713'; 
+    content: '\2713';
     display: block;
     position: absolute;
     top: 50%;
@@ -262,10 +267,10 @@
 }
 
 .filter-submit-area {
-    grid-column: 4 / 5; 
+    grid-column: 4 / 5;
     display: flex;
     justify-content: flex-end;
-    align-items: flex-end; 
+    align-items: flex-end;
 }
 
 .btn-filter {
@@ -277,7 +282,7 @@
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s;
-    height: 40px; 
+    height: 40px;
 }
 
 .btn-filter:hover {
@@ -288,7 +293,7 @@
 /* TABELA MELHORES CRIATIVOS */
 
 .table-responsive {
-    overflow-x: auto; 
+    overflow-x: auto;
 }
 
 .creatives-table {
@@ -314,7 +319,7 @@
 
 .creatives-table tbody td {
     padding: 10px 15px;
-    height: 60px; 
+    height: 60px;
     vertical-align: top;
 }
 
@@ -328,11 +333,12 @@
 /* LEGIBILIDADE FINAL DA CONTA AD.LINK */
 
 .ad-link {
-    color: #012c99 !important; /* AZUL */
+    color: #012c99 !important;
+    /* AZUL */
     opacity: 1 !important;
     font-weight: 600;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.062);
-    
+
 }
 
 /* */
@@ -346,7 +352,7 @@
 
 
 .col-roas {
-    color: var(--profit-color); 
+    color: var(--profit-color);
     font-weight: 700;
 }
 
@@ -391,70 +397,81 @@
 
 .metric-card-change {
     font-size: 0.8rem;
-    color: var(--profit-color); 
+    color: var(--profit-color);
     margin-top: 5px;
 }
+
+
 
 /*  */
 
 /* RESPONSIVIDADE */
 
 @media (max-width: 1200px) {
+
     /* 4 -> 3 colunas */
-    .filters-grid, .metrics-grid {
+    .filters-grid,
+    .metrics-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .filter-submit-area {
-        grid-column: 3 / 4; 
+        grid-column: 3 / 4;
         /*  3 + CTA na linha 1 / 1 filtro + CTA na linha 2 */
-        grid-row: 2 / 3; 
-        align-items: flex-end; /* mantem no canto inferior */
+        grid-row: 2 / 3;
+        align-items: flex-end;
+        /* mantem no canto inferior */
     }
 }
 
 @media (max-width: 768px) {
+
     /* 3 -> 2 colunas */
-    .filters-grid, .metrics-grid {
+    .filters-grid,
+    .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .filter-submit-area {
-        grid-column: 2 / 3; 
+        grid-column: 2 / 3;
         /* 2 filtros na linha 1 / 2 filtros na linha 2 / CTA na linha 3 */
-        grid-row: 3 / 4; 
+        grid-row: 3 / 4;
         justify-content: flex-end;
-        align-items: flex-end; 
+        align-items: flex-end;
     }
-    
+
     .glass-card {
         padding: 20px 15px;
         border-radius: 10px;
     }
-    
+
     .dashboard-page-title {
         font-size: 1.5rem;
     }
 
     /* min-width e scroll */
     .creatives-table {
-        min-width: 600px; 
+        min-width: 600px;
     }
 }
 
 @media (max-width: 480px) {
+
     /* 2 -> 1 coluna */
-    .filters-grid, .metrics-grid {
+    .filters-grid,
+    .metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .filter-submit-area {
-        grid-column: 1 / 2; 
-        grid-row: auto; /* volta ao fluxo normal */
-        justify-content: center; /* centraliza no mobile */
+        grid-column: 1 / 2;
+        grid-row: auto;
+        /* volta ao fluxo normal */
+        justify-content: center;
+        /* centraliza no mobile */
         margin-top: 10px;
     }
-    
+
     .btn-filter {
         width: 100%;
         max-width: 250px;
@@ -467,13 +484,16 @@
 @media (max-width: 1200px) {
     .filter-submit-area {
         display: flex !important;
-        justify-content: flex-end !important; /* empurra o CTA para a direita */
+        justify-content: flex-end !important;
+        /* empurra o CTA para a direita */
         align-items: flex-end !important;
-        grid-column: 1 / -1 !important; /* ocupa toda a linha, CTA fica a direita */
+        grid-column: 1 / -1 !important;
+        /* ocupa toda a linha, CTA fica a direita */
     }
 
     .btn-filter {
-        margin-right: 10px; /* espaco da borda */
+        margin-right: 10px;
+        /* espaco da borda */
     }
 }
 
@@ -503,10 +523,8 @@
     }
 
     .btn-filter {
-        width: 100%; 
+        width: 100%;
         max-width: 200px;
         margin-right: 0;
     }
 }
-
-
