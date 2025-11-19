@@ -20,6 +20,7 @@
         'resources/css/css-admin/admin-time.css', // CSS DO TIME //
         'resources/css/css-admin/admin-perfil.css', // CSS DO PERFIL //
         'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
+        'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')
@@ -53,17 +54,17 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon"></i> Métricas
+                            <i class="fas fa-chart-bar nav-icon"></i> Métricas
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon"></i> CopyWriters
+                            <i class="fas fa-pen-fancy nav-icon"></i> CopyWriters
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.editors') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon"></i> Editores
+                            <i class="fas fa-edit nav-icon"></i> Editores
                         </a>
                     </li>
                 </ul>
