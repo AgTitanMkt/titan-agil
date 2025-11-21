@@ -149,8 +149,26 @@
             padding: 20px;
             margin-bottom: 25px;
             position: relative;
-            z-index: 1;
+            z-index: 50;
         }
+
+        /* COLOCA O FILTRO DE PLATAFORMAS ACIMA DO GRAFICO, ELE ESTAVA SOBREPOSTO */
+        .multiselect__content,
+        .multiselect__content-wrapper,
+        .select-dropdown,
+        .multiselect__menu {
+            position: absolute !important;   
+            z-index: 2147483647 !important;  /* maior numero possivel */
+        }
+
+        /* para o dropdown nao ficar desalinhado forca overflow visivel nos pais proximos a ele */
+        .filters-dataset,
+        .filters-grid-dataset,
+        .chart-container,
+        .chart-wrapper {
+            overflow: visible !important;
+        }
+
 
         .filters-title {
             color: white;
@@ -428,6 +446,421 @@
         </div>
     </div>
 
+    {{--  ADICIONAR AQUI O COPA PROFIT  --}}
+           <div class="chart-dashboard-wrapper-vertical">
+
+    {{--  COPA PROFIT VISUAL AAA/BATTLE PASS --}}
+    <div class="copa-profit-section">
+        {{-- header da copa --}}
+        <div class="copa-header">
+            <div class="copa-title-wrapper">
+                <h1 class="copa-main-title">COPA PROFIT <span class="year">2025</span></h1>
+                <p class="copa-subtitle">Outubro • Novembro • Dezembro</p>
+            </div>
+            <div class="total-prize-pool">
+                <span class="prize-label">PREMIAÇÃO TOTAL EM JOGO</span>
+                <span class="prize-value">R$ 130.000,00</span>
+            </div>
+        </div>
+
+        {{-- grid dos podios --}}
+        <div class="podium-grid-container">
+
+            {{-- PODIO 1 SQUADS (R$ 100K) --}}
+            <div class="podium-category squad-category">
+                <div class="category-header-podium">
+                    <h3 class="category-title"><i class="fas fa-users"></i> SQUAD CAMPEÃO</h3>
+                    <div class="category-prize gold">R$ 100.000</div>
+                </div>
+                
+                <div class="podium-structure">
+                    {{-- 2º lugar --}}
+                    <div class="podium-place place-2">
+                        <div class="avatar-container"><i class="fas fa-shield-alt"></i></div>
+                        <div class="place-info">
+                            <span class="place-rank">#2</span>
+                            <span class="place-name">Native Squad</span>
+                            <span class="place-profit">R$ 850k</span>
+                        </div>
+                        <div class="pedestal-block"></div>
+                    </div>
+                    
+                    {{-- 1º Lugar SEMPREM MAIS DESTACADO --}}
+                    <div class="podium-place place-1 champion">
+                        <div class="champion-crown-floater"><i class="fas fa-crown"></i></div>
+                        <div class="avatar-container champion-avatar"><i class="fas fa-dragon"></i></div>
+                        <div class="place-info">
+                            <span class="place-rank">#1 CAMPEÃO</span>
+                            <span class="place-name">YTD-MT Squad</span>
+                            <span class="place-profit gold-text">R$ 1.2M</span>
+                        </div>
+                         <div class="pedestal-block champion-pedestal"></div>
+                    </div>
+
+                    {{-- 3º Lugar --}}
+                    <div class="podium-place place-3">
+                        <div class="avatar-container"><i class="fas fa-rocket"></i></div>
+                         <div class="place-info">
+                            <span class="place-rank">#3</span>
+                            <span class="place-name">Facebook Squad</span>
+                            <span class="place-profit">R$ 720k</span>
+                        </div>
+                         <div class="pedestal-block"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- PODIO 2: COPYS (R$ 20K) --}}
+            <div class="podium-category copy-category">
+                 <div class="category-header-podium">
+                    <h3 class="category-title"><i class="fas fa-pen-nib"></i> MELHOR COPY</h3>
+                    <div class="category-prize silver">R$ 20.000</div>
+                </div>
+                 <div class="podium-structure compact-podium">
+                    <div class="podium-flat-list">
+                        <div class="flat-item rank-1">
+                            <i class="fas fa-crown gold-icon"></i>
+                            <div class="flat-avatar gen-avatar">C1</div>
+                            <div class="flat-info"><strong>Copy 01</strong><span>R$ 450k</span></div>
+                        </div>
+                        <div class="flat-item rank-2">
+                            <div class="flat-rank">#2</div>
+                            <div class="flat-avatar gen-avatar">C2</div>
+                            <div class="flat-info"><strong>Copy 02</strong><span>R$ 320k</span></div>
+                        </div>
+                        <div class="flat-item rank-3">
+                            <div class="flat-rank">#3</div>
+                            <div class="flat-avatar gen-avatar">C3</div>
+                            <div class="flat-info"><strong>Copy 03</strong><span>R$ 280k</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- PODIO 3: EDITORES (R$ 10K) --}}
+            <div class="podium-category editor-category">
+                 <div class="category-header-podium">
+                    <h3 class="category-title"><i class="fas fa-video"></i> MELHOR EDITOR</h3>
+                    <div class="category-prize bronze">R$ 10.000</div>
+                </div>
+                <div class="podium-structure compact-podium">
+                    <div class="podium-flat-list">
+                         <div class="flat-item rank-1">
+                            <i class="fas fa-crown gold-icon"></i>
+                            <div class="flat-avatar gen-avatar editor-av">E1</div>
+                            <div class="flat-info"><strong>Editor 01</strong><span>R$ 380k</span></div>
+                        </div>
+                        <div class="flat-item rank-2">
+                             <div class="flat-rank">#2</div>
+                            <div class="flat-avatar gen-avatar editor-av">E2</div>
+                            <div class="flat-info"><strong>Editor 02</strong><span>R$ 290k</span></div>
+                        </div>
+                        <div class="flat-item rank-3">
+                             <div class="flat-rank">#3</div>
+                            <div class="flat-avatar gen-avatar editor-av">E3</div>
+                            <div class="flat-info"><strong>Editor 03</strong><span>R$ 210k</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> 
+    </div>
+
+</div> {{-- fim copa profit --}}
+
+
+<style>
+   :root {
+
+
+        /* CORES VISUAL COPA PROFIT */
+        --gold-1: #FFD700; 
+        --gold-2: #FFA500; 
+        --gold-glow: rgba(255, 215, 0, 0.5);
+        --silver-1: #E0E0E0; 
+        --silver-2: #B0B0B0;
+        --bronze-1: #CD7F32; 
+        --bronze-2: #A0522D;
+        --neon-purple: #bc13fe; 
+        --neon-blue: #0f53ff;
+        --bg-copa: linear-gradient(135deg, rgba(10,10,15,0.8) 0%, rgba(20,20,30,0.6) 100%);
+    }
+
+    /* COPA PROFIT CONTEINER/SECTITON */
+    .copa-profit-section {
+        background: var(--bg-copa);
+        border-radius: 30px;
+        padding: 40px;
+        position: relative;
+        border: 1px solid rgba(15, 83, 255, 0.3);
+        box-shadow: 0 0 50px rgba(15, 83, 255, 0.15);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    /* fundo padarao - da para adicionar um backgorund */
+    .copa-profit-section::before {
+        content: ''; 
+        position: absolute; 
+        top: -50%; 
+        left: -50%; 
+        width: 200%; 
+        height: 200%;
+        background: radial-gradient(circle, rgba(15,83,255,0.1) 0%, transparent 70%);
+        pointer-events: none; z-index: 0;
+    }
+
+    .copa-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-end;
+        margin-bottom: 50px; 
+        position: relative; 
+        z-index: 1;
+        border-bottom: 2px solid rgba(255,255,255,0.1); 
+        padding-bottom: 20px;
+    }
+
+    .copa-main-title {
+        font-size: 3.5rem; 
+        font-weight: 900; 
+        color: #fff; 
+        letter-spacing: -2px; 
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(15, 83, 255, 0.8);
+    }
+
+    .copa-main-title .year {
+        color: transparent;
+        -webkit-text-stroke: 2px var(--color-primary);
+        font-style: italic; 
+        margin-left: 10px;
+    }
+    .copa-subtitle { 
+        color: var(--text-muted); 
+        font-size: 1.1rem; 
+        margin-top: 5px; 
+        font-weight: 500; 
+        letter-spacing: 4px; 
+        text-transform: uppercase; 
+    }
+
+    .total-prize-pool { text-align: right; }
+
+    .prize-label { 
+        display: block; 
+        font-size: 0.8rem; 
+        color: var(--color-success); 
+        font-weight: 700; 
+        letter-spacing: 2px; 
+    }
+
+    .prize-value {
+        font-size: 2.5rem;
+         font-weight: 800; 
+         color: #fff;
+        background: linear-gradient(90deg, #fff, var(--color-success)); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* grid dos podios */
+    .podium-grid-container {
+        display: grid; 
+        grid-template-columns: 1.4fr 1fr 1fr; 
+        gap: 30px; 
+        position: relative;
+        z-index: 1;
+    }
+
+    .category-header-podium {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+        background: rgba(255,255,255,0.05); 
+        padding: 10px 20px; 
+        border-radius: 12px;
+    }
+
+    .category-title { 
+        font-size: 1.1rem; 
+        font-weight: 800; 
+        color: var(--text-main); 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+    }
+
+    .category-title i { color: var(--color-primary); }
+    
+    .category-prize {
+        font-weight: 800; 
+        padding: 4px 12px; 
+        border-radius: 20px; 
+        font-size: 0.9rem; 
+        color: #000;
+    }
+
+    .category-prize.gold { background: var(--gold-1); box-shadow: 0 0 10px var(--gold-glow); }
+    .category-prize.silver { background: var(--silver-1); }
+    .category-prize.bronze { background: var(--bronze-1); }
+
+    /* estrutura do podium dos squads */
+    .podium-structure {
+        display: flex; 
+        align-items: flex-end; 
+        justify-content: center; 
+        height: 300px; 
+        gap: 10px;
+    }
+    
+    .podium-place {
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        width: 30%; 
+        position: relative;
+    }
+    
+    /* avatares para representar o squad/nome de todo mundo */
+    .avatar-container {
+        width: 60px; 
+        height: 60px; 
+        border-radius: 50%; 
+        background: #333; 
+        border: 3px solid rgba(255,255,255,0.2);
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 1.5rem; 
+        color: #fff; 
+        margin-bottom: 10px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
+        z-index: 2;
+    }
+
+    .champion-avatar {
+        width: 80px; 
+        height: 80px; 
+        border-color: var(--gold-1); 
+        background: linear-gradient(135deg, #000, #333);
+        font-size: 2.5rem; 
+        box-shadow: 0 0 25px var(--gold-glow);
+    }
+    
+    .place-info { text-align: center; margin-bottom: 10px; z-index: 2; }
+    .place-rank { font-size: 0.8rem; font-weight: 900; color: var(--text-muted); display: block; }
+    .place-name { font-size: 0.95rem; font-weight: 700; color: #fff; display: block; white-space: nowrap; }
+    .place-profit { font-size: 0.8rem; color: var(--color-success); font-weight: 600; }
+    .gold-text { color: var(--gold-1); }
+
+    /* pedestral */
+    .pedestal-block {
+        width: 100%; 
+        background: linear-gradient(180deg, rgba(15,83,255,0.6) 0%, rgba(15,83,255,0.1) 100%);
+        border-top: 1px solid rgba(255,255,255,0.3); 
+        border-radius: 8px 8px 0 0;
+        position: relative;
+    }
+
+    .place-2 .pedestal-block { height: 100px; }
+    .place-3 .pedestal-block { height: 70px; }
+
+    .champion-pedestal {
+        height: 140px;
+        background: linear-gradient(180deg, var(--color-primary) 0%, rgba(15,83,255,0.3) 100%);
+        box-shadow: 0 0 30px rgba(15, 83, 255, 0.4);
+    }
+    
+    .champion-crown-floater {
+        position: absolute; 
+        top: -40px; 
+        color: var(--gold-1); 
+        font-size: 2.5rem;
+        animation: floatCrown 3s ease-in-out infinite; filter: drop-shadow(0 0 10px var(--gold-1));
+    }
+
+    /* copy e editores flat list*/
+    .podium-flat-list { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 10px; 
+        width: 100%; 
+    }
+
+    .flat-item {
+        display: flex; 
+        align-items: center; 
+        padding: 15px; 
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03); 
+        border: 1px solid rgba(255,255,255,0.05);
+        transition: 0.2s; 
+        position: relative; 
+        overflow: hidden;
+    }
+
+    .flat-item.rank-1 {
+        background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
+        border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .flat-item:hover { transform: translateX(5px); background: rgba(255,255,255,0.08); }
+    
+    .gold-icon { 
+        color: var(--gold-1); 
+        font-size: 1.2rem; 
+        margin-right: 10px; 
+    }
+
+    .flat-rank { 
+        width: 30px; 
+        font-weight: 800; 
+        color: var(--text-muted); 
+        font-size: 1.1rem; 
+    }
+
+    .gen-avatar {
+        width: 35px; 
+        height: 35px; 
+        background: #333; 
+        border-radius: 50%;
+        margin-right: 12px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 0.8rem; 
+        font-weight: 700;
+    }
+
+    .flat-info { 
+        display: flex; 
+        flex-direction: column; 
+    }
+
+    .flat-info strong { color: #fff; font-size: 0.95rem; }
+    .flat-info span { color: var(--color-success); font-size: 0.85rem; font-weight: 600; }
+
+    /* animacao padrao */
+    @keyframes floatCrown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes pulseGold { 0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); } }
+    
+    /* responsividade */
+    @media (max-width: 1200px) {
+        .chart-dashboard-wrapper { grid-template-columns: 1fr; }
+        .podium-grid-container { grid-template-columns: 1fr; }
+    }
+</style>
+
+    {{-- SCRIPTS JS  --}}
+<script>
+    // VAI USAR O SCRIPT DO GRAFICO + TOP PLATAFORMAS 
+</script>
+    {{--  FIM DA COPA PROFIT  --}}
+
+
     <div class="filters-dataset glass-card">
         <h3 class="filters-title">Filtrar métricas</h3>
 
@@ -452,338 +885,799 @@
     </div>
 
 
-    <div class="chart-section glass-card">
-        <h3 class="section-title">Gráfico de Faturamento</h3>
-        <div class="chart-mode-controls">
-            <button id="modeSeparated" class="btn-modes">Separado</button>
-            <button id="modeStacked" class="btn-modes">Empilhado</button>
+    {{-- GRAFICO + TOP PLATAFORMAS AQUI --}}
+    <div class="chart-dashboard-wrapper-vertical">
+
+    {{-- GRAFICO PRINCIPAL PERFOMANCE --}}
+    <div class="chart-section glass-card-premium main-chart-area full-width-chart">
+        <div class="chart-header">
+            <h3 class="section-title-premium">Performance Financeira & Metas</h3>
+            <p class="chart-subtitle-premium">Acompanhamento mensal de faturamento & Meta ($1M/Mês)</p>
         </div>
 
-        <div class="zoom-controls">
-            <button id="zoomOut" class="zoom-btn">−</button>
-            <span style="color:white; opacity:.8;">Zoom</span>
-            <button id="zoomIn" class="zoom-btn">+</button>
-            <button id="zoomReset" class="zoom-reset-btn">Reset</button>
+        <div class="chart-controls-wrapper">
+            <div class="control-group mode-group">
+                <button id="modeSeparated" class="btn-mode active" onclick="setChartMode('separated')"><i class="fas fa-chart-bar"></i> Separado</button>
+                <button id="modeStacked" class="btn-mode" onclick="setChartMode('stacked')"><i class="fas fa-layer-group"></i> Empilhado</button>
+                <button id="modeTargets" class="btn-mode btn-mode-target" onclick="toggleTargets()"><i class="fas fa-bullseye"></i> Metas</button>
+            </div>
+            <div class="control-group zoom-group">
+                <button id="zoomOut" class="btn-icon"><i class="fas fa-minus"></i></button> <span class="zoom-label">ZOOM</span> <button id="zoomIn" class="btn-icon"><i class="fas fa-plus"></i></button> <button id="zoomReset" class="btn-reset">Resetar</button>
+            </div>
         </div>
 
-        <div class="chart-legend">
-            <span class="legend-label">Plataformas</span>
-
-            <button type="button" class="legend-item" data-alias="Facebook">
-                <span class="legend-color facebook"></span> Facebook
-            </button>
-            <button type="button" class="legend-item" data-alias="TikTok">
-                <span class="legend-color tiktok"></span> TikTok
-            </button>
-            <button type="button" class="legend-item" data-alias="Taboola">
-                <span class="legend-color taboola"></span> Taboola
-            </button>
-            <button type="button" class="legend-item" data-alias="Native">
-                <span class="legend-color native"></span> Native
-            </button>
+        <div class="chart-legend-premium">
+            <span class="legend-title">Plataformas:</span>
+            <button type="button" class="legend-pill facebook active" data-alias="Facebook" onclick="togglePlatform(this)"><span class="dot"></span> Facebook</button>
+            <button type="button" class="legend-pill tiktok active" data-alias="TikTok" onclick="togglePlatform(this)"><span class="dot"></span> TikTok</button>
+            <button type="button" class="legend-pill taboola active" data-alias="Taboola" onclick="togglePlatform(this)"><span class="dot"></span> Taboola</button>
+            <button type="button" class="legend-pill native active" data-alias="Native" onclick="togglePlatform(this)"><span class="dot"></span> Native</button>
         </div>
 
-
-        <p class="chart-subtitle">Visualização completa do faturamento mensal ao longo do ano</p>
-
-        <div class="revenue-chart-placeholder">
-            <div id="chart-tooltip" class="chart-tooltip"></div>
-            <div class="chart-bar-grid">
-                <div class="expected-trendline" id="expectedTrendline"></div>
-                @foreach ($chartData as $month => $platforms)
-                    @php
-                        // soma todas as plataformas do mês
-                        $monthTotal = array_sum($platforms);
-                    @endphp
-                    <div class="month-group" data-total="{{ $monthTotal }}">
-                        <div class="bars">
-                            @foreach ($aliases as $alias)
-                                @php
-                                    $value = $platforms[$alias];
-                                    $height = ($value / $maxValue) * 18.6; // rem
-                                @endphp
-
-                                @if ($height > 0)
-                                    <div class="bar {{ strtolower($alias) }}-bar" style="height: {{ $height }}rem"
-                                        data-alias="{{ $alias }}" data-month="{{ $month }}"
-                                        data-value="@dollar($value)" data-raw="{{ $value }}">
-                                        <span class="bar-label">@dollar($value)</span>
-                                    </div>
-                                @endif
-                            @endforeach
+        <div class="revenue-chart-container custom-scrollbar-x" id="chartContainer">
+            <div id="chart-tooltip" class="chart-tooltip-premium"></div>
+            <div class="chart-grid-wrapper" id="chartGridWrapper">
+                <div class="target-line-wrapper" id="targetLine">
+                    <div class="target-line"></div>
+                    <div class="target-label"><i class="fas fa-flag-checkered"></i> META: $1M</div>
+                </div>
+                <div class="chart-bars-area">
+                    @foreach ($chartData as $month => $platforms)
+                        @php
+                            $monthTotal = array_sum($platforms); $monthROI = rand(-20, 150); $roiClass = $monthROI >= 0 ? 'positive' : 'negative';
+                            $maxValueVisual = 1500000; $scaleFactor = 18 / $maxValueVisual; $hitTarget = $monthTotal >= 1000000;
+                        @endphp
+                        <div class="month-column-group" data-month="{{ $month }}" data-total="{{ $monthTotal }}">
+                            @if($hitTarget) <div class="month-achievement-crown target-element"><i class="fas fa-crown"></i><span>META BATIDA</span></div> @endif
+                            <div class="roi-badge {{ $roiClass }}">{{ $monthROI }}% <i class="fas fa-caret-{{ $monthROI >= 0 ? 'up' : 'down' }}"></i></div>
+                            <div class="total-value-label">@dollar($monthTotal)</div>
+                            <div class="bars-stack">
+                                @foreach ($aliases as $alias)
+                                    @php $value = $platforms[$alias] ?? 0; $height = $value * $scaleFactor; $hitIndividualTarget = $value >= 250000; @endphp
+                                    @if ($value > 0)
+                                        <div class="bar-segment {{ strtolower($alias) }}-segment" style="height: {{ $height }}rem;" data-value="@dollar($value)" data-platform="{{ $alias }}" onmouseenter="showTooltip(this, event)" onmouseleave="hideTooltip()">
+                                            @if($hitIndividualTarget) <div class="mini-crown target-element-item"><i class="fas fa-crown"></i></div> @endif
+                                            @if($height > 1.5) <span class="inner-value">@dollar($value)</span> @endif
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                            <div class="month-label">{{ $month }}</div><div class="grid-line-vertical"></div>
                         </div>
-
-                        <span class="month-label">{{ $month }}</span>
-
-                    </div>
-                @endforeach
-
-
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- CSS do grafico --}}
-    <style>
-        .chart-section {
-            position: relative;
-            overflow: visible !important;
+    {{-- TOP PLATAFORMAS --}}
+    <div class="ranking-section-fullwidth glass-card-premium">
+        <div class="ranking-header-full">
+            <div class="header-left">
+                 <h4 class="ranking-title"><i class="fas fa-trophy"></i> Top Plataformas do Mês</h4>
+                 <p class="ranking-subtitle">Liderança em faturamento acumulado</p>
+            </div>
+             {{-- status geral movido para o header para economizar espaco vertical --}}
+             <div class="status-card-inline">
+                <div class="status-info-inline">
+                    <i class="fas fa-bullseye"></i> <span>Meta Global: 85%</span>
+                </div>
+                <div class="progress-bar-wrapper inline-bar"><div class="progress-bar-fill" style="width: 85%;"></div></div>
+            </div>
+        </div>
+
+        {{-- lista em grid horizontal --}}
+        <div class="ranking-list-horizontal" id="rankingList">
+            </div>
+    </div>
+
+</div> {{-- FIM DO GRAFICO PERFOMANCE + FIM DO TOP PLATAFORMAS --}}
+
+
+
+<style>
+    /* CORES GRAFICO + TOP PLATAFORMAS  */
+    :root {
+        --color-primary: #0f53ff;
+        --color-primary-dark: #012c99;
+        --color-success: #4ADE80;
+        --color-danger: #F87171;
+        --color-gold: #FFD700;
+        --color-gold-glow: rgba(255, 215, 0, 0.6);
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --border-card: rgba(255, 255, 255, 0.1);
+        --text-main: #F0F0F0;
+        --text-muted: #9CA3AF;
+        --color-fb: #1877F2;
+        --color-tiktok: #ffffff;
+        --color-tiktok-bg: #252525;
+        --color-taboola: #21A0FF;
+        --color-native: #9C4DFF;
+    }
+
+    .chart-dashboard-wrapper-vertical {
+        display: flex;
+        flex-direction: column; /* empilha um abaixo do outro */
+        width: 100%;
+        /* max-width: 1600px; removido para ficar 100% da largura */
+        margin: 0 auto;
+        gap: 30px;
+    }
+
+    /* BASE PADRAO GLASS */
+    .glass-card-premium {
+        background: var(--bg-card);
+        border: 1px solid var(--border-card);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(12px);
+        position: relative;
+        width: 100%; /* garante largura total */
+        box-sizing: border-box;
+    }
+
+    /* GRAFICO PERFOMANCE */
+    .chart-header { margin-bottom: 25px; }
+
+    .section-title-premium {
+        font-size: 1.6rem; 
+        font-weight: 800; 
+        color: var(--text-main); 
+        margin: 0 0 5px 0;
+        background: linear-gradient(90deg, #fff, #a0a0a0); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent;
+    }
+
+    .chart-subtitle-premium {
+        color: var(--text-muted);
+        font-size: 0.9rem; margin: 0; 
+    }
+
+    .chart-controls-wrapper { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px; 
+        flex-wrap: wrap; 
+        gap: 10px; 
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding-bottom: 15px; 
+    }
+
+    .control-group {
+         display: flex; 
+         align-items: center; 
+         gap: 5px; 
+         background: rgba(0, 0, 0, 0.2); 
+         padding: 4px; 
+         border-radius: 10px; 
+         border: 1px solid rgba(255,255,255,0.05); 
+    }
+
+    .btn-mode { 
+        background: transparent; 
+        border: none; color: var(--text-muted); 
+        padding: 6px 12px; 
+        border-radius: 8px; 
+        font-size: 0.85rem;
+         font-weight: 600; cursor: pointer; 
+         transition: all 0.3s; 
+         display: flex; 
+         align-items: center; 
+         gap: 5px; 
+    }
+
+
+    .btn-mode.active, .btn-mode:hover { 
+        background: var(--color-primary); color: white; 
+    }
+
+    .btn-mode-target.active { 
+        background: var(--color-gold); 
+        color: #000; 
+        box-shadow: 0 0 15px var(--color-gold-glow); 
+        animation: pulseGold 2s infinite; 
+    }
+
+    .btn-icon { 
+        width: 28px; 
+        height: 28px; 
+        border-radius: 6px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        background: rgba(255,255,255,0.05); 
+        color: white; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
+
+    .btn-icon:hover { 
+        background: rgba(255,255,255,0.15); 
+    }
+
+    .zoom-label {
+         font-size: 0.7rem; 
+         font-weight: 700; 
+         color: var(--text-muted); 
+         margin: 0 5px; 
+    }
+
+    .btn-reset { 
+        background: transparent; 
+        border: 1px solid var(--color-primary); 
+        color: var(--color-primary); 
+        padding: 4px 8px; 
+        border-radius: 6px; 
+        font-size: 0.75rem;
+        cursor: pointer; 
+    }
+
+    .btn-reset:hover { 
+        background: var(--color-primary); color: white; 
+    }
+
+    .chart-legend-premium { 
+        display: flex;
+         gap: 10px; 
+         margin-bottom: 20px; 
+         flex-wrap: wrap; 
+    }
+
+    .legend-pill { 
+        background: rgba(255,255,255,0.03); 
+        border: 1px solid rgba(255,255,255,0.1); 
+        color: var(--text-muted); 
+        padding: 5px 10px; 
+        border-radius: 15px; 
+        font-size: 0.8rem; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        gap: 6px; 
+        transition: 0.3s; 
+    }
+
+    .legend-pill .dot { 
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%; 
+    }
+
+    .legend-pill.facebook .dot { 
+        background: var(--color-fb); } 
+        
+    .legend-pill.tiktok .dot { 
+        background: var(--color-tiktok); }
+        
+    .legend-pill.taboola .dot {
+         background: var(--color-taboola); } 
+         
+    .legend-pill.native .dot { 
+        background: var(--color-native); }
+
+
+    .legend-pill.active { 
+        background: rgba(255,255,255,0.08); 
+        color: white; border-color: rgba(255,255,255,0.3); 
+    }
+
+    .legend-pill:not(.active) { 
+        opacity: 0.5; 
+        filter: grayscale(1); 
+    }
+
+    .revenue-chart-container { 
+        position: relative; 
+        height: 450px; 
+        overflow-x: auto; 
+        overflow-y: hidden; 
+        padding-bottom: 10px; 
+    }
+
+    .chart-grid-wrapper {
+         display: flex; 
+         height: 100%; 
+         align-items: flex-end; 
+         padding: 60px 20px 20px 20px; 
+         min-width: 100%; 
+         width: max-content; 
+    }
+
+    .chart-bars-area { 
+        display: flex; 
+        height: 100%; 
+        align-items: flex-end; 
+        gap: 2.5rem; 
+    }
+
+    .month-column-group { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: flex-end; 
+        height: 100%; 
+        position: relative; 
+        min-width: 70px; 
+    }
+
+    .grid-line-vertical { 
+        position: absolute; 
+        bottom: 0;
+         left: 50%; 
+         width: 1px; 
+         height: 100%; 
+        background: linear-gradient(to top, rgba(255,255,255,0.03), transparent); 
+        z-index: 0; 
+        pointer-events: none; 
+    }
+
+    .target-element, .target-element-item { 
+        display: none; 
+    }
+
+    .show-targets .target-element { 
+        display: flex; 
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+
+    .show-targets .month-column-group.separated .target-element-item { 
+        display: block; 
+    }
+
+    .target-line-wrapper { 
+        position: absolute; 
+        left: 0; 
+        right: 0; 
+        bottom: calc((1000000 / 1500000) * 100%); 
+        height: 2px; z-index: 5; pointer-events: none; 
+        display: none; 
+    }
+
+    .target-line { 
+        width: 100%; 
+        height: 100%; 
+        border-top: 2px dashed var(--color-gold); 
+        box-shadow: 0 0 10px var(--color-gold); 
+    }
+
+    .target-label { 
+        position: absolute; 
+        right: 0; top: -25px; 
+        background: var(--color-gold); 
+        color: #000; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        padding: 2px 8px; 
+        border-radius: 4px; 
+        box-shadow: 0 0 10px var(--color-gold-glow); 
+    }
+
+    .month-achievement-crown { 
+        position: absolute;
+        top: -50px; display: none; 
+        flex-direction: column; align-items: center; 
+        color: var(--color-gold); 
+        z-index: 20; 
+        text-shadow: 0 0 10px rgba(0,0,0,0.8); 
+    }
+
+    .month-achievement-crown i { 
+        font-size: 2rem; 
+        filter: drop-shadow(0 0 15px var(--color-gold)); 
+        animation: floatCrown 3s ease-in-out infinite; 
+    }
+
+    .month-achievement-crown span { 
+        font-size: 0.6rem; 
+        font-weight: 900; 
+        background: #000; 
+        padding: 2px 4px; 
+        border-radius: 4px; 
+        margin-top: -5px; 
+    }
+
+    .mini-crown { 
+        position: absolute; 
+        top: -18px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        color: var(--color-gold); 
+        font-size: 0.8rem; 
+        display: none; 
+        z-index: 15; 
+    }
+
+    .roi-badge { 
+        font-size: 0.7rem; 
+        font-weight: 700; 
+        padding: 2px 6px; 
+        border-radius: 4px; 
+        margin-bottom: 4px; 
+        display: flex; 
+        align-items: center; 
+        gap: 3px; 
+        z-index: 5; 
+    }
+
+    .roi-badge.positive { 
+        background: rgba(74, 222, 128, 0.15); 
+        color: var(--color-success); 
+    } 
+    
+    .roi-badge.negative { 
+        background: rgba(248, 113, 113, 0.15); 
+        color: var(--color-danger); 
+    }
+
+    .total-value-label { 
+        color: #fff; 
+        font-size: 0.85rem; 
+        font-weight: 700; 
+        margin-bottom: 4px; 
+        text-shadow: 0 2px 4px #000; 
+        z-index: 5; 
+    }
+
+    .month-label { 
+        margin-top: 10px; 
+        font-size: 0.85rem; 
+        font-weight: 600; 
+        color: var(--text-muted); 
+        text-transform: uppercase; 
+    }
+
+    .bars-stack { 
+        display: flex; 
+        flex-direction: column-reverse; 
+        align-items: center; 
+        width: 100%; 
+        transition: all 0.3s ease; 
+        position: relative; 
+        z-index: 2; 
+    }
+
+    .month-column-group.separated .bars-stack { 
+        flex-direction: row; 
+        align-items: flex-end; 
+        gap: 2px; 
+    }
+
+    .bar-segment { 
+        width: 100%; 
+        min-height: 0; 
+        transition: height 0.4s, opacity 0.2s; 
+        position: relative;
+        cursor: pointer; 
+    }
+
+    .bars-stack .bar-segment:last-child { 
+        border-top-left-radius: 6px; 
+        border-top-right-radius: 6px; 
+    }
+
+    .month-column-group.separated .bar-segment { 
+        width: 16px; 
+        border-radius: 4px 4px 0 0; 
+    }
+
+    .bar-segment:hover { 
+        filter: brightness(1.3); 
+        z-index: 10; 
+    }
+
+    .facebook-segment { 
+        background: var(--color-fb); } 
+    
+    .tiktok-segment { 
+        background: var(--color-tiktok-bg); 
+        border: 1px solid #555; } 
+        
+    .taboola-segment { 
+        background: var(--color-taboola); } 
+    
+    .native-segment { 
+        background: var(--color-native); }
+
+    .inner-value { 
+        font-size: 0.6rem; 
+        color: rgba(255,255,255,0.9); 
+        position: absolute; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        pointer-events: none; 
+        font-weight: 600; 
+        opacity: 0; 
+        transition: 0.2s; 
+    }
+
+    .bar-segment:hover .inner-value { 
+        opacity: 1; 
+    }
+
+    .chart-tooltip-premium { 
+        position: absolute; 
+        background: rgba(0,0,0,0.9); 
+        border: 1px solid var(--color-primary); 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 8px; 
+        font-size: 0.8rem; 
+        pointer-events: none; 
+        opacity: 0; 
+        transform: translate(-50%, -10px); 
+        transition: 0.2s; 
+        z-index: 100; 
+        white-space: nowrap; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+    }
+
+    .custom-scrollbar-x::-webkit-scrollbar { 
+        height: 8px; 
+    } 
+        
+    .custom-scrollbar-x::-webkit-scrollbar-track { 
+        background: rgba(255,255,255,0.02); 
+        border-radius: 4px; 
+    } 
+        
+    .custom-scrollbar-x::-webkit-scrollbar-thumb { 
+        background: var(--color-primary); 
+        border-radius: 4px; 
+    }
+
+    @keyframes floatCrown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes pulseGold { 0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); } }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* TOP PLATAFROMAS AQUI */
+    .ranking-section-fullwidth {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 30px; /* espaco para o conteiner abaixo - metricas */
+    }
+
+    .ranking-header-full {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-card);
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .header-left { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 5px; 
+    }
+
+    .ranking-title { 
+        font-size: 1.4rem; 
+        font-weight: 700; 
+        color: var(--color-gold); 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        margin: 0; 
+    }
+
+    .ranking-subtitle { 
+        font-size: 0.9rem; 
+        color: var(--text-muted); 
+        margin: 0; 
+    }
+
+    /* status bar inline */
+    .status-card-inline {
+        display: flex; 
+        align-items: center; 
+        gap: 15px; background: rgba(255,255,255,0.05); 
+        padding: 8px 15px; 
+        border-radius: 10px; 
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .status-info-inline { 
+        color: var(--text-muted); 
+        font-size: 0.85rem; 
+        white-space: nowrap; 
+        display: flex; 
+        align-items: center; 
+        gap: 6px; 
+    }
+
+    .status-info-inline i { 
+        color: var(--color-primary); 
+    }
+
+    .progress-bar-wrapper.inline-bar { 
+        width: 150px; height: 8px; 
+        background: #333; 
+        border-radius: 4px; 
+        overflow: hidden; 
+    }
+
+    .progress-bar-fill { 
+        height: 100%; 
+        background: var(--color-primary); 
+        border-radius: 4px; 
+    }
+
+    /* lista horizontal grid */
+    .ranking-list-horizontal {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* responsivo */
+        gap: 15px;
+    }
+
+    .ranking-item {
+        display: flex; align-items: center; padding: 15px 20px;
+        background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid transparent;
+        transition: all 0.3s; position: relative;
+    }
+
+    .ranking-item:hover { 
+        background: rgba(255,255,255,0.06); 
+        transform: translateY(-3px); 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+    }
+    
+    .ranking-item.rank-1 {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), transparent);
+        border-color: var(--color-gold);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+    }
+
+    .rank-pos { 
+        font-size: 1.4rem; 
+        font-weight: 800; 
+        margin-right: 15px; 
+        color: var(--text-muted); 
+    }
+
+    .rank-1 .rank-pos { 
+        color: var(--color-gold); 
+        font-size: 1.8rem; 
+    }
+
+    .rank-info { flex: 1; }
+
+    .rank-name { 
+        display: block; 
+        font-weight: 700; 
+        color: #fff; 
+        font-size: 1rem; 
+    }
+
+    .rank-val { 
+        font-size: 0.9rem; 
+        color: var(--color-success); 
+        font-weight: 600; 
+        margin-top: 4px; 
+        display: block; 
+    }
+
+    .rank-crown { 
+        font-size: 1.5rem; 
+        color: var(--color-gold); 
+        position: absolute; 
+        top: 10px; 
+        right: 15px; 
+        opacity: 0; 
+    }
+
+    .rank-1 .rank-crown { 
+        opacity: 1; 
+        animation: floatCrown 3s infinite ease-in-out; 
+    }
+
+    /* responsividade */
+    @media (max-width: 768px) {
+        .ranking-header-full { flex-direction: column; align-items: flex-start; gap: 15px; }
+        .status-card-inline { width: 100%; justify-content: space-between; }
+        .progress-bar-wrapper.inline-bar { width: 100px; }
+    }
+</style>
+
+{{-- SCRIPT DO GRAFICO PERFOMANCE FINANCEIRO + TOP PLATAFORMAS DO MES --}}
+
+<script>
+    // DADOS DE EXEMPLO (meta 1 milhao)
+    const rankingData = {
+        'Facebook': 850000,
+        'Native': 1200000, // bateu a meta - exemplo
+        'TikTok': 450000,
+        'Taboola': 600000
+    };
+
+    let isTargetMode = false;
+
+    function setChartMode(mode) {
+        const groups = document.querySelectorAll('.month-column-group');
+        const btnSep = document.getElementById('modeSeparated');
+        const btnStk = document.getElementById('modeStacked');
+        if (mode === 'separated') {
+            groups.forEach(g => g.classList.add('separated'));
+            btnSep.classList.add('active'); btnStk.classList.remove('active');
+        } else {
+            groups.forEach(g => g.classList.remove('separated'));
+            btnStk.classList.add('active'); btnSep.classList.remove('active');
         }
+    }
 
-        .revenue-chart-placeholder {
-            height: 27rem;
-            padding-bottom: 10px;
-            position: relative;
-            overflow-x: auto;
-            overflow-y: visible !important; /* impede o SVG de sumir */
+    function toggleTargets() {
+        isTargetMode = !isTargetMode;
+        const btn = document.getElementById('modeTargets');
+        const container = document.getElementById('chartContainer');
+        const line = document.getElementById('targetLine');
+        if (isTargetMode) {
+            btn.classList.add('active'); container.classList.add('show-targets'); line.style.display = 'block';
+        } else {
+            btn.classList.remove('active'); container.classList.remove('show-targets'); line.style.display = 'none';
         }
+    }
 
-        .chart-bar-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            /* 12 meses */
-            align-items: end;
-            height: 24.5rem;
-            padding: 20px 30px 10px 30px;
-            column-gap: 2rem;
-            /* menor espaçamento */
-            position: relative;
-            z-index: 10;
-        }
-
-        .month-group {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-        }
-
-        .month-group .bars {
-            display: flex;
-            gap: 6px;
-            align-items: flex-end;
-        }
-
-        .month-group .bar {
-            width: var(--bar-width);
-            border-radius: 6px 6px 0 0;
-            transition: transform .18s ease, width .18s ease, opacity .18s ease, box-shadow .18s ease;
-            position: relative;
-        }
-
-        .month-group .bar:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
-        }
-
-        .bar-label {
-            position: absolute;
-            top: -22px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.9);
-            white-space: nowrap;
-            pointer-events: none;
-            padding: 2px 6px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(6px);
-        }
-
-        .month-label {
-            margin-top: 6px;
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        /* paleta ajustada */
-        .facebook-bar {
-            background: #1877F2;
-        }
-
-        .tiktok-bar {
-            background: #000000;
-        }
-
-        .taboola-bar {
-            background: #21A0FF;
-            /* azul mais ciano pra diferenciar */
-        }
-
-        .native-bar {
-            background: #9C4DFF;
-            /* roxo mais vibrante */
-        }
-
-        /* estado "apagado" quando highlight de legenda estiver ativo */
-        .bar.dimmed {
-            opacity: 0.25;
-        }
-
-        .chart-legend {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 10px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .legend-label {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-right: auto;
-        }
-
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            background: transparent;
-            transition: background .18s ease, border-color .18s ease, transform .1s ease;
-        }
-
-        .legend-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-1px);
-        }
-
-        .legend-item.active {
-            border-color: rgba(255, 255, 255, 0.45);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .legend-color.facebook {
-            background: #1877f2;
-        }
-
-        .legend-color.tiktok {
-            background: #000;
-        }
-
-        .legend-color.taboola {
-            background: #21A0FF;
-        }
-
-        .legend-color.native {
-            background: #9C4DFF;
-        }
-
-        .zoom-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .zoom-btn,
-        .zoom-reset-btn {
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 14px;
-            min-width: 32px;
-            height: 32px;
-            border-radius: 999px;
-            cursor: pointer;
-            transition: background .18s ease, transform .1s ease;
-            padding: 0 12px;
-        }
-
-        .zoom-btn:hover,
-        .zoom-reset-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
-            transform: translateY(-1px);
-        }
-
-        /* tooltip custom do gráfico */
-        .chart-tooltip {
-            position: absolute;
-            z-index: 999;
-            pointer-events: none;
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 8px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-            opacity: 0;
-            transform: translateY(6px);
-            transition: opacity .15s ease, transform .15s ease;
-            white-space: nowrap;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropdowns = document.querySelectorAll('.custom-dropdown-filter');
-
-            dropdowns.forEach(dropdown => {
-                const header = dropdown.querySelector('.dropdown-header');
-                const display = dropdown.querySelector('.selected-items-display');
-                const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
-                // pega o texto base ('Canais' 'Canais de Tráfego')
-                const baseText = dropdown.querySelector('label')?.textContent || display.textContent.split(
-                    '(')[0].trim();
-
-                // atualiza o texto de selecao
-                const updateDisplay = () => {
-                    const checked = Array.from(checkboxes).filter(c => c.checked);
-                    if (checked.length === 0) {
-                        // mantem a primeira palavra e adiciona (0)
-                        display.textContent = `${baseText.split(' ')[0]} (0)`;
-                    } else if (checked.length === 1) {
-                        display.textContent = `${baseText.split(' ')[0]} (1)`;
-                    } else {
-                        display.textContent = `${baseText.split(' ')[0]} (${checked.length})`;
-                    }
-                };
-
-                // inicia o display
-                updateDisplay();
-
-                // tiggle do dropdown
-                header.addEventListener('click', () => {
-                    // fecha outros dropdowns abertos antes de abrir este
-                    document.querySelectorAll('.custom-dropdown-filter.open').forEach(
-                        openDropdown => {
-                            if (openDropdown !== dropdown) {
-                                openDropdown.classList.remove('open');
-                            }
-                        });
-                    dropdown.classList.toggle('open');
-                });
-
-                // atualiza o display ao marcar/desmarcar
-                checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', updateDisplay);
-                });
-
-                // fecha o dropdown ao clicar fora
-                document.addEventListener('click', (event) => {
-                    if (!dropdown.contains(event.target)) {
-                        dropdown.classList.remove('open');
-                    }
-                });
-            });
+    function togglePlatform(btn) {
+        btn.classList.toggle('active');
+        const alias = btn.getAttribute('data-alias').toLowerCase();
+        const segments = document.querySelectorAll(`.${alias}-segment`);
+        segments.forEach(seg => {
+            if (btn.classList.contains('active')) {
+                seg.style.display = 'block'; setTimeout(() => seg.style.opacity = '1', 10);
+            } else {
+                seg.style.opacity = '0'; setTimeout(() => seg.style.display = 'none', 300);
+            }
         });
-    </script>
+        updateRanking();
+    }
+
+    const tooltip = document.getElementById('chart-tooltip');
+    function showTooltip(el, event) {
+        const value = el.getAttribute('data-value');
+        const platform = el.getAttribute('data-platform');
+        tooltip.innerHTML = `<strong style="color:var(--color-primary)">${platform}</strong>: ${value}`;
+        tooltip.style.opacity = '1';
+        const rect = el.getBoundingClientRect();
+        const containerRect = document.querySelector('.revenue-chart-container').getBoundingClientRect();
+        const leftPos = rect.left - containerRect.left + (rect.width / 2);
+        const topPos = rect.top - containerRect.top;
+        tooltip.style.left = `${leftPos}px`; tooltip.style.top = `${topPos}px`; tooltip.style.transform = 'translate(-50%, -120%)';
+    }
+    function hideTooltip() { tooltip.style.opacity = '0'; }
+
+    let currentZoom = 1;
+    const gridWrapper = document.getElementById('chartGridWrapper');
+    document.getElementById('zoomIn').addEventListener('click', (e) => { e.preventDefault(); currentZoom += 0.1; updateZoom(); });
+    document.getElementById('zoomOut').addEventListener('click', (e) => { e.preventDefault(); if(currentZoom > 0.5) currentZoom -= 0.1; updateZoom(); });
+    document.getElementById('zoomReset').addEventListener('click', (e) => { e.preventDefault(); currentZoom = 1; updateZoom(); });
+    function updateZoom() { gridWrapper.style.transform = `scale(${currentZoom})`; gridWrapper.style.transformOrigin = 'bottom left'; }
+
+    function updateRanking() {
+        const list = document.getElementById('rankingList');
+        list.innerHTML = '';
+        const sorted = Object.entries(rankingData).sort(([,a], [,b]) => b - a);
+        sorted.forEach(([platform, value], index) => {
+            const rank = index + 1;
+            const isFirst = rank === 1;
+            const item = document.createElement('div');
+            item.className = `ranking-item ${isFirst ? 'rank-1' : ''}`;
+            item.innerHTML = `
+                <div class="rank-pos">${rank}</div>
+                <div class="rank-info"><span class="rank-name">${platform}</span><span class="rank-val">$ ${(value/1000).toFixed(1)}k</span></div>
+                <div class="rank-crown"><i class="fas fa-crown"></i></div>
+            `;
+            list.appendChild(item);
+        });
+    }
+    updateRanking();
+</script>
+
+    {{-- FIM DO GRAFICO PERFOMANCE + TOP PLATAFORMAS --}}
 
     <div class="metrics-table-section glass-card">
         <h3 class="section-title">Métricas por plataforma</h3>
