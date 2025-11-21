@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\RedtrackReport;
 use App\Models\User;
+use App\Services\Dashboard\AgentsService;
+use App\Services\Dashboard\CopaProfitService;
+use App\Services\Dashboard\SquadService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -322,8 +325,6 @@ class AdminController extends Controller
     }
 
 
-
-
     public function allCopywritersArray()
     {
         return DB::table('users AS u')
@@ -458,7 +459,7 @@ class AdminController extends Controller
         // 🔹 ALIASES FIXOS DO GRÁFICO
         // =====================================================================
 
-        $aliases = ['facebook', 'tiktok', 'taboola', 'native'];
+        $aliases = ['facebook', 'tiktok', 'google', 'native'];
 
         // =====================================================================
         // 🔹 BUSCA LUCRO POR MÊS E POR ALIAS
@@ -468,7 +469,8 @@ class AdminController extends Controller
             MONTH(date) as month_number,
             DATE_FORMAT(date, '%b') as month_name,
             LOWER(alias) as alias,
-            SUM(profit) as profit
+            SUM(profit) as profit,
+            SUM(cost) as cost
         ")
             ->groupBy('month_number', 'month_name', 'alias')
             ->orderBy('month_number');
@@ -484,10 +486,26 @@ class AdminController extends Controller
         $chartData = [];
         foreach ($monthsList as $m) {
             $chartData[$m] = [
-                'facebook' => 0,
-                'tiktok'   => 0,
-                'taboola'  => 0,
-                'native'   => 0,
+                'facebook' => [
+                    'profit' => 0,
+                    'cost'   => 0,
+                    'roi'    => 0,
+                ],
+                'tiktok'   => [
+                    'profit' => 0,
+                    'cost'   => 0,
+                    'roi'    => 0,
+                ],
+                'google'  => [
+                    'profit' => 0,
+                    'cost'   => 0,
+                    'roi'    => 0,
+                ],
+                'native'   => [
+                    'profit' => 0,
+                    'cost'   => 0,
+                    'roi'    => 0,
+                ],
             ];
         }
         // =====================================================================
@@ -498,22 +516,44 @@ class AdminController extends Controller
             $monthName = $row->month_name;        // Jan / Fev / Mar
             $alias     = strtolower($row->alias); // facebook / tiktok / ...
             $profit    = (float) $row->profit;
-            if (in_array($alias, ['facebook', 'tiktok', 'taboola'])) {
+            $cost    = (float) $row->cost;
+            if (in_array($alias, ['facebook', 'tiktok', 'google'])) {
                 // plataforma conhecida
-                $chartData[$monthName][$alias] += $profit;
+                $chartData[$monthName][$alias]['profit'] += $profit;
+                $chartData[$monthName][$alias]['cost'] += $cost;
             } else {
                 // qualquer outra entra em NATIVE
-                $chartData[$monthName]['native'] += $profit;
+                $chartData[$monthName]['native']['profit'] += $profit;
+                $chartData[$monthName]['native']['cost'] += $cost;
             }
         }
+        $chartWithRoi = $chartData;
+
+        foreach ($chartWithRoi as $month => $platforms) {
+            foreach ($platforms as $aliasName => $values) {
+
+                $profit = $values['profit'] ?? 0;
+                $cost   = $values['cost']   ?? 0;
+
+                $roi = ($cost > 0)
+                    ? round($profit / $cost, 4)
+                    : 0;
+
+                // Atualiza no array FINAL
+                $chartWithRoi[$month][$aliasName]['roi'] = $roi;
+            }
+        }
+
+        $chartData = $chartWithRoi;
+
         // =====================================================================
         // 🔹 CALCULA MAIOR VALOR PARA ESCALA DO GRAFICO
         // =====================================================================
         $maxValue = 0;
         foreach ($chartData as $month => $platforms) {
             foreach ($platforms as $value) {
-                if ($value > $maxValue) {
-                    $maxValue = $value;
+                if ($value['profit'] > $maxValue) {
+                    $maxValue = $value['profit'];
                 }
             }
         }
@@ -535,7 +575,7 @@ class AdminController extends Controller
         ")
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('alias')
-            ->orderBy('alias')
+            ->orderBy('total_profit','desc')
             ->get();
 
         // agrupamento das contas por alias
@@ -550,17 +590,39 @@ class AdminController extends Controller
         ")
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('alias', 'source')
-            ->orderBy('alias')
-            ->orderBy('roi', 'desc')
+            ->orderBy('total_profit', 'desc')
             ->get()
             ->groupBy('alias');
 
+        $copaService = new CopaProfitService();
+        $copaData = $copaService->make();
+        $podium = $copaData['podium'];
+        $copiesPodium = $copaData['copiesPodium'];
+        $editorsPodium = $copaData['editorsPodium'];
+        $copaYear = $copaData['copaYear'];
+        $copaMonths = $copaData['copaMonths'];
+        $copaPrize = $copaData['copaPrize'];
+        $editorPrize = $copaData['editorPrize'];
+        $copiePrize = $copaData['copiePrize'];
+        $aliasRanking = new SquadService()->rankByAlias(4);
+        $aliasRanking = $aliasRanking->filter(function ($item) {
+            return $item['profit'] > 0;
+        });
+
         $expectedMonthlyProfit = 1000000;
+        
+        //calculando status da meta
+        $month = substr(Carbon::now()->locale('en')->monthName,0,3);
+        $total = 0;
+        $profitMonth = collect($chartData[$month])->map(function($data) use (&$total){
+            $total += $data['profit'];
+            return $data['profit'];
+        });
+        $target = number_format($total/$expectedMonthlyProfit,2) * 100;
 
         // =====================================================================
         // 🔹 RETORNO FINAL PARA A VIEW
         // =====================================================================
-
         return view("admin.dashboard", compact(
             'totals',
             'startDate',
@@ -571,7 +633,17 @@ class AdminController extends Controller
             'sources',
             'accountsByAlias',
             'lastUpdate',
-            'expectedMonthlyProfit'
+            'expectedMonthlyProfit',
+            'podium',
+            'copiesPodium',
+            'editorsPodium',
+            'copaYear',
+            'copaMonths',
+            'copaPrize',
+            'editorPrize',
+            'copiePrize',
+            'aliasRanking',
+            'target',
         ));
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,9 +21,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Diretiva personalizada para valores em reais
+
+        Carbon::setLocale('pt_BR');
+
+        // Diretiva personalizada para valores
         Blade::directive('dollar', function ($amount) {
             return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
+        });
+        Blade::directive('real', function ($amount) {
+            return "<?php echo 'R$ ' . number_format($amount, 2, ',', '.'); ?>";
         });
     }
 }
