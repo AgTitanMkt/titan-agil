@@ -67,6 +67,11 @@
                             <i class="fas fa-edit nav-icon"></i> Editores
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.import.index') }}" class="nav-link">
+                            <i class="fas fa-file-excel nav-icon"></i> Importar CSV Criativos
+                        </a>
+                    </li>
                 </ul>
 
 
@@ -108,6 +113,22 @@
             </header>
 
             <main class="page-content">
+
+                @if (session('success'))
+                    <x-alert type="success" :message="session('success')" />
+                @endif
+
+                @if (session('error'))
+                    <x-alert type="error" :message="session('error')" />
+                @endif
+
+                @if (session('warning'))
+                    <x-alert type="warning" :message="session('warning')" />
+                @endif
+
+                @if (session('info'))
+                    <x-alert type="info" :message="session('info')" />
+                @endif
                 {{ $slot }}
             </main>
             @stack('scripts')
@@ -119,7 +140,9 @@
 
         <header class="header-bar">
             <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
+                <div id="burger-toggle" class="burger-btn">
+                    <i class="fa fa-bars"></i>
+                </div>
             </button>
 
             <div class="header-user">
@@ -161,6 +184,30 @@
                         }
                     });
                 }
+            });
+        </script>
+        {{-- script do burger --}}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const burger = document.getElementById("burger-toggle");
+                const sidebar = document.querySelector(".sidebar");
+                const mainContent = document.querySelector(".main-content-area");
+
+                burger.addEventListener("click", () => {
+                    sidebar.classList.toggle("sidebar-open");
+                    mainContent.classList.toggle("sidebar-open");
+                });
+
+                // Fechar clicando fora da sidebar (mobile)
+                document.addEventListener("click", (e) => {
+                    const clickedInsideSidebar = sidebar.contains(e.target);
+                    const clickedBurger = burger.contains(e.target);
+
+                    if (!clickedInsideSidebar && !clickedBurger) {
+                        sidebar.classList.remove("sidebar-open");
+                        mainContent.classList.remove("sidebar-open");
+                    }
+                });
             });
         </script>
 
