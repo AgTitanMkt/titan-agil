@@ -82,19 +82,25 @@
                             </td>
                             {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                             <td class="action-cell">
-                                <button class="btn-subview-cta"
-                                    onclick="event.stopPropagation(); openEditorDetailsModal('{{ $copy->agent_name }}', '{{ $creativesJson }}');"
+                                <button class="btn-subview-cta" data-name="{{ $copy->agent_name }}"
+                                    data-email="{{ $copy->agent_email }}" data-json='@json($creativesByAgent[$copy->user_id] ?? [])'
+                                    data-clicks="@int_number($copy->total_clicks)"
+                                    data-copies="@int_number($copy->total_creatives)"
+                                    data-profit="@real($copy->total_profit)"
+                                    data-roi="{{ $copy->total_roi * 100 }}%"
+                                    onclick="event.stopPropagation(); handleCopyModalOpen(this);"
                                     title="Ver Sub Visualização 2.0">
                                     <i class="fas fa-box-open"></i>
                                 </button>
                             </td>
+
                         </tr>
 
                         {{-- detalhes DO COPY (Modal In-line) --}}
                         <tr id="details-{{ $key }}" class="details-row" style="display: none;">
                             <td colspan="8" class="details-cell">
                                 <div class="nested-table-container custom-scrollbar">
-                                    <h4 class="nested-table-title">Criativos de **{{ $copy->agent_name }}** TESTE</h4>
+                                    <h4 class="nested-table-title">Criativos de {{ $copy->agent_name }}</h4>
                                     <table class="nested-table">
                                         <thead>
                                             <tr>
@@ -389,29 +395,6 @@
             copyDailyChartType = 'line';
         }
 
-        // preencher cards de resumo principal (ADAPTADA)
-        function fillCopySummaryCards(data) {
-            // renomeado de totalCreatives para totalCopies
-            const totalCopies = data.length;
-            const totalClicks = data.reduce((sum, item) => sum + item.clicks, 0);
-            const totalProfit = data.reduce((sum, item) => sum + item.profit, 0);
-            const totalCost = data.reduce((sum, item) => sum + item.cost, 0);
-            const avgROI = totalCost > 0 ? totalProfit / totalCost : 0;
-
-            document.getElementById('cardTotalCopies').innerText = totalCopies;
-            document.getElementById('cardTotalClicksCopy').innerText = totalClicks.toLocaleString('pt-BR');
-
-            const profitElement = document.getElementById('cardTotalProfitCopy');
-            profitElement.innerText = formatCurrency(totalProfit);
-            profitElement.classList.toggle('positive-value', totalProfit >= 0);
-            profitElement.classList.toggle('negative-value', totalProfit < 0);
-
-            const roiElement = document.getElementById('cardAverageROICopy');
-            roiElement.innerText = formatRoi(avgROI);
-            roiElement.classList.toggle('positive-value', avgROI >= 0);
-            roiElement.classList.toggle('negative-value', avgROI < 0);
-        }
-
         // desenhar grafico diario ADAPTADA para copy
         function drawCopyDailyChart(data, chartType = 'line') {
 
@@ -529,7 +512,7 @@
             drawCopyDailyChart(currentCopyData, copyDailyChartType);
             alert(
                 "Gráfico de Performance Diária atualizado (redesenhado com dados existentes, pois precisa atualizar a logica.)."
-                );
+            );
         }
 
         // AGRUPA DADOS POR NICHO IGUAL
@@ -827,33 +810,33 @@
 
 
         // ABRIR MODAL DE DETALHES DO COPY, ARRUMADA
-        async function openEditorDetailsModal(copyName, creativesJson) {
+        function openEditorDetailsModal(copyName, clicks, copies, profit, roi, copyEmail, creativesJson) {
+
             document.getElementById("copyDetailsModal").style.display = "flex";
-
-
-
             document.getElementById("copyNameTitle").innerText = copyName;
-            // BUSCAR O ROLE/EMAIL, TA APEANS COM NOME
 
+            document.getElementById("copyRoleEmail").innerHTML =
+                `Função: Copywriter | Email: <b>${copyEmail}</b>`;
+            document.getElementById('cardTotalClicksCopy').innerHTML = clicks
+            document.getElementById('cardTotalProfitCopy').innerHTML = profit
+            document.getElementById('cardTotalCopies').innerHTML = copies
+            document.getElementById('cardAverageROICopy').innerHTML = roi
             try {
                 currentCopyData = JSON.parse(creativesJson);
             } catch (e) {
-                console.error("Erro ao parsear dados dos criativos.", e);
+                console.error("Erro ao parsear JSON:", e);
                 currentCopyData = [];
             }
 
-            fillCopySummaryCards(currentCopyData);
-            // GRAFICO com o tipo padrao line (ADAPTADO PARA COPY)
             drawCopyDailyChart(currentCopyData, copyDailyChartType);
 
-            // processa e preenche dados por nicho
             const nicheData = groupDataByNiche(currentCopyData);
             fillNicheTableCopy(nicheData);
 
-            // garante que a tab de tabela de nicho esteja ativa
             switchNicheViewCopy('table');
-
         }
+
+
 
         // FUNCOES DO MODAL DE GRAFICO DO CRIATIVO (creativeChartModalCopy) 
 
@@ -869,7 +852,7 @@
         // BUSCA DADOS POR GRAFICO, AJUSTADA
         async function fetchChartDataCopy(creativeCode) {
             document.getElementById("chartCreativeTitleCopy").innerText =
-                `Carregando dados para ${creativeCode}...`;
+                `${creativeCode}`;
 
             try {
                 const response = await fetch(`/admin/creative-history?creative=${creativeCode}`);
@@ -901,6 +884,7 @@
             const labels = data.map(item => item.date);
             const profitData = data.map(item => item.profit);
             const costData = data.map(item => item.cost);
+            const roiData = data.map(item => item.roi);
 
             const ctx = document.getElementById("creativeChartCopy").getContext("2d");
 
@@ -913,11 +897,11 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                            label: "Lucro",
+                            label: "Lucro (R$)",
                             data: profitData,
                             borderColor: chartType === 'line' ? COLOR_SUCCESS_VERDE : 'transparent',
-                            backgroundColor: chartType === 'line' ? `rgba(74,222,128,0.15)` :
-                                COLOR_SUCCESS_VERDE,
+                            backgroundColor: chartType === 'line' ?
+                                "rgba(74,222,128,0.15)" : COLOR_SUCCESS_VERDE,
                             fill: chartType === 'line',
                             tension: chartType === 'line' ? 0.35 : 0,
                             borderWidth: 2,
@@ -925,16 +909,26 @@
                             yAxisID: 'y'
                         },
                         {
-                            label: "Custo",
+                            label: "Custo (R$)",
                             data: costData,
                             borderColor: chartType === 'line' ? COLOR_DANGER_VERMELHO : 'transparent',
-                            backgroundColor: chartType === 'line' ? `rgba(248,113,113,0.15)` :
-                                COLOR_DANGER_VERMELHO,
+                            backgroundColor: chartType === 'line' ?
+                                "rgba(248,113,113,0.15)" : COLOR_DANGER_VERMELHO,
                             fill: chartType === 'line',
                             tension: chartType === 'line' ? 0.35 : 0,
                             borderWidth: 2,
                             pointRadius: chartType === 'line' ? 4 : 0,
-                            yAxisID: 'y'
+                            yAxisID: 'y' // MESMO EIXO
+                        },
+                        {
+                            label: "ROI (%)",
+                            data: roiData,
+                            borderColor: "#3B82F6",
+                            backgroundColor: "transparent",
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            tension: 0.35,
+                            yAxisID: 'roi'
                         }
                     ],
                 },
@@ -965,14 +959,11 @@
                             padding: 12,
                             callbacks: {
                                 label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
+                                    let label = context.dataset.label + ': ';
+                                    if (context.dataset.yAxisID === 'roi') {
+                                        return label + (context.raw * 100).toFixed(2) + '%';
                                     }
-                                    if (context.parsed.y !== null) {
-                                        label += formatCurrency(context.parsed.y);
-                                    }
-                                    return label;
+                                    return label + formatCurrency(context.raw);
                                 }
                             }
                         }
@@ -988,32 +979,52 @@
                                 color: "rgba(255,255,255,0.08)"
                             }
                         },
+
+                        // 📌 ESCALA ÚNICA PARA CUSTO E LUCRO
                         y: {
+                            type: 'linear',
                             position: 'left',
                             ticks: {
                                 color: "#aaa",
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
+                                callback: value => formatCurrency(value)
                             },
                             grid: {
                                 color: "rgba(255,255,255,0.08)"
                             },
                             title: {
                                 display: true,
-                                text: 'Valor (R$)',
+                                text: 'Custo / Lucro (R$)',
                                 color: "#ccc",
                                 font: {
                                     size: 14,
                                     weight: '600'
                                 }
                             }
+                        },
+
+                        // 📌 ROI (%) – eixo separado
+                        roi: {
+                            type: 'linear',
+                            position: 'right',
+                            min: -1,
+                            ticks: {
+                                color: "#4aa8ff",
+                                callback: value => (value * 100).toFixed(0) + '%'
+                            },
+                            grid: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'ROI (%)',
+                                color: "#4aa8ff"
+                            }
                         }
                     }
                 }
             });
 
-            // ATUALIZA O ESTADO DO BOTAO PARA ALTERNAR
+            // Atualiza ícone do botão de alternância
             const toggleBtn = document.getElementById('toggleChartTypeBtnCopy');
             if (chartType === 'line') {
                 toggleBtn.innerHTML = '<i class="fas fa-chart-bar"></i>';
@@ -1024,6 +1035,8 @@
             }
         }
 
+
+
         // ABRIR O GRAFICO DE CRIATIVOS, ARRUMADA
         async function openCreativeChart(creativeCode, creativeTitle) {
             currentCreativeCodeCopy = creativeCode;
@@ -1031,7 +1044,6 @@
             document.getElementById("chartCreativeTitleCopy").innerText = creativeTitle;
 
             const data = await fetchChartDataCopy(creativeCode);
-
             if (data.length > 0) {
                 drawCreativeChartCopy(data, currentChartTypeCopy);
             } else {
@@ -1039,10 +1051,9 @@
                     window.creativeChartCopy.destroy();
                 }
                 document.getElementById("chartCreativeTitleCopy").innerText =
-                    `${creativeTitle} (Sem dados no período)`;
+                    `${creativeTitle} (Sem dados no período ainda)`;
             }
         }
-
 
         // listeners de inicializacao
         window.onload = () => {
@@ -1073,6 +1084,19 @@
             // garante que o estado inicial da visualizacao de nicho esteja na tabela
             switchNicheViewCopy('table');
         };
+    </script>
+    <script>
+        function handleCopyModalOpen(button) {
+            const name = button.dataset.name;
+            const email = button.dataset.email;
+            const json = button.dataset.json;
+            const copies = button.dataset.copies
+            const clicks = button.dataset.clicks
+            const profit = button.dataset.profit
+            const roi = button.dataset.roi
+
+            openEditorDetailsModal(name, clicks, copies, profit, roi, email, json);
+        }
     </script>
 
     {{-- biblioteca Chart.js - GRAFICO JA FEITO - APENAS SO REPLIQUEI --}}

@@ -173,7 +173,7 @@ class AdminController extends Controller
                 DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS roi')
             )
             ->groupBy('user_id', 'creative_code')
-            ->orderBy('profit','desc')
+            ->orderBy('profit', 'desc')
             ->get()
             ->groupBy('user_id');
         // -----------------------------------------
@@ -228,6 +228,7 @@ class AdminController extends Controller
             ->whereBetween('rt.date', [$startDate, $endDate])
             ->select(
                 'u.id AS user_id',
+                'u.email AS agent_email',
                 'u.name AS agent_name',
                 't.code AS creative_code',
 
@@ -263,6 +264,7 @@ class AdminController extends Controller
             ->select(
                 'user_id',
                 'agent_name',
+                'agent_email',
                 DB::raw('COUNT(DISTINCT creative_code) AS total_creatives'),
 
                 DB::raw('SUM(rt_clicks) AS total_clicks'),
@@ -283,9 +285,7 @@ class AdminController extends Controller
             $baseQuery->whereIn('agent_name', (array) $request->copywriters);
         }
 
-        $copies = $baseQuery->orderByDesc('total_profit')->paginate(20);
-
-
+        $copies = $baseQuery->orderByDesc('total_profit')->get();
         // -----------------------------------------
         // 6️⃣ CRIATIVOS POR AGENTE (expansão)
         //

@@ -237,7 +237,7 @@ body {
 }
 
 .nested-table-container {
-    padding: 30px;
+    padding: 0 30px;
     border-radius: 18px;
     background: var(--color-modal-nested-bg);
     border: 2px solid var(--color-secondary); 
