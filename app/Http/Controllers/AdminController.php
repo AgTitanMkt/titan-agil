@@ -205,122 +205,34 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
+        $copywriters = $request->input('copywriters');
 
         // -----------------------------------------
         // 2️⃣ Lista completa de copywriters (multiselect)
         // -----------------------------------------
         $allCopywriters = $this->allCopywritersArray();
 
+        $copies = User::withRole(2)
+            ->get();
 
-        // -----------------------------------------
-        // 3️⃣ SUBQUERY BASE
-        //
-        // Esta subquery agora é perfeita:
-        //  ✔ Não perde registros
-        //  ✔ Agrupa por RT.ID + Date (evita merge indevido)
-        //  ✔ Mantém um registro por entrada do RedTrack
-        //  ✔ Soma exata (ex: 1379.46 + 1087.50)
-        // -----------------------------------------
-        $sub = DB::table('redtrack_reports AS rt')
-            ->join('tasks AS t', 't.normalized_code', '=', 'rt.normalized_rt_ad')
-            ->join('sub_tasks AS st', 'st.task_id', '=', 't.id')
-            ->join('user_tasks AS ut', 'ut.sub_task_id', '=', 'st.id')
-            ->join('users AS u', 'u.id', '=', 'ut.user_id')
-            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
-            ->where('ur.role_id', 2) // apenas copywriters
-            ->whereBetween('rt.date', [$startDate, $endDate])
-            ->select(
-                'u.id AS user_id',
-                'u.email AS agent_email',
-                'u.name AS agent_name',
-                't.code AS creative_code',
-
-                // cada linha real do RedTrack
-                'rt.id AS redtrack_id',
-                'rt.date AS redtrack_date',
-                'rt.clicks AS rt_clicks',
-                'rt.conversions AS rt_conversions',
-                'rt.cost AS rt_cost',
-                'rt.profit AS rt_profit',
-                DB::raw('(rt.cost + rt.profit) AS rt_revenue')
-            )
-            ->groupBy(
-                'u.id',
-                'u.name',
-                't.code',
-                'rt.id',
-                'rt.date',
-                'rt.clicks',
-                'rt.conversions',
-                'rt.cost',
-                'rt.profit'
-            );
-
-
-        // -----------------------------------------
-        // 4️⃣ CONSOLIDAÇÃO POR COPYWRITER
-        //
-        // Agora SOMA tudo corretamente
-        // -----------------------------------------
-        $baseQuery = DB::query()
-            ->fromSub($sub, 'c')
-            ->select(
-                'user_id',
-                'agent_name',
-                'agent_email',
-                DB::raw('COUNT(DISTINCT creative_code) AS total_creatives'),
-
-                DB::raw('SUM(rt_clicks) AS total_clicks'),
-                DB::raw('SUM(rt_conversions) AS total_conversions'),
-                DB::raw('SUM(rt_cost) AS total_cost'),
-                DB::raw('SUM(rt_profit) AS total_profit'),
-                DB::raw('SUM(rt_revenue) AS total_revenue'),
-
-                DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS total_roi')
-            )
-            ->groupBy('user_id', 'agent_name');
-
-
-        // -----------------------------------------
-        // 5️⃣ Filtro de copywriters (multiselect)
-        // -----------------------------------------
-        if ($request->filled('copywriters')) {
-            $baseQuery->whereIn('agent_name', (array) $request->copywriters);
+        foreach ($copies as $copy) {
+            $copy->applyFilter($startDate, $endDate, $copywriters);
+            $copy->metrics = $copy->tasks;
         }
 
-        $copies = $baseQuery->orderByDesc('total_profit')->get();
-        // -----------------------------------------
-        // 6️⃣ CRIATIVOS POR AGENTE (expansão)
-        //
-        // Aqui cada entrada é um registro REAL do RedTrack
-        // -----------------------------------------
-        $creativesByAgent = DB::query()
-            ->fromSub($sub, 'c')
-            ->select(
-                'user_id',
-                'creative_code',
-                DB::raw('SUM(rt_clicks) AS clicks'),
-                DB::raw('SUM(rt_conversions) AS conversions'),
-                DB::raw('SUM(rt_cost) AS cost'),
-                DB::raw('SUM(rt_profit) AS profit'),
-                DB::raw('SUM(rt_revenue) AS revenue'),
-                DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS roi')
-            )
-            ->groupBy('user_id', 'creative_code')
-            ->orderBy('profit', 'desc')
-            ->get()
-            ->groupBy('user_id');
+        $copies = $copies->filter(function ($copy) {
+            return count($copy->metrics);
+        });
 
+        $copies = $copies->sortByDesc(function ($copy) {
+            return $copy->metrics->sum('total_profit');
+        })->values();
 
-        // -----------------------------------------
-        // 7️⃣ Retorna tudo para a view
-        // -----------------------------------------
         return view('admin.copy', compact(
             'copies',
             'allCopywriters',
             'startDate',
             'endDate',
-            'creativesByAgent'
         ));
     }
 
@@ -575,7 +487,7 @@ class AdminController extends Controller
         ")
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('alias')
-            ->orderBy('total_profit','desc')
+            ->orderBy('total_profit', 'desc')
             ->get();
 
         // agrupamento das contas por alias
@@ -610,15 +522,15 @@ class AdminController extends Controller
         });
 
         $expectedMonthlyProfit = 1000000;
-        
+
         //calculando status da meta
-        $month = substr(Carbon::now()->locale('en')->monthName,0,3);
+        $month = substr(Carbon::now()->locale('en')->monthName, 0, 3);
         $total = 0;
-        $profitMonth = collect($chartData[$month])->map(function($data) use (&$total){
+        $profitMonth = collect($chartData[$month])->map(function ($data) use (&$total) {
             $total += $data['profit'];
             return $data['profit'];
         });
-        $target = number_format($total/$expectedMonthlyProfit,2) * 100;
+        $target = number_format($total / $expectedMonthlyProfit, 2) * 100;
 
         // =====================================================================
         // 🔹 RETORNO FINAL PARA A VIEW

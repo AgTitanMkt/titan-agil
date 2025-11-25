@@ -2,6 +2,9 @@
 
 namespace App\Services\Dashboard;
 
+use App\Models\Task;
+use App\Models\User;
+use App\Models\UserTask;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -156,4 +159,5 @@ class AgentsService
     {
         return $this->talentDetails(2, $userId);
     }
+
 }

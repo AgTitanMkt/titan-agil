@@ -472,8 +472,7 @@ body {
 /* SUB VISUALIZAÇÃO 2.0  */
 
 .subview-modal-content {
-    max-width: 1300px; /* aumentada a largura para mais espaco */
-    width: 95%;
+    max-width: 100%; /* aumentada a largura para mais espaco */
     padding: 30px;
     
 }

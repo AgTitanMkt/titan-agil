@@ -18,4 +18,9 @@ class Task extends Model
     {
         return $this->hasMany(SubTask::class);
     }
+
+    public function redtrackReports()
+    {
+        return $this->hasMany(RedtrackReport::class, 'normalized_rt_ad', 'normalized_code');
+    }
 }

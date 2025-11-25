@@ -57,37 +57,41 @@
                             // adaptando para usar as variaveis de Copywriter
 
                             // $creativesByAgent baseado no codigo padrao usado, mas precisa verificar no controller para as info vir corretas
-                            $creativesJson = json_encode($creativesByAgent[$copy->user_id] ?? collect());
-                            $key = 'copywriter-' . $copy->user_id;
+                            $creativesJson = json_encode($copy->metrics ?? collect());
+                            $key = 'copywriter-' . $copy->id;
                         @endphp
 
                         {{-- linha principal --}}
-                        <tr class="editor-row clickable-row" data-editor-id="{{ $copy->user_id }}"
+                        <tr class="editor-row clickable-row" data-editor-id="{{ $copy->id }}"
                             onclick="toggleDetails('{{ $key }}')">
                             <td class="editor-name-cell">
                                 <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
-                                <span class="fw-bold">{{ $copy->agent_name }}</span>
+                                <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
-                            <td>{{ $copy->total_creatives }}</td> {{-- adaptado para copy --}}
-                            <td>{{ $copy->total_clicks }}</td>
-                            <td>{{ $copy->total_conversions }}</td>
-                            <td>@dollar($copy->total_cost)</td>
+                            <td>{{ count($copy->metrics->where('status','ok')) }}/{{ count($copy->metrics) }}
+                            <td>@int_number($copy->metrics->sum('total_clicks'))</td>
+                            <td>@int_number($copy->metrics->sum('total_conversions'))</td>
+                            <td>@dollar($copy->metrics->sum('total_cost'))</td>
                             {{-- lucro com cor condicional --}}
-                            <td class="{{ $copy->total_profit >= 0 ? 'positive-value' : 'negative-value' }}">
-                                @dollar($copy->total_profit)
+                            <td class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
+                                @dollar($copy->metrics->sum('total_profit'))
                             </td>
                             {{-- ROI com cor condicional --}}
-                            <td class="{{ $copy->total_roi >= 0 ? 'positive-value' : 'negative-value' }}">
-                                {{ number_format($copy->total_roi * 100, 2, ',', '.') }}%
+                            <td class="{{ $copy->metrics->sum('total_profit') >=  0 ? 'positive-value' : 'negative-value' }}">
+                                {{ 
+                                    $copy->metrics->sum('total_cost') > 0 ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) 
+                                    * 100, 2, ',', '.') : 0
+                                }}%
                             </td>
                             {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                             <td class="action-cell">
-                                <button class="btn-subview-cta" data-name="{{ $copy->agent_name }}"
-                                    data-email="{{ $copy->agent_email }}" data-json='@json($creativesByAgent[$copy->user_id] ?? [])'
-                                    data-clicks="@int_number($copy->total_clicks)"
-                                    data-copies="@int_number($copy->total_creatives)"
-                                    data-profit="@real($copy->total_profit)"
-                                    data-roi="{{ $copy->total_roi * 100 }}%"
+                                <button class="btn-subview-cta" data-name="{{ $copy->name }}"
+                                    data-email="{{ $copy->email }}" data-json='@json($creativesByAgent[$copy->user_id] ?? [])'
+                                    data-clicks="@int_number($copy->metrics->sum('total_clicks'))"
+                                    data-copies="@int_number(count($copy->metrics->where('status','ok'))) / {{ count($copy->metrics) }}"
+                                    data-profit="@dollar($copy->metrics->sum('total_profit'))"
+                                    data-roi="{{ $copy->metrics->sum('total_cost') > 0 ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) 
+                                    * 100, 2, ',', '.') : 0 }}%"
                                     onclick="event.stopPropagation(); handleCopyModalOpen(this);"
                                     title="Ver Sub Visualização 2.0">
                                     <i class="fas fa-box-open"></i>
@@ -100,7 +104,7 @@
                         <tr id="details-{{ $key }}" class="details-row" style="display: none;">
                             <td colspan="8" class="details-cell">
                                 <div class="nested-table-container custom-scrollbar">
-                                    <h4 class="nested-table-title">Criativos de {{ $copy->agent_name }}</h4>
+                                    <h4 class="nested-table-title">Criativos de {{ $copy->name }}</h4>
                                     <table class="nested-table">
                                         <thead>
                                             <tr>
@@ -126,31 +130,31 @@
                                         </thead>
                                         <tbody>
                                             {{-- loop adaptado para os criativos do agente --}}
-                                            @foreach ($creativesByAgent[$copy->user_id] ?? collect() as $cr)
+                                            @foreach ($copy->metrics as $cr)
                                                 <tr class="creative-detail-row">
-                                                    <td class="creative-code">{{ $cr->creative_code }}</td>
-                                                    <td>{{ $cr->clicks }}</td>
-                                                    <td>{{ $cr->conversions }}</td>
-                                                    <td>@dollar($cr->cost)</td>
+                                                    <td class="creative-code">{{ $cr->code }}</td>
+                                                    <td>{{ $cr->total_clicks }}</td>
+                                                    <td>{{ $cr->total_conversions }}</td>
+                                                    <td>@dollar($cr->total_cost)</td>
                                                     <td
-                                                        class="{{ $cr->profit >= 0 ? 'positive-value' : 'negative-value' }}">
-                                                        @dollar($cr->profit)
+                                                        class="{{ $cr->total_profit >= 0 ? 'positive-value' : 'negative-value' }}">
+                                                        @dollar($cr->total_profit)
                                                     </td>
-                                                    <td>@dollar($cr->revenue)</td>
+                                                    <td>@dollar($cr->total_profit + $cr->total_cost)</td>
                                                     <td
                                                         class="{{ $cr->roi >= 0 ? 'positive-value' : 'negative-value' }}">
                                                         {{ number_format($cr->roi * 100, 2, ',', '.') }}%
                                                     </td>
                                                     <td class="text-center">
                                                         <button class="btn-chart"
-                                                            onclick="event.stopPropagation(); openCreativeChart('{{ $cr->creative_code }}', '{{ $cr->creative_code }}');"
+                                                            onclick="event.stopPropagation(); openCreativeChart('{{ $cr->code }}', '{{ $cr->code }}');"
                                                             title="Ver Gráfico">
                                                             <i class="fas fa-chart-line"></i>
                                                         </button>
                                                     </td>
                                                     <td class="text-center">
                                                         <button class="btn-subview-cta-item"
-                                                            onclick="event.stopPropagation(); openCreativeSubView('{{ $cr->creative_code }}');"
+                                                            onclick="event.stopPropagation(); openCreativeSubView('{{ $cr->code }}');"
                                                             title="Ver Sub Visualização do Criativo">
                                                             <i class="fas fa-box-open"></i>
                                                         </button>
