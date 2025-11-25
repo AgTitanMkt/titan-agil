@@ -10,6 +10,7 @@ class Task extends Model
     protected $fillable = [
         'created_by',
         'title',
+        'nicho',
         'code',
         'normalized_code'
     ];

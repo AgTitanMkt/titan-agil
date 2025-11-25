@@ -95,6 +95,7 @@ class User extends Authenticatable
             ->join('users AS u', 'u.id', '=', 'ut.user_id')
             ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
+            ->join('nichos AS n', 'n.id', '=', 't.nicho')
             ->leftJoin('redtrack_reports AS rr', 'rr.normalized_rt_ad', '=', 't.normalized_code')
             ->where('ut.user_id', $this->id)
 
@@ -102,13 +103,15 @@ class User extends Authenticatable
                 $q->whereBetween('rr.date', [$this->startDateFilter, $this->endDateFilter]);
             })
             ->when($this->copywriterFilter, function ($q) {
-                $q->whereIn('u.name',[$this->copywriterFilter]);
+                $q->whereIn('u.name', [$this->copywriterFilter]);
             })
             ->selectRaw("
             ut.sub_task_id,
             st.task_id,
             t.code,
             t.normalized_code,
+            n.id as nicho_id,
+            n.name as nicho_name,
             u.name AS agent_name,
             MAX(rr.date) AS redtrack_date,
             SUM(rr.clicks) AS total_clicks,
@@ -150,8 +153,14 @@ class User extends Authenticatable
     {
         $this->startDateFilter = $start;
         $this->endDateFilter = $end;
-        if($copywriterFilter){
-            $this->copywriterFilter = $copywriterFilter;
+
+        // sempre converte filtro para array (ou null)
+        if ($copywriterFilter) {
+            $this->copywriterFilter = is_array($copywriterFilter)
+                ? $copywriterFilter
+                : [$copywriterFilter];
+        } else {
+            $this->copywriterFilter = null; // IMPORTANTE!
         }
 
         return $this;

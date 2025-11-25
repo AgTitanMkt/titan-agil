@@ -160,4 +160,6 @@ class AgentsService
         return $this->talentDetails(2, $userId);
     }
 
+    
+
 }

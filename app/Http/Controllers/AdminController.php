@@ -77,9 +77,7 @@ class AdminController extends Controller
 
     public function editors(Request $request)
     {
-        // -----------------------------------------
-        // 1️⃣ Intervalo de datas
-        // -----------------------------------------
+        // 1️⃣ Datas
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
             : Carbon::now()->startOfMonth();
@@ -88,108 +86,36 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
-        // -----------------------------------------
-        // 2️⃣ Lista completa de Editores (role_id = 3)
-        // -----------------------------------------
-        $allEditors = DB::table('users AS u')
-            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
-            ->where('ur.role_id', 3) // EDITORES
-            ->pluck('u.name', 'u.name')
-            ->toArray();
+        // 2️⃣ filtro (nomes) vindo do request
+        $editorFilter = $request->input('editors'); // pode ser array ou null
 
-        // -----------------------------------------
-        // 3️⃣ Subquery sem perda de registros
-        // -----------------------------------------
-        $sub = DB::table('redtrack_reports AS rt')
-            ->join('tasks AS t', 't.normalized_code', '=', 'rt.normalized_rt_ad')
-            ->join('sub_tasks AS st', 'st.task_id', '=', 't.id')
-            ->join('user_tasks AS ut', 'ut.sub_task_id', '=', 'st.id')
-            ->join('users AS u', 'u.id', '=', 'ut.user_id')
-            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
-            ->where('ur.role_id', 3) // EDITORES
-            ->whereBetween('rt.date', [$startDate, $endDate])
-            ->select(
-                'u.id AS user_id',
-                'u.name AS editor_name',
-                't.code AS creative_code',
+        // 3️⃣ lista de editores
+        $allEditors = $this->allEditorsArray();
 
-                'rt.id AS redtrack_id',
-                'rt.date AS redtrack_date',
-                'rt.clicks AS rt_clicks',
-                'rt.conversions AS rt_conversions',
-                'rt.cost AS rt_cost',
-                'rt.profit AS rt_profit',
-                DB::raw('(rt.cost + rt.profit) AS rt_revenue')
-            )
-            ->groupBy(
-                'u.id',
-                'u.name',
-                't.code',
-                'rt.id',
-                'rt.date',
-                'rt.clicks',
-                'rt.conversions',
-                'rt.cost',
-                'rt.profit'
-            );
+        // 4️⃣ busca dos usuários com role=editor
+        $editors = User::withRole(3)->get();
 
-        // -----------------------------------------
-        // 4️⃣ Consolidação por editor
-        // -----------------------------------------
-        $baseQuery = DB::query()
-            ->fromSub($sub, 'c')
-            ->select(
-                'user_id',
-                'editor_name',
-                DB::raw('COUNT(DISTINCT creative_code) AS total_creatives'),
-                DB::raw('SUM(rt_clicks) AS total_clicks'),
-                DB::raw('SUM(rt_conversions) AS total_conversions'),
-                DB::raw('SUM(rt_cost) AS total_cost'),
-                DB::raw('SUM(rt_profit) AS total_profit'),
-                DB::raw('SUM(rt_revenue) AS total_revenue'),
-                DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS total_roi')
-            )
-            ->groupBy('user_id', 'editor_name');
-
-        // -----------------------------------------
-        // 5️⃣ Filtro multiselect de editores
-        // -----------------------------------------
-        if ($request->filled('editors')) {
-            $baseQuery->whereIn('editor_name', (array) $request->editors);
+        // 5️⃣ aplica filtros corretamente
+        foreach ($editors as $editor) {
+            $editor->applyFilter($startDate, $endDate, $editorFilter);
+            $editor->metrics = $editor->tasks;
         }
 
-        $editors = $baseQuery->orderByDesc('total_profit')->paginate(20);
+        // 6️⃣ remove quem não tem métricas
+        $editors = $editors->filter(fn($e) => count($e->metrics));
 
-        // -----------------------------------------
-        // 6️⃣ Criativos por editor (para expansão)
-        // -----------------------------------------
-        $creativesByEditor = DB::query()
-            ->fromSub($sub, 'c')
-            ->select(
-                'user_id',
-                'creative_code',
-                DB::raw('SUM(rt_clicks) AS clicks'),
-                DB::raw('SUM(rt_conversions) AS conversions'),
-                DB::raw('SUM(rt_cost) AS cost'),
-                DB::raw('SUM(rt_profit) AS profit'),
-                DB::raw('SUM(rt_revenue) AS revenue'),
-                DB::raw('ROUND(SUM(rt_profit) / NULLIF(SUM(rt_cost), 0), 4) AS roi')
-            )
-            ->groupBy('user_id', 'creative_code')
-            ->orderBy('profit', 'desc')
-            ->get()
-            ->groupBy('user_id');
-        // -----------------------------------------
-        // 7️⃣ Retorno
-        // -----------------------------------------
+        // 7️⃣ ordena pelo lucro
+        $editors = $editors->sortByDesc(fn($e) => $e->metrics->sum('total_profit'))->values();
+
+        // 8️⃣ retorna view
         return view('admin.editors', compact(
             'editors',
             'allEditors',
             'startDate',
             'endDate',
-            'creativesByEditor'
         ));
     }
+
 
 
     public function copywriters(Request $request)
@@ -223,7 +149,6 @@ class AdminController extends Controller
         $copies = $copies->filter(function ($copy) {
             return count($copy->metrics);
         });
-
         $copies = $copies->sortByDesc(function ($copy) {
             return $copy->metrics->sum('total_profit');
         })->values();
@@ -242,6 +167,15 @@ class AdminController extends Controller
         return DB::table('users AS u')
             ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
             ->where('ur.role_id', 2) // COPYWRITER
+            ->orderBy('u.name')
+            ->pluck('u.name')
+            ->toArray();
+    }
+    public function allEditorsArray()
+    {
+        return DB::table('users AS u')
+            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
+            ->where('ur.role_id', 3) // Editor
             ->orderBy('u.name')
             ->pluck('u.name')
             ->toArray();

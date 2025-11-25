@@ -68,30 +68,33 @@
                                 <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
                                 <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
-                            <td>{{ count($copy->metrics->where('status','ok')) }}/{{ count($copy->metrics) }}
+                            <td>{{ count($copy->metrics->where('status', 'ok')) }}/{{ count($copy->metrics) }}
                             <td>@int_number($copy->metrics->sum('total_clicks'))</td>
                             <td>@int_number($copy->metrics->sum('total_conversions'))</td>
                             <td>@dollar($copy->metrics->sum('total_cost'))</td>
                             {{-- lucro com cor condicional --}}
-                            <td class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
+                            <td
+                                class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
                                 @dollar($copy->metrics->sum('total_profit'))
                             </td>
                             {{-- ROI com cor condicional --}}
-                            <td class="{{ $copy->metrics->sum('total_profit') >=  0 ? 'positive-value' : 'negative-value' }}">
-                                {{ 
-                                    $copy->metrics->sum('total_cost') > 0 ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) 
-                                    * 100, 2, ',', '.') : 0
-                                }}%
+                            <td
+                                class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
+                                {{ $copy->metrics->sum('total_cost') > 0
+                                    ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) * 100, 2, ',', '.')
+                                    : 0 }}%
                             </td>
                             {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                             <td class="action-cell">
                                 <button class="btn-subview-cta" data-name="{{ $copy->name }}"
-                                    data-email="{{ $copy->email }}" data-json='@json($creativesByAgent[$copy->user_id] ?? [])'
+                                    data-email="{{ $copy->email }}" 
+                                    data-json='@json($copy->metrics ?? [])'
                                     data-clicks="@int_number($copy->metrics->sum('total_clicks'))"
-                                    data-copies="@int_number(count($copy->metrics->where('status','ok'))) / {{ count($copy->metrics) }}"
+                                    data-copies="@int_number(count($copy->metrics->where('status', 'ok'))) / {{ count($copy->metrics) }}"
                                     data-profit="@dollar($copy->metrics->sum('total_profit'))"
-                                    data-roi="{{ $copy->metrics->sum('total_cost') > 0 ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) 
-                                    * 100, 2, ',', '.') : 0 }}%"
+                                    data-roi="{{ $copy->metrics->sum('total_cost') > 0
+                                        ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) * 100, 2, ',', '.')
+                                        : 0 }}%"
                                     onclick="event.stopPropagation(); handleCopyModalOpen(this);"
                                     title="Ver Sub Visualização 2.0">
                                     <i class="fas fa-box-open"></i>
@@ -164,7 +167,8 @@
                                         </tbody>
                                     </table>
                                     @if (($creativesByAgent[$copy->user_id] ?? collect())->isEmpty())
-                                        <p class="no-data-message">Nenhum criativo encontrado para este copywriter neste
+                                        <p class="no-data-message">Nenhum criativo encontrado para este copywriter
+                                            neste
                                             período.</p>
                                     @endif
                                 </div>
@@ -323,9 +327,9 @@
 
         // Funções de formatação IGUAL
         function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
+            return new Intl.NumberFormat('en-En', {
                 style: 'currency',
-                currency: 'BRL',
+                currency: 'USD',
                 minimumFractionDigits: 2,
             }).format(value);
         }
@@ -407,11 +411,13 @@
             }
 
             const ctx = document.getElementById("copyDailyChart").getContext("2d");
-
+            
             // labels e dados (utilizei Creative Code, pois nao temos dados diarios simulados, ainda)
-            const labels = data.map(item => item.creative_code.substring(0, 10) + '...');
-            const profitData = data.map(item => item.profit);
-            const costData = data.map(item => item.cost);
+            console.log(data);
+            
+            const labels = data.map(item => item.code.substring(0, 10) + '...');
+            const profitData = data.map(item => item.total_profit);
+            const costData = data.map(item => item.total_cost);
 
             copyDetailsChart = new Chart(ctx, {
                 type: chartType,
@@ -522,14 +528,14 @@
         // AGRUPA DADOS POR NICHO IGUAL
         function groupDataByNiche(data) {
             const nicheMap = {};
-
+            
             data.forEach(item => {
-                const niche = item.niche || 'Não Especificado ainda';
+                const niche = item.nicho_name ?? 'Não definido';
 
                 if (!nicheMap[niche]) {
                     nicheMap[niche] = {
                         niche_name: niche,
-                        total_copies: 0, // adaptado de total_creatives
+                        total_copies: 0,
                         clicks: 0,
                         conversions: 0,
                         cost: 0,
@@ -538,21 +544,22 @@
                     };
                 }
 
-                nicheMap[niche].total_copies += 1; // adaptado copy
-                nicheMap[niche].clicks += item.clicks || 0;
-                nicheMap[niche].conversions += item.conversions || 0;
-                nicheMap[niche].cost += item.cost || 0;
-                nicheMap[niche].profit += item.profit || 0;
+                nicheMap[niche].total_copies += 1;
+                nicheMap[niche].clicks += Number(item.total_clicks) || 0;
+                nicheMap[niche].conversions += Number(item.total_conversions) || 0;
+                nicheMap[niche].cost += Number(item.total_cost) || 0;
+                nicheMap[niche].profit += Number(item.total_profit) || 0;
             });
 
-            // calcular ROI apos a soma
+            // calcular ROI final de cada nicho
             Object.keys(nicheMap).forEach(key => {
-                const nicheData = nicheMap[key];
-                nicheData.roi = nicheData.cost > 0 ? nicheData.profit / nicheData.cost : 0;
+                const n = nicheMap[key];
+                n.roi = n.cost > 0 ? n.profit / n.cost : 0;
             });
 
             return Object.values(nicheMap);
         }
+
 
         // PREENCHER A TABELA DE NICHO 
         function fillNicheTableCopy(nicheData) {
@@ -560,7 +567,7 @@
             const noDataMessage = document.getElementById('nicheNoDataMessageCopy');
             tableBody.innerHTML = '';
 
-            if (nicheData.length === 0) {
+            if (!nicheData.length) {
                 noDataMessage.style.display = 'block';
                 return;
             }
@@ -568,27 +575,28 @@
             noDataMessage.style.display = 'none';
 
             nicheData.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = 'niche-detail-row';
-
                 const profitClass = item.profit >= 0 ? 'positive-value' : 'negative-value';
                 const roiClass = item.roi >= 0 ? 'positive-value' : 'negative-value';
 
+                const row = document.createElement('tr');
+                row.className = 'niche-detail-row';
+
                 row.innerHTML = `
-                <td class="niche-name">${item.niche_name}</td>
-                <td>${item.total_copies}</td>
-                <td>${item.clicks.toLocaleString('pt-BR')}</td>
-                <td>${item.conversions.toLocaleString('pt-BR')}</td>
-                <td>${formatCurrency(item.cost)}</td>
-                <td class="${profitClass}">${formatCurrency(item.profit)}</td>
-                <td class="${roiClass}">${formatRoi(item.roi)}</td>
-            `;
+            <td class="niche-name">${item.niche_name}</td>
+            <td>${item.total_copies}</td>
+            <td>${item.clicks.toLocaleString('pt-BR')}</td>
+            <td>${item.conversions.toLocaleString('pt-BR')}</td>
+            <td>${formatCurrency(item.cost)}</td>
+            <td class="${profitClass}">${formatCurrency(item.profit)}</td>
+            <td class="${roiClass}">${formatRoi(item.roi)}</td>
+        `;
+
                 tableBody.appendChild(row);
             });
 
-            // ORDENACAO DA NOVA TABELA
             addNicheTableSortingCopy();
         }
+
 
         // DESENHA GRAFICO DE NICHO PARA COPY, ARRUMADO
         function drawCopyNicheChart(nicheData) {
@@ -1100,6 +1108,7 @@
             const roi = button.dataset.roi
 
             openEditorDetailsModal(name, clicks, copies, profit, roi, email, json);
+
         }
     </script>
 
