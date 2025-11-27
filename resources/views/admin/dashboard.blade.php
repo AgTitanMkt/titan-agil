@@ -54,6 +54,7 @@
             backdrop-filter: blur(6px);
             transition: all 0.25s;
             align-items: center;
+            margin-bottom: 0.5rem;
         }
 
         .account-row:hover {
@@ -1879,6 +1880,9 @@
                 width: 100px;
             }
         }
+        .sub-view-font{
+            margin-left: 1rem; 
+        }
     </style>
 
     {{-- SCRIPT DO GRAFICO PERFOMANCE FINANCEIRO + TOP PLATAFORMAS DO MES --}}
@@ -2005,18 +2009,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($sources as $index => $source)
+                    @php
+                        // plataformas isoladas
+                        $soloPlatforms = ['facebook', 'google', 'tiktok'];
+
+                        // tudo que não for facebook/google/tiktok vai para native
+                        $nativeGroup = $sources->filter(fn($s) => !in_array(strtolower($s->alias), $soloPlatforms));
+
+                        // somente plataformas principais (fb/google/tiktok)
+                        $mainPlatforms = $sources->filter(fn($s) => in_array(strtolower($s->alias), $soloPlatforms));
+                    @endphp
+
+                    {{-- -------------------------- --}}
+                    {{-- 1) PLATAFORMAS PRINCIPAIS --}}
+                    {{-- -------------------------- --}}
+                    @foreach ($mainPlatforms as $source)
                         @php
                             $aliasKey = Str::slug($source->alias);
                             $accounts = $accountsByAlias[$source->alias] ?? collect();
                         @endphp
 
-                        {{-- Linha principal (alias) --}}
+                        {{-- Linha principal --}}
                         <tr class="campaign-row" onclick="toggleDetails('{{ $aliasKey }}')">
                             <td class="col-main-data">
                                 <div class="alias-cell">
                                     <span class="arrow-icon" id="arrow-{{ $aliasKey }}">▼</span>
-                                    <p class="item-name fw-bold">{{ $source->alias }}</p>
+                                    <p class="item-name fw-bold">{{ ucfirst($source->alias) }}</p>
                                 </div>
                             </td>
 
@@ -2032,20 +2050,16 @@
                             <td>{{ $source->total_clicks }}</td>
                         </tr>
 
-
-                        {{-- Linhas detalhadas (contas) --}}
+                        {{-- Contas da plataforma --}}
                         <tr id="details-{{ $aliasKey }}" class="details-row" style="display: none;">
                             <td colspan="7">
                                 <div class="accounts-expand">
                                     @foreach ($accounts as $acc)
                                         <div
-                                            class="account-row
-                                            @if ($acc->roi > 0) row-positive
-                                            @elseif ($acc->roi < 0)
-                                                row-negative
-                                            @else
-                                                row-neutral @endif
-                                        ">
+                                            class="account-row 
+                        @if ($acc->roi > 0) row-positive
+                        @elseif ($acc->roi < 0) row-negative
+                        @else row-neutral @endif">
                                             <div class="acc-col acc-main"><span>{{ $acc->source }}</span></div>
                                             <div class="acc-col">@dollar($acc->total_cost)</div>
                                             <div class="acc-col">@dollar($acc->total_cost + $acc->total_profit)</div>
@@ -2063,6 +2077,98 @@
                             </td>
                         </tr>
                     @endforeach
+
+
+                    {{-- -------------------------- --}}
+                    {{-- 2) AGRUPAMENTO NATIVE --}}
+                    {{-- -------------------------- --}}
+                    @php
+                        $nativeKey = 'native';
+                    @endphp
+
+                    <tr class="campaign-row" onclick="toggleDetails('{{ $nativeKey }}')">
+                        <td class="col-main-data">
+                            <div class="alias-cell">
+                                <span class="arrow-icon" id="arrow-{{ $nativeKey }}">▼</span>
+                                <p class="item-name fw-bold">Native</p>
+                            </div>
+                        </td>
+
+                        {{-- soma geral das nativas --}}
+                        <td>@dollar($nativeGroup->sum('total_cost'))</td>
+                        <td>@dollar($nativeGroup->sum('total_cost') + $nativeGroup->sum('total_profit'))</td>
+                        <td>@dollar($nativeGroup->sum('total_profit'))</td>
+
+                        @php
+                            $totalNativeCost = $nativeGroup->sum('total_cost');
+                            $totalNativeProfit = $nativeGroup->sum('total_profit');
+                            $nativeROI = $totalNativeCost > 0 ? $totalNativeProfit / $totalNativeCost : 0;
+                        @endphp
+
+                        <td class="col-roi-value {{ $nativeROI >= 0 ? 'positive' : 'negative' }}">
+                            {{ number_format($nativeROI * 100, 4, ',', '.') }}%
+                        </td>
+
+                        <td>{{ $nativeGroup->sum('total_conversions') }}</td>
+                        <td>{{ $nativeGroup->sum('total_clicks') }}</td>
+                    </tr>
+
+                    {{-- Subfonte dentro de Native --}}
+                    <tr id="details-{{ $nativeKey }}" class="details-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="accounts-expand">
+
+                                @foreach ($nativeGroup as $sub)
+                                    @php
+                                        $subKey = Str::slug('native-' . $sub->alias);
+                                        $accounts = $accountsByAlias[$sub->alias] ?? collect();
+                                    @endphp
+
+                                    {{-- subtítulo da subfonte --}}
+                                    <div class="account-row row-neutral"
+                                        onclick="toggleDetails('{{ $subKey }}')" style="cursor:pointer;">
+                                        <div class="acc-col acc-main"><span>{{ ucfirst($sub->alias) }}</span></div>
+                                        <div class="acc-col">@dollar($sub->total_cost)</div>
+                                        <div class="acc-col">@dollar($sub->total_cost + $sub->total_profit)</div>
+                                        <div class="acc-col">@dollar($sub->total_profit)</div>
+
+                                        <div class="acc-col {{ $sub->roi >= 0 ? 'positive' : 'negative' }}">
+                                            {{ number_format($sub->roi * 100, 2, ',', '.') }}%
+                                        </div>
+
+                                        <div class="acc-col">{{ $sub->total_conversions }}</div>
+                                        <div class="acc-col">{{ $sub->total_clicks }}</div>
+                                    </div>
+
+                                    {{-- contas da subfonte --}}
+                                    <div class="sub-view-font" id="details-{{ $subKey }}" style="display:none;">
+                                        @foreach ($accounts as $acc)
+                                            <div
+                                                class="account-row 
+                            @if ($acc->roi > 0) row-positive
+                            @elseif ($acc->roi < 0) row-negative
+                            @else row-neutral @endif">
+
+                                                <div class="acc-col acc-main"><span>{{ $acc->source }}</span></div>
+                                                <div class="acc-col">@dollar($acc->total_cost)</div>
+                                                <div class="acc-col">@dollar($acc->total_cost + $acc->total_profit)</div>
+                                                <div class="acc-col">@dollar($acc->total_profit)</div>
+
+                                                <div class="acc-col {{ $acc->roi >= 0 ? 'positive' : 'negative' }}">
+                                                    {{ number_format($acc->roi * 100, 2, ',', '.') }}%
+                                                </div>
+
+                                                <div class="acc-col">{{ $acc->total_conversions }}</div>
+                                                <div class="acc-col">{{ $acc->total_clicks }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+
+                            </div>
+                        </td>
+                    </tr>
+
                 </tbody>
             </table>
         </div>
