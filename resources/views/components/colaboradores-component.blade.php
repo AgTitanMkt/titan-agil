@@ -22,6 +22,7 @@
         'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES CTR (%) CPA//
+        'resources/css/css-colaboradores/colaboradores-metas.css', // CSS DOS COLABORADORES PARA VER AS METAS - ATUAL //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')
@@ -39,44 +40,10 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li class="nav-item active">
-                        <a href="{{ route('admin.dashboard') }}" class="nav-link">
-                            <i class="fas fa-chart-line nav-icon"></i> Dashboard
+                        <a href="{{ route('colaboradores.metas') }}" class="nav-link">
+                            <i class="fas fa-bullseye nav-icon"></i> Metas - Copa Profit
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.time') }}" class="nav-link">
-                            <i class="fas fa-users nav-icon"></i> Time
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.faturamento') }}" class="nav-link">
-                            <i class="fas fa-wallet nav-icon"></i> Faturamento
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-chart-bar nav-icon"></i> Métricas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-pen-fancy nav-icon"></i> CopyWriters
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.editors') }}" class="nav-link">
-                            <i class="fas fa-edit nav-icon"></i> Editores
-                        </a>
-                    </li>
-                     <li class="nav-item">
-                        <a href="{{ route('admin.gestores') }}" class="nav-link">
-                            <i class="fas fa-users-cog nav-icon"></i> Gestores
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.import.index') }}" class="nav-link">
-                            <i class="fas fa-file-excel nav-icon"></i> Importar CSV Criativos
-                        </a>
                     </li>
                 </ul>
 

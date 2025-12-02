@@ -1,0 +1,60 @@
+
+/*  CARDS ESPECIFICOS CTR E CPA QUE E NOVO   */
+
+
+/* CARD CTR MEDIO */
+.card-ctr {
+    background: rgba(102, 204, 255, 0.1); /* azul Claro */
+    border-left: 5px solid #66CCFF;
+}
+.card-ctr .card-icon {
+    color: #66CCFF;
+}
+
+/* CARD CPA MEDIO */
+.card-cpa {
+    background: rgba(255, 102, 153, 0.12); /* rosa */
+    border-left: 5px solid #FF6699;
+}
+.card-cpa .card-icon {
+    color: #FF6699;
+}
+
+
+/*    AJUSTES TIPOGRAFICOS - IGUAL DO COPY/EDITORS PARA MANTER O PADRAO        */
+
+
+.card-ctr .card-title,
+.card-cpa .card-title {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.card-ctr .card-value,
+.card-cpa .card-value {
+    color: var(--color-text-light);
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+
+/*   SE O VALOR MUDAR - MUDA A COR (POSITIVO/NEGATIVO) - IGUAL DO COPY/EDITOS PARA MANTER O PADRAO  */
+
+
+/* CTR POSITIVO */
+.card-ctr .positive-value {
+    color: #66CCFF !important;
+}
+
+/* CPA — positivo = valor alto (ruim), negativo/custo baixo e bom */
+.card-cpa .positive-value {
+    color: #FF6699 !important;
+}
+.card-cpa .negative-value {
+    color: var(--color-success) !important; /* verde = custo baixo */
+}
+
+ /* fim dos CTR (%)	CPA */
