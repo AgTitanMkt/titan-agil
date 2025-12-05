@@ -51,7 +51,8 @@ Route::middleware('auth')->group(function () {
     });
     Route::prefix('rh')->group(function(){
         Route::get('colaboradores',[RhController::class, 'colaboradores'])->name('rh.colaboradores');
-        Route::get('pessoas',[RhController::class, 'pessoas'])->name('rh.pessoas');
+        Route::get('status',[RhController::class, 'status'])->name('rh.status');
+        Route::get('calendario',[RhController::class, 'calendario'])->name('rh.calendario'); 
         Route::get('equipe',[RhController::class, 'equipe'])->name('rh.equipe');
         Route::get('financeiro',[RhController::class, 'financeiro'])->name('rh.financeiro');
         Route::get('operacoes',[RhController::class, 'operacoes'])->name('rh.operacoes');

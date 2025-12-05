@@ -23,6 +23,7 @@
         'resources/css/css-admin/admin-editors.css', 
         'resources/css/css-admin/admin-gestores.css', 
         'resources/css/css-rh/rh-colaboradores.css', // CSS DO RH COLABORADORES AQUI
+        'resources/css/css-rh/rh-pesquisa.css', // CSS DO RH PESQUISA AQUI
         'resources/js/app.js', 
     ])
     @stack('styles')
@@ -96,18 +97,64 @@
                         </a>
                     </li>
                     
-                    {{-- Dashboards --}}
-                    <li class="nav-item has-submenu">
-                        <a href="#" class="nav-link submenu-toggle" data-target="dashboards-menu">
-                            <i class="fas fa-chart-pie nav-icon"></i> Dashboards <i class="fas fa-chevron-down submenu-arrow"></i>
-                        </a>
-                        <ul id="dashboards-menu" class="submenu">
-                            <li class="nav-item-submenu"><a href="{{ route('rh.pessoas') }}" class="nav-link-submenu">Gestão de Pessoal</a></li>
-                            <li class="nav-item-submenu"><a href="{{ route('rh.equipe') }}" class="nav-link-submenu">Inteligência de Equipe (BI e RH)</a></li>
-                            <li class="nav-item-submenu"><a href="{{ route('rh.financeiro') }}" class="nav-link-submenu">Gestão Financeira (Visão RH)</a></li>
-                            <li class="nav-item-submenu"><a href="{{ route('rh.operacoes') }}" class="nav-link-submenu">Operações (Financeiro)</a></li>
-                        </ul>
-                    </li>
+                {{-- Dashboards --}}
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link submenu-toggle" data-target="dashboards-menu">
+                        <i class="fas fa-chart-pie nav-icon"></i> Dashboards 
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </a>
+
+                    <ul id="dashboards-menu" class="submenu">
+
+                        {{-- Gestão de Pessoal --}}
+                        <li class="nav-item has-submenu">
+                            <a href="#" class="nav-link submenu-toggle" data-target="gestao-pessoal-menu">
+                                Gestão de Pessoal <i class="fas fa-chevron-down submenu-arrow"></i>
+                            </a>
+
+                            <ul id="gestao-pessoal-menu" class="submenu">
+
+                                {{-- Visualização de Ativos e Desligados --}}
+                                <li class="nav-item-submenu">
+                                    <a href="{{ route('rh.status') }}" class="nav-link-submenu">
+                                    <i class="fas fa-user-check nav-icon"></i> Status
+                                    </a>
+                                </li>
+
+                                {{-- Calendário: Aniversários e Período de Experiência --}}
+                                <li class="nav-item-submenu">
+                                    <a href="{{ route('rh.calendario') }}" class="nav-link-submenu">
+                                    <i class="fas fa-calendar-alt nav-icon"></i>Calendário 
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                        {{-- Inteligência de Equipe --}}
+                        <li class="nav-item-submenu">
+                            <a href="{{ route('rh.equipe') }}" class="nav-link-submenu">
+                                Inteligência de Equipe (BI e RH)
+                            </a>
+                        </li>
+
+                        {{-- Gestão Financeira --}}
+                        <li class="nav-item-submenu">
+                            <a href="{{ route('rh.financeiro') }}" class="nav-link-submenu">
+                                Gestão Financeira (Visão RH)
+                            </a>
+                        </li>
+
+                        {{-- Operações --}}
+                        <li class="nav-item-submenu">
+                            <a href="{{ route('rh.operacoes') }}" class="nav-link-submenu">
+                                Operações (Financeiro)
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
 
                     {{-- Sistema de Gestão e Integrações  --}}
                     <li class="nav-item has-submenu">
