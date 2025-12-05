@@ -42,6 +42,24 @@ Route::middleware('auth')->group(function () {
             Route::post('store',[ImportCSVController::class,'store'])->name('admin.import.store');
         });
     });
+    Route::prefix('rh')->group(function(){
+        Route::get('colaboradores',[RhController::class, 'colaboradores'])->name('rh.colaboradores');
+        Route::get('status',[RhController::class, 'status'])->name('rh.status');
+        Route::get('calendario',[RhController::class, 'calendario'])->name('rh.calendario'); 
+        Route::get('equipe',[RhController::class, 'equipe'])->name('rh.equipe');
+        Route::get('financeiro',[RhController::class, 'financeiro'])->name('rh.financeiro');
+        Route::get('operacoes',[RhController::class, 'operacoes'])->name('rh.operacoes');
+        Route::get('carreira',[RhController::class, 'carreira'])->name('rh.carreira');
+        Route::get('comportamental',[RhController::class, 'comportamental'])->name('rh.comportamental');
+        Route::get('documentos',[RhController::class, 'documentos'])->name('rh.documentos');
+        Route::get('cadastro',[RhController::class, 'cadastro'])->name('rh.cadastro');
+        Route::get('performance',[RhController::class, 'performance'])->name('rh.performance');
+        Route::get('pesquisa',[RhController::class, 'pesquisa'])->name('rh.pesquisa');
+    });
+
+    Route::prefix('colaboradores')->group(function () {
+        Route::get('metas',[ColaboradoresController::class, 'metas'])->name('colaboradores.metas');
+    });
 });
 
 
