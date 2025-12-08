@@ -16,6 +16,7 @@ export default defineConfig({
                 'resources/css/css-admin/admin-time.css',
                 'resources/css/css-admin/admin-perfil.css',
                 'resources/css/css-admin/admin-multiselect.css',
+                'resources/css/css-admin/admin-gestores.css',
                 'resources/css/css-admin/admin-editors.css',
                 'resources/js/app.js',
             ],
