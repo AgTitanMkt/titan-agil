@@ -520,4 +520,10 @@ class AdminController extends Controller
             ->get();
         return response()->json($history);
     }
+
+    public function gestores(){
+        return view("admin.gestores");
+    }
+
+    
 }

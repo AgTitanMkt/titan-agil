@@ -177,7 +177,7 @@ class CopaProfitService
                 'squad'     => $row['squad'],
                 'name'      => $names[$row['squad']] ?? $row['squad'],
                 'profit'    => $row['profit'],
-                'roi'       =>$row['roi']
+                'roi'       => $row['roi']
             ];
         });
     }
@@ -261,5 +261,165 @@ class CopaProfitService
         }
 
         return substr($initials, 0, 3); // máximo 3 letras
+    }
+
+    public function getPlatformsMetrics()
+    {
+        $metrics = $this->getAliasMetrics();
+        return $metrics;
+    }
+
+    /**
+     * Retorna métricas por SOURCE (sem agrupar por alias)
+     * Ordenado pelo MAIOR total_profit
+     */
+    public function getPlatformsMetricsSources()
+    {
+        $metrics = RedtrackReport::selectRaw("
+            source,
+            LOWER(alias) as alias,
+            SUM(cost) as total_cost,
+            SUM(profit) as total_profit,
+            SUM(clicks) as total_clicks,
+            SUM(conversions) as total_conversions,
+            (SUM(profit)/NULLIF(SUM(cost),0)) as roi
+        ")
+            ->whereBetween('date', [$this->startDate, $this->endDate])
+            ->groupBy('source', 'alias')
+            ->orderBy('total_profit', 'desc')
+            ->get();
+        $result = [];
+
+        foreach ($metrics as $m) {
+
+            // ---------------------------
+            // 🚀 NORMALIZAÇÃO DO ALIAS
+            // ---------------------------
+
+            $alias = $m->alias;
+
+            // FACEBOOK
+            if ($alias === 'facebook') {
+                $alias = 'facebook';
+            }
+
+            // GOOGLE/YOUTUBE
+            elseif (str_contains($alias, 'google') || str_contains($alias, 'youtube')) {
+                $alias = 'google'; // seu front usa GO
+            }
+
+            // NATIVE (TODOS RESTANTES)
+            else {
+                $alias = 'native';
+            }
+
+            // ---------------------------
+            // Monta o resultado
+            // ---------------------------
+            $result[] = [
+                'source'            => $m->source,
+                'alias'             => $alias,
+                'total_cost'        => (float) $m->total_cost,
+                'total_profit'      => (float) $m->total_profit,
+                'total_clicks'      => (int)   $m->total_clicks,
+                'total_conversions' => (int)   $m->total_conversions,
+                'roi'               => $m->total_cost > 0
+                    ? $m->total_profit / $m->total_cost
+                    : 0,
+            ];
+        }
+
+        return $result;
+    }
+
+
+
+    /**
+     * lista as metricas por plataforma agrupando o native
+     */
+    public function getPlatformsMetricsGroup()
+    {
+        $metrics = $this->getPlatformsMetrics();
+
+        // Agora é array puro, não Collection
+        $grouped = [
+            'facebook' => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+            'google'  => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+            'native'   => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+        ];
+
+        foreach ($metrics as $metric) {
+            $alias = strtolower($metric->alias);
+
+            if ($alias === 'facebook') {
+                $group = 'facebook';
+            } elseif ($alias === 'google') {
+                $group = 'google';
+            } else {
+                $group = 'native';
+            }
+
+            // Soma valores normalmente (agora funciona)
+            $grouped[$group]['total_cost']        += (float) $metric->total_cost;
+            $grouped[$group]['total_profit']      += (float) $metric->total_profit;
+            $grouped[$group]['total_clicks']      += (int)   $metric->total_clicks;
+            $grouped[$group]['total_conversions'] += (int)   $metric->total_conversions;
+        }
+
+        // Calcula ROI individual
+        foreach ($grouped as $key => $row) {
+            if ($row['total_cost'] > 0) {
+                $grouped[$key]['roi'] = $row['total_profit'] / $row['total_cost'];
+            } else {
+                $grouped[$key]['roi'] = 0;
+            }
+
+            if ($key === 'facebook') {
+                $grouped[$key]['sku'] = "FB";
+            } elseif ($key === 'google') {
+                $grouped[$key]['sku'] = "GO";
+            } elseif ($key == 'native') {
+                $grouped[$key]['sku'] = "NT";
+            }
+        }
+
+        $result = [];
+
+        foreach ($grouped as $platform => $data) {
+            $result[] = [
+                'platform'          => $platform,
+                'sku'               => $data['sku'],
+                'total_cost'        => $data['total_cost'],
+                'total_profit'      => $data['total_profit'],
+                'total_clicks'      => $data['total_clicks'],
+                'total_conversions' => $data['total_conversions'],
+                'roi'               => $data['roi'],
+            ];
+        }
+
+        // Ordena pelo maior profit
+        usort($result, function ($a, $b) {
+            return $b['total_profit'] <=> $a['total_profit'];
+        });
+
+        return $result;
     }
 }
