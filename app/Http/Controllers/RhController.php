@@ -10,8 +10,8 @@ class RhController extends Controller
         return view('rh.colaboradores');
     }
 
-    public function pessoas (){
-        return view('rh.pessoas');
+    public function status (){ // trocado de pessoas para "status"
+        return view('rh.status'); 
     }
 
     public function equipe (){
@@ -49,4 +49,9 @@ class RhController extends Controller
     public function pesquisa (){
         return view ('rh.pesquisa');
     }
+
+    public function calendario (){
+        return view ('rh.calendario'); // adicionado calendario a gestao pessoal - dashboard
+    }
+
 }
