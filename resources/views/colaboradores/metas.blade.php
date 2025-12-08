@@ -28,9 +28,9 @@
                     <div class="card-glow"></div>
                    <h3 class="goal-title" style="color: #fff;">META DIÁRIA</h3>
                     <div class="goal-values">
-                        <div class="val-row"><span class="plat fb">FB</span> <span class="money" id="val-diaria-fb">$30K</span></div>
-                        <div class="val-row"><span class="plat yt">YT</span> <span class="money" id="val-diaria-yt">$30K</span></div>
-                        <div class="val-row"><span class="plat nt">NT</span> <span class="money" id="val-diaria-nt">$15K</span></div>
+                        <div class="val-row"><span class="plat fb">FB</span> <span class="money" id="val-diaria-fb">@dollarK($metasDiaria['facebook'])</span></div>
+                        <div class="val-row"><span class="plat yt">YT</span> <span class="money" id="val-diaria-yt">@dollarK($metasDiaria['youtube'])</span></div>
+                        <div class="val-row"><span class="plat nt">NT</span> <span class="money" id="val-diaria-nt">@dollarK($metasDiaria['native'])</span></div>
                     </div>
                 </div>
 
@@ -39,9 +39,9 @@
                     <div class="card-glow"></div>
                     <h3 class="goal-title" style="color: #fff;">META SEMANAL</h3>
                     <div class="goal-values">
-                        <div class="val-row"><span class="plat fb">FB</span> <span class="money" id="val-semanal-fb">$210K</span></div>
-                        <div class="val-row"><span class="plat yt">YT</span> <span class="money" id="val-semanal-yt">$210K</span></div>
-                        <div class="val-row"><span class="plat nt">NT</span> <span class="money" id="val-semanal-nt">$105K</span></div>
+                        <div class="val-row"><span class="plat fb">FB</span> <span class="money" id="val-semanal-fb">@dollarK($metasSemanal['facebook'])</span></div>
+                        <div class="val-row"><span class="plat yt">YT</span> <span class="money" id="val-semanal-yt">@dollarK($metasSemanal['youtube'])</span></div>
+                        <div class="val-row"><span class="plat nt">NT</span> <span class="money" id="val-semanal-nt">@dollarK($metasSemanal['native'])</span></div>
                     </div>
                 </div>
 
@@ -49,7 +49,7 @@
                 <div class="goal-card animated-border purple-border" id="card-quinzenal">
                     <div class="card-glow"></div>
                     <h3 class="goal-title" style="color: #fff;">META QUINZENAL</h3>
-                    <div class="goal-total" id="val-quinzenal-total">$ 1.05M</div>
+                    <div class="goal-total" id="val-quinzenal-total">@dollarM($metaQuinzenal)</div>
                     <p class="goal-sub" style="color: #fff;">Consolidado Geral</p>
                 </div>
             </div>
@@ -78,22 +78,24 @@
             {{-- 2 lugar --}}
             <div class="podium-pillar place-2">
                 <div class="avatar-floating">
-                    <div class="avatar-circle" style="background: #1877F2;">FB</div>
+                    <div class="avatar-circle" style="background: var(--{{ $metrics[1]['platform'] }}-collor);">{{ $metrics[1]['sku'] }}</div>
                     <div class="rank-badge">2</div>
                 </div>
-                <div class="squad-name">FB Olimpus</div>
+                <div class="squad-name">{{ $metrics[1]['platform'] }}</div>
                 <div class="squad-gap">Faltam 15% para o topo</div>
-                <div class="pillar-block"></div>
+                <div style="background: var(--{{ $metrics[1]['platform'] }}-collor)" class="pillar-block">
+                    <p class="pillar-profit">@dollarK($metrics[1]['total_profit'])</p>
+                </div>
             </div>
 
             {{-- 1 lugar --}}
             <div class="podium-pillar place-1">
                 <div class="crown-floating"><i class="fas fa-crown"></i></div>
                 <div class="avatar-floating champion">
-                    <div class="avatar-circle" style="background: #FF0000;">YT</div>
+                    <div class="avatar-circle" style="background: var(--{{ $metrics[0]['platform'] }}-collor)">{{ $metrics[0]['sku'] }}</div>
                     <div class="rank-badge gold">1</div>
                 </div>
-                <div class="squad-name highlight">YT Shenlong</div>
+                <div class="squad-name highlight">{{ $metrics[0]['platform'] }}</div>
                 <div class="squad-status"><i class="fas fa-fire"></i> META BATIDA!</div>
                 
                 {{-- BOTAO CELEBRAR CENTRALIZADO AO CONTAINER BLOCO AZUL --}}
@@ -101,18 +103,22 @@
                     <button class="btn-confetti" onclick="fireConfetti()">🎉 CELEBRAR!</button>
                 </div>
 
-                <div class="pillar-block champion-block"></div>
+                <div style="background: var(--{{ $metrics[0]['platform'] }}-collor)" class="pillar-block champion-block">
+                    <p class="pillar-profit">@dollarK($metrics[0]['total_profit'])</p>
+                </div>
             </div>
 
             {{-- 3 lugar --}}
             <div class="podium-pillar place-3">
                 <div class="avatar-floating">
-                    <div class="avatar-circle" style="background: #28a745;">NT</div> 
+                    <div class="avatar-circle" style="background: var(--{{ $metrics[2]['platform'] }}-collor)">{{ $metrics[2]['sku'] }}</div> 
                     <div class="rank-badge">3</div>
                 </div>
-                <div class="squad-name">Native Eagle</div>
+                <div class="squad-name">{{ $metrics[2]['platform'] }}</div>
                 <div class="squad-gap">Faltam 32% para o topo</div>
-                <div class="pillar-block"></div>
+                <div style="background: var(--{{ $metrics[2]['platform'] }}-collor)" class="pillar-block">
+                    <p class="pillar-profit">@dollarK($metrics[2]['total_profit'])</p>
+                </div>
             </div>
 
         </div>

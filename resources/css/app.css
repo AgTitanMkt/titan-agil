@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root{
+    --facebook-collor: #1877F2;
+    --youtube-collor: #FF0000;
+    --native-collor: #28a745;
+}

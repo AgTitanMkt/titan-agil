@@ -34,5 +34,18 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('dollar', function ($amount) {
             return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
         });
+
+        Blade::directive('dollar', function ($amount) {
+            return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
+        });
+
+        Blade::directive('dollarK', function ($amount) {
+            return "<?php echo '$' . number_format($amount/1000, 0, '.', ',') . 'K'; ?>";
+        });
+
+        Blade::directive('dollarM', function ($amount) {
+            return "<?php echo '$' . number_format($amount/1000000, 2, '.', ',') . 'M'; ?>";
+        });
+
     }
 }

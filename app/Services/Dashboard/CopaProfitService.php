@@ -177,7 +177,7 @@ class CopaProfitService
                 'squad'     => $row['squad'],
                 'name'      => $names[$row['squad']] ?? $row['squad'],
                 'profit'    => $row['profit'],
-                'roi'       =>$row['roi']
+                'roi'       => $row['roi']
             ];
         });
     }
@@ -261,5 +261,97 @@ class CopaProfitService
         }
 
         return substr($initials, 0, 3); // máximo 3 letras
+    }
+
+    public function getPlatformsMetrics()
+    {
+        $metrics = $this->getAliasMetrics();
+        return $metrics;
+    }
+
+    public function getPlatformsMetricsGroup()
+    {
+        $metrics = $this->getPlatformsMetrics();
+
+        // Agora é array puro, não Collection
+        $grouped = [
+            'facebook' => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+            'youtube'  => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+            'native'   => [
+                'total_cost'        => 0,
+                'total_profit'      => 0,
+                'total_clicks'      => 0,
+                'total_conversions' => 0,
+                'roi'               => 0,
+            ],
+        ];
+
+        foreach ($metrics as $metric) {
+            $alias = strtolower($metric->alias);
+
+            if ($alias === 'facebook') {
+                $group = 'facebook';
+            } elseif ($alias === 'youtube') {
+                $group = 'youtube';
+            } else {
+                $group = 'native';
+            }
+
+            // Soma valores normalmente (agora funciona)
+            $grouped[$group]['total_cost']        += (float) $metric->total_cost;
+            $grouped[$group]['total_profit']      += (float) $metric->total_profit;
+            $grouped[$group]['total_clicks']      += (int)   $metric->total_clicks;
+            $grouped[$group]['total_conversions'] += (int)   $metric->total_conversions;
+        }
+
+        // Calcula ROI individual
+        foreach ($grouped as $key => $row) {
+            if ($row['total_cost'] > 0) {
+                $grouped[$key]['roi'] = $row['total_profit'] / $row['total_cost'];
+            } else {
+                $grouped[$key]['roi'] = 0;
+            }
+
+            if($key === 'facebook'){
+                $grouped[$key]['sku'] = "FB";
+            }elseif($key === 'youtube'){
+                $grouped[$key]['sku'] = "YT";
+            }elseif($key == 'native'){
+                $grouped[$key]['sku'] = "NT";
+            }
+        }
+
+        $result = [];
+
+        foreach ($grouped as $platform => $data) {
+            $result[] = [
+                'platform'          => $platform,
+                'sku'               =>$data['sku'],
+                'total_cost'        => $data['total_cost'],
+                'total_profit'      => $data['total_profit'],
+                'total_clicks'      => $data['total_clicks'],
+                'total_conversions' => $data['total_conversions'],
+                'roi'               => $data['roi'],
+            ];
+        }
+
+        // Ordena pelo maior profit
+        usort($result, function ($a, $b) {
+            return $b['total_profit'] <=> $a['total_profit'];
+        });
+
+        return $result;
     }
 }

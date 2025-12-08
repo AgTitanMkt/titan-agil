@@ -840,29 +840,33 @@ body {
     text-shadow: 0 0 10px rgba(40, 167, 69, 0.5); 
 }
 
+.pillar-profit{
+    opacity: 0.5;
+}
 .pillar-block { 
     width: 100%; 
-    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%); 
     border-top: 1px solid rgba(255,255,255,0.3); 
     border-radius: 10px 10px 0 0; 
     backdrop-filter: blur(10px); 
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    font-size: 25pt;
+    font-weight: 700;
 }
 
 .place-2 .pillar-block { height: 150px; 
-    background: linear-gradient(180deg, #0f172a 0%, #020617 100%); 
     border-top-color: #aaa; 
 }
 
 .place-1 .pillar-block { 
     height: 220px; 
-    background: var(--podium-blue); 
     border-top-color: var(--neon-gold); 
     box-shadow: 0 0 50px rgba(15, 83, 255, 0.4); 
 }
 
 .place-3 .pillar-block { 
     height: 100px; 
-    background: linear-gradient(180deg, #0f172a 0%, #020617 100%); 
     border-top-color: #cd7f32; 
 }
 
