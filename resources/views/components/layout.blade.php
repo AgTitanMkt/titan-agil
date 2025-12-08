@@ -53,22 +53,32 @@
                             <i class="fas fa-wallet nav-icon"></i> Faturamento
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('colaboradores.metas') }}" class="nav-link">
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
                             <i class="fas fa-chart-bar nav-icon"></i> Métricas
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
                         </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('colaboradores.metas') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-bullseye nav-icon"></i> Metas
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.copywriters') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> CopyWriters
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.editors') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-edit nav-icon"></i> Editores
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+
                     <li class="nav-item">
-                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
-                            <i class="fas fa-pen-fancy nav-icon"></i> CopyWriters
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.editors') }}" class="nav-link">
-                            <i class="fas fa-edit nav-icon"></i> Editores
-                        </a>
-                    </li>
-                     <li class="nav-item">
                         <a href="{{ route('admin.gestores') }}" class="nav-link">
                             <i class="fas fa-users-cog nav-icon"></i> Gestores
                         </a>
@@ -219,6 +229,19 @@
 
     </div>
     @stack('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.submenu-toggle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault(); // evita navegação imediata
+
+                    const item = btn.parentElement;
+                    item.classList.toggle('open');
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

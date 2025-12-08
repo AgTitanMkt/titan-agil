@@ -54,7 +54,7 @@ html {
     /* DEFINE FLEX PARA POSICIONAR HEADER/NAV/FOOTER */
     display: flex;
     flex-direction: column;
-    
+
     height: 100vh;
     position: fixed;
     top: 0;
@@ -74,7 +74,7 @@ html {
     margin-bottom: 20px;
     border-bottom: 1px solid var(--border-subtle);
     /* garante que o header nao seja afetado pelo scroll */
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .sidebar-logo {
@@ -94,12 +94,12 @@ html {
 /* navegacao dos navs - O ELEMENTO DE SCROLL */
 .sidebar-nav {
     /* OCUPA TODO O ESPAÇO */
-    flex-grow: 1; 
+    flex-grow: 1;
     /* ADICIONA SCROLL VERTICAL */
-    overflow-y: auto; 
+    overflow-y: auto;
     padding: 0 10px;
     /* padding horizontal  */
-    padding-right: 5px; 
+    padding-right: 5px;
 }
 
 /* SCROLL  */
@@ -109,9 +109,9 @@ html {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background-color: var(--hover-active-color); 
+    background-color: var(--hover-active-color);
     border-radius: 10px;
-    border: 2px solid var(--primary-dark); 
+    border: 2px solid var(--primary-dark);
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
@@ -187,7 +187,7 @@ html {
     padding: 40px 40px 40px;
     text-align: center;
     /* garante que o footer nao seja afetado pelo scroll */
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .footer-image {
@@ -359,6 +359,40 @@ html {
 .main-content-area.sidebar-open {
     transition: margin-left .3s ease;
 }
+
+/* Submenu container */
+.has-submenu .submenu {
+    display: none;
+    padding-left: 40px;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.has-submenu.open .submenu {
+    display: flex;
+}
+
+/* seta do submenu */
+.submenu-arrow {
+    margin-left: auto;
+    transition: transform .2s ease;
+}
+
+.has-submenu.open .submenu-arrow {
+    transform: rotate(180deg);
+}
+
+/* estilo dos itens */
+.submenu-link {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.submenu-link:hover {
+    opacity: 1;
+}
+
+
 
 /* Em telas menores — não empurra o conteúdo */
 @media (max-width: 1024px) {

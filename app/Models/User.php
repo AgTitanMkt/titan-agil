@@ -105,32 +105,83 @@ class User extends Authenticatable
             ->when($this->copywriterFilter, function ($q) {
                 $q->whereIn('u.name', [$this->copywriterFilter]);
             })
+
             ->selectRaw("
-            ut.sub_task_id,
-            st.task_id,
-            t.code,
-            t.normalized_code,
-            n.id as nicho_id,
-            n.name as nicho_name,
-            u.name AS agent_name,
-            MAX(rr.date) AS redtrack_date,
-            SUM(rr.clicks) AS total_clicks,
-            SUM(rr.conversions) AS total_conversions,
-            SUM(rr.cost) AS total_cost,
-            SUM(rr.profit) AS total_profit,
-            CASE 
-                WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
-                ELSE 0
-            END AS roi,
-            CASE 
-                WHEN MAX(rr.id) IS NULL THEN 'inconsistente'
-                ELSE 'ok'
-            END AS status,
-            CASE 
-                WHEN MAX(rr.id) IS NULL THEN 'não encontrado no redtrack'
-                ELSE NULL
-            END AS info
-        ")
+    ut.sub_task_id,
+    st.task_id,
+    t.code,
+    t.normalized_code,
+    n.id as nicho_id,
+    n.name as nicho_name,
+    u.name AS agent_name,
+
+    -- Datas
+    MAX(rr.date) AS redtrack_date,
+    MIN(rr.date) AS first_redtrack_date,
+
+    -- Métricas padrão
+    SUM(rr.clicks) AS total_clicks,
+    SUM(rr.conversions) AS total_conversions,
+    SUM(rr.cost) AS total_cost,
+    SUM(rr.profit) AS total_profit,
+
+    -- ROI
+    CASE 
+        WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
+        ELSE 0
+    END AS roi,
+
+    -- Status
+    CASE WHEN MAX(rr.id) IS NULL THEN 'inconsistente' ELSE 'ok' END AS status,
+    CASE WHEN MAX(rr.id) IS NULL THEN 'não encontrado no redtrack' ELSE NULL END AS info,
+
+    /* ============================================================
+       🔥 NOVAS MÉTRICAS — SEM CTR / SEM HOOK RATE
+       ============================================================ */
+
+    COUNT(*) AS produzido,
+
+    COUNT(DISTINCT rr.id) AS testados,
+
+    SUM(
+        CASE 
+            WHEN rr.conversions >= 20 
+             AND (rr.profit / NULLIF(rr.cost,0)) >= 1.8
+        THEN 1 ELSE 0 END
+    ) AS validados,
+
+    CASE 
+        WHEN COUNT(DISTINCT rr.id) > 0
+        THEN ROUND(
+            (
+                SUM(
+                    CASE 
+                        WHEN rr.conversions >= 20 
+                         AND (rr.profit / NULLIF(rr.cost,0)) >= 1.8
+                        THEN 1 ELSE 0 END
+                ) 
+            / COUNT(DISTINCT rr.id)
+            ) * 100
+        ,2)
+        ELSE 0
+    END AS win_rate,
+
+    -- CPC
+    CASE 
+        WHEN SUM(rr.clicks) > 0 
+        THEN SUM(rr.cost) / SUM(rr.clicks)
+        ELSE NULL
+    END AS cpc,
+
+    -- EPC
+    CASE 
+        WHEN SUM(rr.clicks) > 0
+        THEN (SUM(rr.profit) + SUM(rr.cost)) / SUM(rr.clicks)
+        ELSE NULL
+    END AS epc
+")
+
+
             ->groupBy(
                 'ut.sub_task_id',
                 'st.task_id',
