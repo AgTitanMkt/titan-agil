@@ -54,7 +54,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.copywriters') }}" class="nav-link">
+                        <a href="{{ route('colaboradores.metas') }}" class="nav-link">
                             <i class="fas fa-chart-bar nav-icon"></i> Métricas
                         </a>
                     </li>
