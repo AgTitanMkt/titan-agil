@@ -18,6 +18,7 @@ export default defineConfig({
                 'resources/css/css-admin/admin-multiselect.css',
                 'resources/css/css-admin/admin-gestores.css',
                 'resources/css/css-admin/admin-editors.css',
+                'resources/css/css-colaboradores/colaboradores-metas.css',
                 'resources/js/app.js',
             ],
             refresh: true,
