@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ImportCSVController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SpyController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,12 @@ Route::middleware('auth')->group(function () {
         Route::get('time', [AdminController::class, 'time'])->name('admin.time');
         Route::get('faturamento', [AdminController::class, 'faturamento'])->name('admin.faturamento');
         Route::get('creative-history', [AdminController::class, 'creativeHistory'])->name('admin.creative.history');
+
+        
+        Route::prefix('spy')->group(function () {
+            Route::get('mrm', [SpyController::class, 'mrm'])->name('spy.mrm');
+        });
+
         Route::prefix('import')->group(function(){
             Route::get('index',[ImportCSVController::class,'index'])->name('admin.import.index');
             Route::post('preview',[ImportCSVController::class,'preview'])->name('admin.import.preview');
