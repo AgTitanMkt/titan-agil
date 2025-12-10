@@ -153,6 +153,8 @@ class AdminController extends Controller
             return $copy->metrics->sum('total_profit');
         })->values();
 
+        // dd($copies->first()->metrics);
+
         return view('admin.copy', compact(
             'copies',
             'allCopywriters',

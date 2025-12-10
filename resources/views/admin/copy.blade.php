@@ -39,7 +39,9 @@
                 <thead>
                     <tr>
                         <th class="header-editor">Copywriter</th>
-                        <th class="header-metrics">Copies</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Produzido</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Validados</th>
+                        <th class="header-metrics">Win Rate</th>
                         <th class="header-metrics">Cliques</th>
                         <th class="header-metrics">Conversões</th>
                         <th class="header-metrics">Custo</th>
@@ -67,7 +69,9 @@
                                 <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
                                 <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
-                            <td>{{ count($copy->metrics->where('status', 'ok')) }}/{{ count($copy->metrics) }}
+                            <td>{{ count($copy->metrics) }}
+                            <td>@int_number($copy->metrics->sum('validados'))</td>
+                            <td>@percent($copy->metrics->sum('validados') / count($copy->metrics))</td>
                             <td>@int_number($copy->metrics->sum('total_clicks'))</td>
                             <td>@int_number($copy->metrics->sum('total_conversions'))</td>
                             <td>@dollar($copy->metrics->sum('total_cost'))</td>
@@ -86,8 +90,7 @@
                             {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                             <td class="action-cell">
                                 <button class="btn-subview-cta" data-name="{{ $copy->name }}"
-                                    data-email="{{ $copy->email }}" 
-                                    data-json='@json($copy->metrics ?? [])'
+                                    data-email="{{ $copy->email }}" data-json='@json($copy->metrics ?? [])'
                                     data-clicks="@int_number($copy->metrics->sum('total_clicks'))"
                                     data-copies="@int_number(count($copy->metrics->where('status', 'ok'))) / {{ count($copy->metrics) }}"
                                     data-profit="@dollar($copy->metrics->sum('total_profit'))"
@@ -112,9 +115,15 @@
                                             <tr>
                                                 <th data-sort-key="creative_code" class="sortable">Criativo <i
                                                         class="fas fa-sort"></i></th>
+                                                <th data-sort-key="date" class="sortable">Data <i
+                                                        class="fas fa-sort"></i></th>
                                                 <th data-sort-key="clicks" class="sortable">Cliques <i
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="conversions" class="sortable">Conversões <i
+                                                        class="fas fa-sort"></i></th>
+                                                <th data-sort-key="conversions" class="sortable">CPC <i
+                                                        class="fas fa-sort"></i></th>
+                                                <th data-sort-key="conversions" class="sortable">EPC <i
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="cost" class="sortable">Custo <i
                                                         class="fas fa-sort"></i></th>
@@ -135,8 +144,23 @@
                                             @foreach ($copy->metrics as $cr)
                                                 <tr class="creative-detail-row">
                                                     <td class="creative-code">{{ $cr->code }}</td>
+                                                    <td>{{ $cr->first_redtrack_date }}</td>
                                                     <td>{{ $cr->total_clicks }}</td>
                                                     <td>{{ $cr->total_conversions }}</td>
+                                                    <td>
+                                                        @if ($cr->total_clicks > 0)
+                                                            @dollar($cr->total_cost / $cr->total_clicks)
+                                                        @else
+                                                            0
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($cr->total_clicks > 0)
+                                                            @dollar(($cr->total_cost+ $cr->total_profit) / $cr->total_clicks)
+                                                        @else
+                                                            0
+                                                        @endif
+                                                    </td>
                                                     <td>@dollar($cr->total_cost)</td>
                                                     <td
                                                         class="{{ $cr->total_profit >= 0 ? 'positive-value' : 'negative-value' }}">
@@ -284,7 +308,7 @@
                                 <tr>
                                     <th data-sort-key="niche_name" class="sortable details-sortable">Nicho <i
                                             class="fas fa-sort"></i></th>
-                                    <th data-sort-key="total_copies" class="sortable details-sortable">Copies <i
+                                    <th data-sort-key="total_copies" class="sortable details-sortable">Produzido <i
                                             class="fas fa-sort"></i></th>
                                     <th data-sort-key="clicks" class="sortable details-sortable">Cliques <i
                                             class="fas fa-sort"></i></th>
@@ -410,10 +434,10 @@
             }
 
             const ctx = document.getElementById("copyDailyChart").getContext("2d");
-            
+
             // labels e dados (utilizei Creative Code, pois nao temos dados diarios simulados, ainda)
             console.log(data);
-            
+
             const labels = data.map(item => item.code.substring(0, 10) + '...');
             const profitData = data.map(item => item.total_profit);
             const costData = data.map(item => item.total_cost);
@@ -527,7 +551,7 @@
         // AGRUPA DADOS POR NICHO IGUAL
         function groupDataByNiche(data) {
             const nicheMap = {};
-            
+
             data.forEach(item => {
                 const niche = item.nicho_name ?? 'Não definido';
 

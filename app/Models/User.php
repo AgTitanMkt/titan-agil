@@ -91,106 +91,112 @@ class User extends Authenticatable
 
     public function tasks()
     {
+        /** ------------------------------------------------------------
+         * SUBQUERY: primeira ocorrência global do criativo no RedTrack
+         * ------------------------------------------------------------ */
+        $firstDateSub = DB::table('redtrack_reports')
+            ->selectRaw('normalized_rt_ad, MIN(date) AS first_redtrack_date')
+            ->groupBy('normalized_rt_ad');
+
+        /** ------------------------------------------------------------
+         * QUERY PRINCIPAL
+         * ------------------------------------------------------------ */
         return DB::table('user_tasks AS ut')
             ->join('users AS u', 'u.id', '=', 'ut.user_id')
             ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
             ->leftJoin('redtrack_reports AS rr', 'rr.normalized_rt_ad', '=', 't.normalized_code')
+
+            ->leftJoinSub($firstDateSub, 'fr', function ($join) {
+                $join->on('fr.normalized_rt_ad', '=', 't.normalized_code');
+            })
+
             ->where('ut.user_id', $this->id)
 
             ->when($this->startDateFilter && $this->endDateFilter, function ($q) {
                 $q->whereBetween('rr.date', [$this->startDateFilter, $this->endDateFilter]);
             })
+
             ->when($this->copywriterFilter, function ($q) {
                 $q->whereIn('u.name', [$this->copywriterFilter]);
             })
 
             ->selectRaw("
-    ut.sub_task_id,
-    st.task_id,
-    t.code,
-    t.normalized_code,
-    n.id as nicho_id,
-    n.name as nicho_name,
-    u.name AS agent_name,
+            ut.sub_task_id,
+            st.task_id,
+            t.code,
+            t.normalized_code,
+            n.id as nicho_id,
+            n.name as nicho_name,
+            u.name AS agent_name,
 
-    -- Datas
-    MAX(rr.date) AS redtrack_date,
-    MIN(rr.date) AS first_redtrack_date,
+            MAX(rr.date) AS redtrack_date,
+            fr.first_redtrack_date,
 
-    -- Métricas padrão
-    SUM(rr.clicks) AS total_clicks,
-    SUM(rr.conversions) AS total_conversions,
-    SUM(rr.cost) AS total_cost,
-    SUM(rr.profit) AS total_profit,
+            SUM(rr.clicks) AS total_clicks,
+            SUM(rr.conversions) AS total_conversions,
+            SUM(rr.cost) AS total_cost,
+            SUM(rr.profit) AS total_profit,
 
-    -- ROI
-    CASE 
-        WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
-        ELSE 0
-    END AS roi,
+            CASE 
+                WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
+                ELSE 0
+            END AS roi,
 
-    -- Status
-    CASE WHEN MAX(rr.id) IS NULL THEN 'inconsistente' ELSE 'ok' END AS status,
-    CASE WHEN MAX(rr.id) IS NULL THEN 'não encontrado no redtrack' ELSE NULL END AS info,
+            CASE WHEN MAX(rr.id) IS NULL THEN 'inconsistente' ELSE 'ok' END AS status,
+            CASE WHEN MAX(rr.id) IS NULL THEN 'não encontrado no redtrack' ELSE NULL END AS info,
 
-    /* ============================================================
-       🔥 NOVAS MÉTRICAS — SEM CTR / SEM HOOK RATE
-       ============================================================ */
+            COUNT(*) AS produzido,
+            COUNT(DISTINCT rr.id) AS testados,
 
-    COUNT(*) AS produzido,
+            /* ============================================================
+               🔥 NOVA REGRA B — validação por CRIATIVO
+               ============================================================ */
+            CASE 
+                WHEN SUM(rr.conversions) >= 20
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
+                THEN 1 ELSE 0
+            END AS validados,
 
-    COUNT(DISTINCT rr.id) AS testados,
+            /* ============================================================
+               🔥 WIN RATE INDIVIDUAL (0% ou 100%)
+               ============================================================ */
+            CASE 
+                WHEN SUM(rr.conversions) >= 20
+                    AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
+                THEN 100 ELSE 0
+            END AS win_rate,
 
-    SUM(
-        CASE 
-            WHEN rr.conversions >= 20 
-             AND (rr.profit / NULLIF(rr.cost,0)) >= 1.8
-        THEN 1 ELSE 0 END
-    ) AS validados,
+            CASE 
+                WHEN SUM(rr.clicks) > 0 
+                THEN SUM(rr.cost) / SUM(rr.clicks)
+                ELSE NULL
+            END AS cpc,
 
-    CASE 
-        WHEN COUNT(DISTINCT rr.id) > 0
-        THEN ROUND(
-            (
-                SUM(
-                    CASE 
-                        WHEN rr.conversions >= 20 
-                         AND (rr.profit / NULLIF(rr.cost,0)) >= 1.8
-                        THEN 1 ELSE 0 END
-                ) 
-            / COUNT(DISTINCT rr.id)
-            ) * 100
-        ,2)
-        ELSE 0
-    END AS win_rate,
-
-    -- CPC
-    CASE 
-        WHEN SUM(rr.clicks) > 0 
-        THEN SUM(rr.cost) / SUM(rr.clicks)
-        ELSE NULL
-    END AS cpc,
-
-    -- EPC
-    CASE 
-        WHEN SUM(rr.clicks) > 0
-        THEN (SUM(rr.profit) + SUM(rr.cost)) / SUM(rr.clicks)
-        ELSE NULL
-    END AS epc
-")
-
+            CASE 
+                WHEN SUM(rr.clicks) > 0
+                THEN (SUM(rr.profit) + SUM(rr.cost)) / SUM(rr.clicks)
+                ELSE NULL
+            END AS epc
+        ")
 
             ->groupBy(
                 'ut.sub_task_id',
                 'st.task_id',
                 't.code',
                 't.normalized_code',
-                'u.name'
+                'u.name',
+                'fr.first_redtrack_date',
+                'n.id',
+                'n.name'
             )
+
             ->orderBy('total_profit', 'DESC');
     }
+
+
+
 
 
 
