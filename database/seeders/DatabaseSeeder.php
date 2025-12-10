@@ -13,6 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       $this->call(Nichos::class);
+        $this->call(Nichos::class);
+        $this->call(DepartmentsTableSeeder::class);
+        $this->call(PositionsTableSeeder::class);
+        $this->call(SquadsTableSeeder::class);
+        $this->call(PlatformsTableSeeder::class);
     }
 }
