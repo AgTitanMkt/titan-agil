@@ -2,8 +2,15 @@
 
 namespace App\Services\RedTrack;
 
+use App\Models\Nicho;
 use App\Models\RedtrackReport;
+use App\Models\SubTask;
+use App\Models\TagUsers;
+use App\Models\Task;
+use App\Models\UserTask;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -91,6 +98,9 @@ class RedtrackAPIService
                 }
                 foreach ($items as $item) {
                     try {
+
+                        $ad = explode('-', $item['rt_ad']);
+
                         RedtrackReport::updateOrCreate(
                             [
                                 'name'   => $item['rt_ad'],
@@ -100,6 +110,7 @@ class RedtrackAPIService
                             ],
                             [
                                 'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
+                                'ad_code' => $ad[0],
                                 'clicks'       => $item['clicks'] ?? 0,
                                 'conversions'  => $item['conversions'] ?? 0,
                                 'cost'         => $item['cost'] ?? 0,
@@ -111,16 +122,66 @@ class RedtrackAPIService
 
 
                         if (preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $item['rt_ad'])) {
-                            // Criativo válido
+
+                            // limpa: remove espaços e valores vazios
+                            $ad = array_map('trim', $ad);
+                            $ad = array_filter($ad);
+                            $ad = array_values($ad); // reorganiza índices
+
+                            // pega as 2 últimas posições (ajuste o número se quiser)
+                            $lastParts = array_slice($ad, -2);
+
+                            // busca os usuários
+                            $agents = TagUsers::whereIn('tag', $lastParts)->get()
+                                ->map(function ($agent) {
+                                    return $agent->user;
+                                });
+
+                            try {
+                                // Criando a task e subtask
+                                $task = Task::updateOrCreate(
+                                    ['code' => $ad[0]],
+                                    [
+                                        'created_by' => 81,
+                                        'title' => 'nova tarefa',
+                                        'nicho' => Nicho::where('sigla', strtoupper(substr($ad[0], 0, 2)))->first()->id,
+                                        'normalized_code' => strtolower(str_replace(' ', '', $ad[0]))
+                                    ]
+                                );
+                                $SubTask = SubTask::updateOrCreate(
+                                    ['task_id' => $task->id],
+                                    [
+                                        'description' => 'Subtask Inicial',
+                                        'status' => 'Pendente',
+                                        'hook' => 'H1',
+                                        'due_date' => Carbon::now()
+                                    ]
+                                );
+
+                                foreach ($agents as $agent) {
+                                    UserTask::updateOrCreate(
+                                        [
+                                            'user_id' => $agent->id,
+                                            'sub_task_id' => $SubTask->id
+                                        ],
+
+                                    );
+                                }
+                            } catch (Exception $e) {
+                                Log::error("Erro ao salvar task Criativo. " . $e->getMessage(), $ad);
+                            }
                         }
 
                         $totalItems++;
                     } catch (Exception $innerEx) {
                         Log::warning('RedTrack → Falha ao salvar item', [
                             'page' => $page,
-                            'item' => $item['rt_campaign'],
+                            // 'item' => json_encode($item),
+                            'file' => $innerEx->getFile(),
+                            'line' => $innerEx->getLine(),
                             'erro' => $innerEx->getMessage(),
                         ]);
+                        throw new Exception($innerEx->getMessage());
                     }
                 }
 
