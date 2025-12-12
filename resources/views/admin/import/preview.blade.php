@@ -1,12 +1,22 @@
 <x-layout>
 
+    <style>
+        select {
+            background-color: unset;
+            border: solid 1px;
+            border-radius: 7px;
+        }
+    </style>
+
     <h2 class="dashboard-page-title">Prévia da Importação</h2>
     <p class="dashboard-page-subtitle">
         Ajuste os agentes antes de confirmar o salvamento.
     </p>
 
-    <form action="{{ route('admin.import.store') }}" method="POST">
+    <form action="{{ route('admin.import.store') }}" method="POST" onsubmit="preparePayload()">
         @csrf
+
+        <input type="hidden" name="payload" id="payload">
 
         <div class="glass-card" style="padding: 25px; margin-top: 20px;">
             <h3 class="section-title">Registros encontrados</h3>
@@ -24,51 +34,34 @@
                     <tbody>
                         @foreach ($preview as $i => $row)
                             <tr>
-                                {{-- Código --}}
-                                <td>
-                                    {{ $row['code'] }}
-                                    <input type="hidden" name="items[{{$i}}][code]" value="{{ $row['code'] }}">
-                                </td>
+                                <td>{{ $row['code'] }}</td>
 
-                                {{-- COPY --}}
+                                {{-- SELECT COPY --}}
                                 <td>
-                                    <select name="items[{{$i}}][copy_id]"
-                                        class="form-control"
-                                        style="background: rgba(255,255,255,0.06);
-                                               color:white;
-                                               border: 1px solid rgba(255,255,255,0.15);
-                                               padding: 8px;
-                                               border-radius: 6px;">
+                                    <select onchange="updateCopy({{ $i }}, this.value)" class="form-control">
                                         <option value="">Selecione o Copy</option>
 
-                                        @foreach($copywriters as $copy)
+                                        @foreach ($copywriters as $copy)
                                             <option value="{{ $copy->id }}"
                                                 {{ $row['copy_id'] == $copy->id ? 'selected' : '' }}>
                                                 {{ $copy->name }}
                                             </option>
                                         @endforeach
-
                                     </select>
                                 </td>
 
-                                {{-- EDITOR --}}
+                                {{-- SELECT EDITOR --}}
                                 <td>
-                                    <select name="items[{{$i}}][editor_id]"
-                                        class="form-control"
-                                        style="background: rgba(255,255,255,0.06);
-                                               color:white;
-                                               border: 1px solid rgba(255,255,255,0.15);
-                                               padding: 8px;
-                                               border-radius: 6px;">
+                                    <select onchange="updateEditor({{ $i }}, this.value)"
+                                        class="form-control">
                                         <option value="">Selecione o Editor</option>
 
-                                        @foreach($editors as $editor)
+                                        @foreach ($editors as $editor)
                                             <option value="{{ $editor->id }}"
                                                 {{ $row['editor_id'] == $editor->id ? 'selected' : '' }}>
                                                 {{ $editor->name }}
                                             </option>
                                         @endforeach
-
                                     </select>
                                 </td>
                             </tr>
@@ -81,8 +74,27 @@
                 <button class="btn-filter">Salvar Dados</button>
                 <a href="{{ route('admin.import.index') }}" class="btn-clear">Cancelar</a>
             </div>
+
         </div>
 
     </form>
+
+    {{-- SCRIPT DE SINCRONIZAÇÃO DO JSON --}}
+    <script>
+        // Clona o preview vindo do controller
+        let rows = @json($preview);
+
+        function updateCopy(index, value) {
+            rows[index].copy_id = value === "" ? null : parseInt(value);
+        }
+
+        function updateEditor(index, value) {
+            rows[index].editor_id = value === "" ? null : parseInt(value);
+        }
+
+        function preparePayload() {
+            document.getElementById('payload').value = JSON.stringify(rows);
+        }
+    </script>
 
 </x-layout>

@@ -105,9 +105,15 @@ class RedtrackAPIService
                                 'cost'         => $item['cost'] ?? 0,
                                 'profit'       => $item['profit'] ?? 0,
                                 'roi'          => $item['roi'] ?? 0,
-                                'date'         => $dateFrom 
+                                'date'         => $dateFrom
                             ]
                         );
+
+
+                        if (preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $item['rt_ad'])) {
+                            // Criativo válido
+                        }
+
                         $totalItems++;
                     } catch (Exception $innerEx) {
                         Log::warning('RedTrack → Falha ao salvar item', [

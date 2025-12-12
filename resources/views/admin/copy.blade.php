@@ -41,7 +41,7 @@
                         <th class="header-editor">Copywriter</th>
                         <th class="header-metrics">Produzido</th> {{-- adaptado para copy --}}
                         <th class="header-metrics">Validados</th>
-                        <th class="header-metrics">Win Rate</th>
+                        <th class="header-metrics">Win/Rate</th>
                         <th class="header-metrics">Cliques</th>
                         <th class="header-metrics">Conversões</th>
                         <th class="header-metrics">Custo</th>

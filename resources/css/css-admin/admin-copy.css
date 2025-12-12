@@ -1,14 +1,18 @@
 /* CORES */
 
 :root {
-    --bg-card-dark: rgba(255, 255, 255, 0.05); /* FUNDO CARD */
-    --bg-card-darker: rgba(0, 0, 0, 0.15); /* FUNDO INPUT/TABELA */
+    --bg-card-dark: rgba(255, 255, 255, 0.05);
+    /* FUNDO CARD */
+    --bg-card-darker: rgba(0, 0, 0, 0.15);
+    /* FUNDO INPUT/TABELA */
     --input-border: rgba(255, 255, 255, 0.2);
     --text-white: #FFFFFF;
     --text-light: #C0C0C0;
     --text-dark: #333333;
-    --profit-color: #4CAF50; /* manter se for usar em algum lugar */
-    --accent-blue: #007bff; /* COR PRINCIPAL DE DESTAQUE */
+    --profit-color: #4CAF50;
+    /* manter se for usar em algum lugar */
+    --accent-blue: #007bff;
+    /* COR PRINCIPAL DE DESTAQUE */
     --table-header-color: rgba(255, 255, 255, 0.7);
     --table-line-separator: rgba(255, 255, 255, 0.05);
 }
@@ -51,10 +55,10 @@
 .filters-grid {
     display: grid;
     /* 4 colunas em telas grandes */
-    grid-template-columns: repeat(4, 1fr); 
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     width: 100%;
-    min-width: 0; 
+    min-width: 0;
 }
 
 
@@ -66,8 +70,10 @@
 /* Z-INDEX AJUSTE PARA O CARD DE FILTROS */
 .production-filters-section {
     position: relative;
-    overflow: visible !important; /* permite que o dropdown saia do limite do card */
-    z-index: 30; /* sobrepoe o card de baixo */
+    overflow: visible !important;
+    /* permite que o dropdown saia do limite do card */
+    z-index: 30;
+    /* sobrepoe o card de baixo */
 }
 
 .filter-group label {
@@ -76,7 +82,7 @@
     color: var(--text-white);
     font-size: 0.9rem;
     font-weight: 500;
-    text-align: left; 
+    text-align: left;
 }
 
 /* SCROLL PERSONALIZADO PARA O COPY */
@@ -104,7 +110,7 @@
 /* Firefox ADICIONADO .production-filters-section .dropdown-list {
     * scrollbar-width: thin;
     *  scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.05);
-} */ 
+} */
 
 /* */
 
@@ -115,14 +121,14 @@
     width: 100%;
     cursor: pointer;
     outline: none;
-    height: 40px; 
-    
-    z-index: 10; 
+    height: 40px;
+
+    z-index: 10;
 }
 
 
 .custom-dropdown-filter.open {
-    
+
     z-index: 100;
 }
 
@@ -132,11 +138,11 @@
     color: var(--text-white);
     background-color: var(--bg-card-darker);
     border: 1px solid var(--input-border);
-    border-radius: 8px; 
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px; 
+    height: 40px;
     transition: border-color 0.2s;
 }
 
@@ -167,23 +173,23 @@
 
 .dropdown-list {
     position: absolute;
-    top: 100%; 
+    top: 100%;
     left: 0;
     right: 0;
-    
-    
-    z-index: 50; 
-    
-    background-color: rgba(0, 0, 0, 0.8); 
+
+
+    z-index: 50;
+
+    background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(8px);
     border: 1px solid var(--accent-blue);
     border-top: none;
     border-radius: 0 0 8px 8px;
-    
+
     /* rolagem para visualizar as opcoes */
-    max-height: 200px; 
-    overflow-y: auto; 
-    
+    max-height: 200px;
+    overflow-y: auto;
+
     opacity: 0;
     visibility: hidden;
     transform: translateY(-5px);
@@ -231,7 +237,7 @@
 }
 
 .dropdown-item input[type="checkbox"]:checked::after {
-    content: '\2713'; 
+    content: '\2713';
     display: block;
     position: absolute;
     top: 50%;
@@ -250,11 +256,12 @@
 /* AREA DO BOTAO  */
 .filter-submit-area {
     /* 4ª coluna */
-    grid-column: 4 / 5; 
+    grid-column: 4 / 5;
     display: flex;
-    justify-content: flex-end; /* alinha a direita */
-    align-items: flex-end;    
-    height: 100%;             
+    justify-content: flex-end;
+    /* alinha a direita */
+    align-items: flex-end;
+    height: 100%;
 }
 
 /* AREA DO BOTAO */
@@ -263,8 +270,8 @@
     /* SEGUNDA linha */
     grid-row: 2 / 3;
     display: flex;
-    justify-content: flex-end; 
-    align-items: flex-end; 
+    justify-content: flex-end;
+    align-items: flex-end;
     height: 100%;
 }
 
@@ -278,7 +285,7 @@
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s;
-    height: 40px; 
+    height: 40px;
 }
 
 .btn-filter:hover {
@@ -290,7 +297,7 @@
 
 
 .table-responsive {
-    overflow-x: auto; 
+    overflow-x: auto;
 }
 
 .creatives-table {
@@ -318,7 +325,7 @@
 
 .creatives-table tbody td {
     padding: 10px 15px;
-    height: 60px; 
+    height: 60px;
     vertical-align: top;
 }
 
@@ -339,32 +346,66 @@
 }
 
 
+.metrics-main-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-white);
+    font-size: 0.9rem;
+}
+
+.metrics-main-table thead th {
+    text-align: left;
+    padding: 10px 15px;
+    color: var(--table-header-color);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    border-bottom: 2px solid var(--input-border);
+}
+
+.metrics-main-table tbody tr {
+    border-bottom: 1px solid var(--table-line-separator);
+}
+
+.metrics-main-table tbody td {
+    padding: 10px 15px;
+    height: 60px;
+    vertical-align: middle;
+}
+
+.metrics-main-table tbody .editor-name-cell {
+    width: max-content;
+}
+
+
 /*   RESPONSIVIDADE           */
 
 /* DESKTOP/TELAS GRANDES Max 1200px */
 @media (max-width: 1200px) {
+
     /* 3 colunas para o grid geral */
-    .filters-grid, .filters-grid-production {
+    .filters-grid,
+    .filters-grid-production {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     /*  3 colunas */
     .filter-submit-area {
-        grid-column: 3 / 4; 
-        
-        grid-row: 2 / 3; 
+        grid-column: 3 / 4;
+
+        grid-row: 2 / 3;
         align-items: flex-end;
     }
-    
-    
+
+
     .filter-submit-area-production {
         grid-column: 3 / 4;
-        
-        grid-row: 3 / 4; 
+
+        grid-row: 3 / 4;
         align-items: flex-end;
     }
-    
-    
+
+
     .glass-card {
         padding: 25px 20px;
     }
@@ -372,65 +413,71 @@
 
 /* TABLETS/DESKTOPS Max 768px */
 @media (max-width: 768px) {
+
     /* tablets verticais/grandes celulares 2 colunas */
-    .filters-grid, .filters-grid-production {
+    .filters-grid,
+    .filters-grid-production {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     /*  2 colunas  */
     .filter-submit-area {
-        grid-column: 2 / 3; 
-        
-        grid-row: 3 / 4; 
+        grid-column: 2 / 3;
+
+        grid-row: 3 / 4;
         justify-content: flex-end;
         align-items: flex-end;
         margin-top: 0;
     }
-    
+
     .filter-submit-area-production {
-        grid-column: 2 / 3; 
-        
-        grid-row: 4 / 5; 
+        grid-column: 2 / 3;
+
+        grid-row: 4 / 5;
         justify-content: flex-end;
         align-items: flex-end;
         margin-top: 0;
     }
-    
+
     .glass-card {
         padding: 20px 15px;
         border-radius: 10px;
     }
-    
+
     .dashboard-page-title {
         font-size: 1.5rem;
     }
 
-    
+
     .table-responsive {
-        overflow-x: auto; 
+        overflow-x: auto;
     }
+
     .creatives-table {
-        
-        min-width: 700px; 
+
+        min-width: 700px;
     }
 }
 
 /* CELULARES Max 480px */
 @media (max-width: 480px) {
+
     /* 1 coluna */
-    .filters-grid, .filters-grid-production {
+    .filters-grid,
+    .filters-grid-production {
         grid-template-columns: 1fr;
     }
-    
+
     /*  1 coluna (centralizado) */
-    .filter-submit-area, .filter-submit-area-production {
-        grid-column: 1 / 2; 
-        grid-row: auto; 
-        justify-content: center; 
-        align-items: center; 
-        margin-top: 15px; 
+    .filter-submit-area,
+    .filter-submit-area-production {
+        grid-column: 1 / 2;
+        grid-row: auto;
+        justify-content: center;
+        align-items: center;
+        margin-top: 15px;
     }
-    
+
     .btn-filter {
         width: 100%;
         max-width: 250px;

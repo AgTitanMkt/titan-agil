@@ -140,7 +140,6 @@ class AdminController extends Controller
 
         $copies = User::withRole(2)
             ->get();
-
         foreach ($copies as $copy) {
             $copy->applyFilter($startDate, $endDate, $copywriters);
             $copy->metrics = $copy->tasks;
@@ -149,6 +148,7 @@ class AdminController extends Controller
         $copies = $copies->filter(function ($copy) {
             return count($copy->metrics);
         });
+        
         $copies = $copies->sortByDesc(function ($copy) {
             return $copy->metrics->sum('total_profit');
         })->values();

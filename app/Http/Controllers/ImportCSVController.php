@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubTask;
+use App\Models\TagUsers;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\UserTask;
@@ -52,16 +53,20 @@ class ImportCSVController extends Controller
 
         foreach ($rows as $r) {
 
+
             $line = array_combine($headers, $r);
-            $copy   = User::where('name', 'LIKE', '%' . $line['COPY RESPONSÁVEL'] . '%')->first();
-            $editor = User::where('name', 'LIKE', '%' . $line['EDITOR'] . '%')->first();
-            $preview[] = [
-                'code'        => trim($line['ID CRIATIVO']),
-                'copy_name'   => $line['COPY RESPONSÁVEL'],
-                'editor_name' => $line['EDITOR'],
-                'copy_id'     => $copy->id ?? null,
-                'editor_id'   => $editor->id ?? null,
-            ];
+            $copy = TagUsers::where('tag', explode(" ", $line['COPY RESPONSÁVEL'])[0])->first();
+            $editor = TagUsers::where('tag', explode(" ", $line['EDITOR'])[0])->first();
+            $copy   = $copy ? $copy->user : null;
+            $editor   = $editor ? $copy->user : null;
+            if (trim($line['ID CRIATIVO']) && ($line['COPY RESPONSÁVEL'] || $line['EDITOR']))
+                $preview[] = [
+                    'code'        => trim($line['ID CRIATIVO']),
+                    'copy_name'   => $line['COPY RESPONSÁVEL'],
+                    'editor_name' => $line['EDITOR'],
+                    'copy_id'     => $copy->id ?? null,
+                    'editor_id'   => $editor->id ?? null,
+                ];
         }
 
         return view('admin.import.preview', [
@@ -74,22 +79,45 @@ class ImportCSVController extends Controller
 
     public function store(Request $request)
     {
-        foreach ($request->items as $item) {
+        $items = json_decode($request->payload, true);
+
+        foreach ($items as $item) {
+
+            // Ignorar registros inválidos
+            if (empty($item['code']) || (empty($item['copy_id']) && empty($item['editor_id']))) {
+                continue;
+            }
+
+            /**
+             * 🔥 1. Extrair sigla (nichos)
+             */
+            $sigla = strtoupper(substr($item['code'], 0, 2));
+
+            $nicho = \App\Models\Nicho::where('sigla', $sigla)->first();
+
+            $nicho_id = $nicho->id ?? null;
+
+
+            /**
+             * 🔥 2. Criar/atualizar TASK com nicho preenchido
+             */
             $task = Task::updateOrCreate(
-                [
-                    'code' => $item['code'],
-                ],
+                ['code' => $item['code']],
                 [
                     'title' => 'criativo',
                     'normalized_code' => strtolower(str_replace(' ', '', $item['code'])),
-                    'created_by' => FacadesAuth::user()->id,
+                    'created_by' => FacadesAuth::id(),
+                    'nicho' => $nicho_id,
                 ]
             );
 
+            /**
+             * 🔥 3. Criar/atualizar SubTask com HOOK H1
+             */
             $sub = SubTask::updateOrCreate(
                 [
                     'task_id' => $task->id,
-                    'hook' => 1,
+                    'hook' => 'H1',
                 ],
                 [
                     'description' => 'Subtask inicial',
@@ -98,15 +126,22 @@ class ImportCSVController extends Controller
                 ]
             );
 
-            if ($item['copy_id']) {
+            /**
+             * 🔥 4. Copywriter
+             */
+            if (!empty($item['copy_id'])) {
                 UserTask::updateOrCreate([
-                    'user_id' => $item['copy_id'],
+                    'user_id'     => $item['copy_id'],
                     'sub_task_id' => $sub->id
                 ]);
             }
-            if ($item['editor_id']) {
+
+            /**
+             * 🔥 5. Editor
+             */
+            if (!empty($item['editor_id'])) {
                 UserTask::updateOrCreate([
-                    'user_id' => $item['editor_id'],
+                    'user_id'     => $item['editor_id'],
                     'sub_task_id' => $sub->id
                 ]);
             }

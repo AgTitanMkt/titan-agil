@@ -106,7 +106,10 @@ class User extends Authenticatable
             ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
-            ->leftJoin('redtrack_reports AS rr', 'rr.normalized_rt_ad', '=', 't.normalized_code')
+            ->leftJoin('redtrack_reports AS rr', function ($join) {
+                $join->on('rr.normalized_rt_ad', 'LIKE', DB::raw("CONCAT(t.normalized_code, '%')"));
+            })
+
 
             ->leftJoinSub($firstDateSub, 'fr', function ($join) {
                 $join->on('fr.normalized_rt_ad', '=', 't.normalized_code');
