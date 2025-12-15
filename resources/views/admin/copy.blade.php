@@ -71,7 +71,7 @@
                                 <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
                             <td>{{ count($copy->metrics) }}
-                            <td>@percent($copy->metrics->sum('em_potencial') / count($copy->metrics))</td>
+                            <td>@int_number($copy->metrics->sum('em_potencial'))</td>
                             <td>@int_number($copy->metrics->sum('validados'))</td>
                             <td>@percent($copy->metrics->sum('validados') / count($copy->metrics))</td>
                             <td>@int_number($copy->metrics->sum('total_clicks'))</td>
@@ -119,6 +119,8 @@
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="date" class="sortable">Data <i
                                                         class="fas fa-sort"></i></th>
+                                                <th data-sort-key="em-potencial" class="sortable">Em potencial <i
+                                                        class="fas fa-sort"></i></th>
                                                 <th data-sort-key="clicks" class="sortable">Cliques <i
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="conversions" class="sortable">Conversões <i
@@ -147,6 +149,13 @@
                                                 <tr class="creative-detail-row">
                                                     <td class="creative-code">{{ $cr->code }}</td>
                                                     <td>{{ $cr->first_redtrack_date }}</td>
+                                                    <td>
+                                                        @if ($cr->em_potencial)
+                                                            <label for="">SIM</label>
+                                                        @else
+                                                            <label for="">NÃO</label>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $cr->total_clicks }}</td>
                                                     <td>{{ $cr->total_conversions }}</td>
                                                     <td>
@@ -158,7 +167,7 @@
                                                     </td>
                                                     <td>
                                                         @if ($cr->total_clicks > 0)
-                                                            @dollar(($cr->total_cost+ $cr->total_profit) / $cr->total_clicks)
+                                                            @dollar(($cr->total_cost + $cr->total_profit) / $cr->total_clicks)
                                                         @else
                                                             0
                                                         @endif

@@ -72,7 +72,7 @@
                             </td>
                             <td>{{ count($editor->metrics) }}
                             <td>@int_number($editor->metrics->sum('validados'))</td>
-                            <td>@percent($editor->metrics->sum('em_potencial')/count($editor->metrics))</td>
+                            <td>@int_number($editor->metrics->sum('em_potencial'))</td>
                             <td>@percent($editor->metrics->sum('validados')/count($editor->metrics))</td>
                             <td>@int_number($editor->metrics->sum('total_clicks'))</td>
                             <td>@int_number($editor->metrics->sum('total_conversions'))</td>
@@ -119,6 +119,8 @@
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="date" class="sortable">Data <i
                                                         class="fas fa-sort"></i></th>
+                                                <th data-sort-key="em-potencial" class="sortable">Em potencial <i
+                                                        class="fas fa-sort"></i></th>
                                                 <th data-sort-key="clicks" class="sortable">Cliques <i
                                                         class="fas fa-sort"></i></th>
                                                 <th data-sort-key="conversions" class="sortable">Conversões <i
@@ -147,6 +149,13 @@
                                                 <tr class="creative-detail-row">
                                                     <td class="creative-code">{{ $cr->code }}</td>
                                                     <td>{{ $cr->first_redtrack_date }}</td>
+                                                    <td>
+                                                        @if($cr->em_potencial) 
+                                                            <label for="">SIM</label>
+                                                        @else 
+                                                            <label for="">NÃO</label>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $cr->total_clicks }}</td>
                                                     <td>{{ $cr->total_conversions }}</td>
                                                     <td>
