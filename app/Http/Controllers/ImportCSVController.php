@@ -58,7 +58,7 @@ class ImportCSVController extends Controller
             $copy = TagUsers::where('tag', explode(" ", $line['COPY RESPONSÁVEL'])[0])->first();
             $editor = TagUsers::where('tag', explode(" ", $line['EDITOR'])[0])->first();
             $copy   = $copy ? $copy->user : null;
-            $editor   = $editor ? $copy->user : null;
+            $editor   = $editor ? $editor->user : null;
             if (trim($line['ID CRIATIVO']) && ($line['COPY RESPONSÁVEL'] || $line['EDITOR']))
                 $preview[] = [
                     'code'        => trim($line['ID CRIATIVO']),
