@@ -19,6 +19,8 @@ export default defineConfig({
                 'resources/css/css-admin/admin-gestores.css',
                 'resources/css/css-admin/admin-editors.css',
                 'resources/css/css-colaboradores/colaboradores-metas.css',
+                'resources/css/css-spy/spy-component.css',
+                'resources/css/css-spy/spy-mrm.css',
                 'resources/js/app.js',
             ],
             refresh: true,
