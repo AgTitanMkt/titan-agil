@@ -39,7 +39,8 @@
                 <thead>
                     <tr>
                         <th class="header-editor">Editor</th>
-                        <th class="header-metrics">Produzido</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Testados</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Em potencial</th>
                         <th class="header-metrics">Validados</th>
                         <th class="header-metrics">Win Rate</th>
                         <th class="header-metrics">Cliques</th>
@@ -71,6 +72,7 @@
                             </td>
                             <td>{{ count($editor->metrics) }}
                             <td>@int_number($editor->metrics->sum('validados'))</td>
+                            <td>@percent($editor->metrics->sum('em_potencial')/count($editor->metrics))</td>
                             <td>@percent($editor->metrics->sum('validados')/count($editor->metrics))</td>
                             <td>@int_number($editor->metrics->sum('total_clicks'))</td>
                             <td>@int_number($editor->metrics->sum('total_conversions'))</td>

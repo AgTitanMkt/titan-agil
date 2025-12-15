@@ -39,7 +39,8 @@
                 <thead>
                     <tr>
                         <th class="header-editor">Copywriter</th>
-                        <th class="header-metrics">Produzido</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Testado</th> {{-- adaptado para copy --}}
+                        <th class="header-metrics">Em potencial</th>
                         <th class="header-metrics">Validados</th>
                         <th class="header-metrics">Win/Rate</th>
                         <th class="header-metrics">Cliques</th>
@@ -70,6 +71,7 @@
                                 <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
                             <td>{{ count($copy->metrics) }}
+                            <td>@percent($copy->metrics->sum('em_potencial') / count($copy->metrics))</td>
                             <td>@int_number($copy->metrics->sum('validados'))</td>
                             <td>@percent($copy->metrics->sum('validados') / count($copy->metrics))</td>
                             <td>@int_number($copy->metrics->sum('total_clicks'))</td>
