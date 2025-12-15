@@ -23,66 +23,132 @@
                     alto, chega mais longe.’"</p>
             </div>
 
-            {{-- card e animacao --}}
-            <div class="goals-overview-grid">
-                {{-- meta diaria --}}
-                <div class="goal-card animated-border blue-border" id="card-diaria">
-                    <div class="card-glow"></div>
-                    <h3 class="goal-title" style="color: #fff;">META DIÁRIA</h3>
-                    <div class="goal-values">
-                        <div class="val-row">
-                        <span class="plat fb">FB</span>
+    {{-- card e animacao --}}
+    <div class="goals-overview-grid">
+    @php
+        // VALORES MOCKADOS 
+        $progressDiariaFb = 115; // 115%
+        $progressDiariaYt = 75;  // 75%
+        $progressDiariaNt = 99;  // 99%
+        $progressSemanalFb = 100; // 100%
+        $progressSemanalYt = 60; // 60%
+        $progressSemanalNt = 85; // 85%
+        $progressQuinzenal = 55; // 55%
+    @endphp
 
-                        <div class="progress-track">
-                            <div class="progress-fill fb" style="width: 55%;"></div>
-                        </div>
-
-                        <span class="money" id="val-diaria-fb">@dollarK($metasDiaria['facebook'])</span>
-                    </div>
-                    <div class="val-row">
-                    <span class="plat yt">YT</span>
-
-                    <div class="progress-track">
-                        <div class="progress-fill yt" style="width: 40%;"></div>
-                    </div>
-
-                    <span class="money" id="val-diaria-yt">@dollarK($metasDiaria['google'])</span>
-                </div>
-                    <div class="val-row">
-                <span class="plat nt">NT</span>
-
+    {{-- META DIARIA --}}
+    <div class="goal-card animated-border blue-border" id="card-diaria">
+        <div class="card-glow"></div>
+        <h3 class="goal-title" style="color: #fff;">META DIÁRIA</h3>
+        <div class="goal-values">
+            {{-- FB --}}
+            <div class="val-row">
+                <span class="plat fb">FB</span>
                 <div class="progress-track">
-                    <div class="progress-fill nt" style="width: 70%;"></div>
+                    <div class="progress-fill fb @if($progressDiariaFb >= 100) success @endif" 
+                         style="width: {{ min(100, $progressDiariaFb) }}%;"
+                         data-progress="{{ $progressDiariaFb }}">
+                        <span class="progress-percentage">{{ $progressDiariaFb }}%</span>
+                    </div>
                 </div>
-
+                <span class="money" id="val-diaria-fb">@dollarK($metasDiaria['facebook'])</span>
+            </div>
+            
+            {{-- YT --}}
+            <div class="val-row">
+                <span class="plat yt">YT</span>
+                <div class="progress-track">
+                    <div class="progress-fill yt @if($progressDiariaYt >= 100) success @endif" 
+                         style="width: {{ min(100, $progressDiariaYt) }}%;"
+                         data-progress="{{ $progressDiariaYt }}">
+                        <span class="progress-percentage">{{ $progressDiariaYt }}%</span>
+                    </div>
+                </div>
+                <span class="money" id="val-diaria-yt">@dollarK($metasDiaria['google'])</span>
+            </div>
+            
+            {{-- NT --}}
+            <div class="val-row">
+                <span class="plat nt">NT</span>
+                <div class="progress-track">
+                    <div class="progress-fill nt @if($progressDiariaNt >= 100) success @endif" 
+                         style="width: {{ min(100, $progressDiariaNt) }}%;"
+                         data-progress="{{ $progressDiariaNt }}">
+                        <span class="progress-percentage">{{ $progressDiariaNt }}%</span>
+                    </div>
+                </div>
                 <span class="money" id="val-diaria-nt">@dollarK($metasDiaria['native'])</span>
             </div>
+        </div>
+    </div>
+
+    {{-- META SEMANAL --}}
+    <div class="goal-card animated-border gold-border" id="card-semanal">
+        <div class="card-glow"></div>
+        <h3 class="goal-title" style="color: #fff;">META SEMANAL</h3>
+        <div class="goal-values">
+            {{-- FB --}}
+            <div class="val-row">
+                <span class="plat fb">FB</span>
+                <div class="progress-track">
+                    <div class="progress-fill fb @if($progressSemanalFb >= 100) success @endif" 
+                         style="width: {{ min(100, $progressSemanalFb) }}%;"
+                         data-progress="{{ $progressSemanalFb }}">
+                        <span class="progress-percentage">{{ $progressSemanalFb }}%</span>
                     </div>
                 </div>
-
-                {{-- meta semanal --}}
-                <div class="goal-card animated-border gold-border" id="card-semanal">
-                    <div class="card-glow"></div>
-                    <h3 class="goal-title" style="color: #fff;">META SEMANAL</h3>
-                    <div class="goal-values">
-                        <div class="val-row"><span class="plat fb">FB</span> <span class="money"
-                                id="val-semanal-fb">@dollarK($metasSemanal['facebook'])</span></div>
-                        <div class="val-row"><span class="plat yt">YT</span> <span class="money"
-                                id="val-semanal-yt">@dollarK($metasSemanal['google'])</span></div>
-                        <div class="val-row"><span class="plat nt">NT</span> <span class="money"
-                                id="val-semanal-nt">@dollarK($metasSemanal['native'])</span></div>
+                <span class="money" id="val-semanal-fb">@dollarK($metasSemanal['facebook'])</span>
+            </div>
+            
+            {{-- YT --}}
+            <div class="val-row">
+                <span class="plat yt">YT</span>
+                <div class="progress-track">
+                    <div class="progress-fill yt @if($progressSemanalYt >= 100) success @endif" 
+                         style="width: {{ min(100, $progressSemanalYt) }}%;"
+                         data-progress="{{ $progressSemanalYt }}">
+                        <span class="progress-percentage">{{ $progressSemanalYt }}%</span>
                     </div>
                 </div>
-
-                {{-- meta quinzenal --}}
-                <div class="goal-card animated-border purple-border" id="card-quinzenal">
-                    <div class="card-glow"></div>
-                    <h3 class="goal-title" style="color: #fff;">META QUINZENAL</h3>
-                    <div class="goal-total" id="val-quinzenal-total">@dollarM($metaQuinzenal)</div>
-                    <p class="goal-sub" style="color: #fff;">Consolidado Geral</p>
+                <span class="money" id="val-semanal-yt">@dollarK($metasSemanal['google'])</span>
+            </div>
+            
+            {{-- NT --}}
+            <div class="val-row">
+                <span class="plat nt">NT</span>
+                <div class="progress-track">
+                    <div class="progress-fill nt @if($progressSemanalNt >= 100) success @endif" 
+                         style="width: {{ min(100, $progressSemanalNt) }}%;"
+                         data-progress="{{ $progressSemanalNt }}">
+                        <span class="progress-percentage">{{ $progressSemanalNt }}%</span>
+                    </div>
                 </div>
+                <span class="money" id="val-semanal-nt">@dollarK($metasSemanal['native'])</span>
             </div>
         </div>
+    </div>
+
+    {{-- META QUINZENAL --}}
+    <div class="goal-card animated-border purple-border" id="card-quinzenal">
+        <div class="card-glow"></div>
+        <h3 class="goal-title" style="color: #fff;">META QUINZENAL</h3>
+        
+        <div class="val-row consolidated-row">
+            <span class="goal-sub" style="color: #fff; margin-right: 15px;">Consolidado Geral</span>
+            <div class="progress-track">
+                <div class="progress-fill consolidated @if($progressQuinzenal >= 100) success @endif" 
+                     style="width: {{ min(100, $progressQuinzenal) }}%;"
+                     data-progress="{{ $progressQuinzenal }}">
+                    <span class="progress-percentage">{{ $progressQuinzenal }}%</span>
+                </div>
+            </div>
+            <div class="goal-total" id="val-quinzenal-total">@dollarM($metaQuinzenal)</div>
+        </div>
+        
+    </div>
+</div>
+
+    {{-- A ANIMACAO JA estA no CSS (transition: width 0.6s ease) --}}
 
 
         {{-- RANK CONTOLS COM ABA E ANIMACAO --}}

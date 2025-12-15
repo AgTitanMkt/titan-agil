@@ -449,52 +449,103 @@ body {
     color: var(--text-main);
 }
 
-/* linha inteira */
+/* PROGRESSO */
+
+/* linha inteira*/
 .val-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 15px; /* aumentado o espaco */
+    padding-right: 5px; 
+}
+
+/* base do card para o texto nao ser empurrado */
+.goal-card .goal-values {
+    margin-top: 25px;
 }
 
 /* trilho da barra */
 .progress-track {
     flex: 1;
     height: 14px;
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1); 
     border-radius: 20px;
-    overflow: hidden;
+    overflow: visible; /* PERCENTUTAL SEMPRE VISIVEL */
     position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.15); 
 }
 
 /* preenchimento */
 .progress-fill {
     height: 100%;
     border-radius: 20px;
-    transition: width 0.6s ease;
+    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+    position: relative;
+    white-space: nowrap;
 }
 
-/* cores por plataforma */
+/* PERCENTUAL FLUTUANTE */
+.progress-percentage {
+    position: absolute;
+    right: -10px; /* direita */
+    top: -20px;
+    background: #1e1e1e; 
+    color: #fff;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transform: translateX(50%); 
+    transition: color 1.2s ease;
+}
+
+/* ADICIONAR COR POR SQUAD */
 .progress-fill.fb {
-    background: linear-gradient(90deg, #ff2d2d, #d90000);
+    background: linear-gradient(90deg, #07487e, #001d5a);
 }
 
 .progress-fill.yt {
-    background: linear-gradient(90deg, #ff2d2d, #c40000);
+    background: linear-gradient(90deg, #ff4d4d, #c40000);
 }
 
 .progress-fill.nt {
-    background: linear-gradient(90deg, #ff2d2d, #a00000);
+    background: linear-gradient(90deg, #078618, #093d02);
+}
+
+/* COR VERDE META BATIDA */
+.progress-fill.success {
+    background: linear-gradient(90deg, #38ef7d, #11998e); 
+    box-shadow: 0 0 10px rgba(56, 239, 125, 0.5);
+}
+
+/* cor do percentual no sucesso */
+.progress-fill.success .progress-percentage {
+    color: #38ef7d; 
+}
+
+/* META QUINZENAL */
+.progress-fill.consolidated {
+    background: linear-gradient(90deg, #9963ff, #6200ff); 
+}
+.consolidated-row .goal-total {
+    min-width: unset; 
 }
 
 /* valor a direita */
-.money {
+.money, .goal-total {
     min-width: 60px;
     text-align: right;
     font-weight: 700;
     color: #fff;
+    font-size: 1rem;
 }
 
+/* ajuste do nome da plataforma para alinhamento */
+.plat { 
+    margin-right: -5px; 
+}
 
 /* NOTIFICAÇÕES MOTIVACIONAIS  */
 .motivation-toast-container {
@@ -604,6 +655,7 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 .goal-card {
