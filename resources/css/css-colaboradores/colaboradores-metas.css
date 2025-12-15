@@ -449,6 +449,53 @@ body {
     color: var(--text-main);
 }
 
+/* linha inteira */
+.val-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* trilho da barra */
+.progress-track {
+    flex: 1;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* preenchimento */
+.progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.6s ease;
+}
+
+/* cores por plataforma */
+.progress-fill.fb {
+    background: linear-gradient(90deg, #ff2d2d, #d90000);
+}
+
+.progress-fill.yt {
+    background: linear-gradient(90deg, #ff2d2d, #c40000);
+}
+
+.progress-fill.nt {
+    background: linear-gradient(90deg, #ff2d2d, #a00000);
+}
+
+/* valor a direita */
+.money {
+    min-width: 60px;
+    text-align: right;
+    font-weight: 700;
+    color: #fff;
+}
+
+
 /* NOTIFICAÇÕES MOTIVACIONAIS  */
 .motivation-toast-container {
     position: fixed;
@@ -961,6 +1008,28 @@ body {
 
 .btn-confetti:hover {
     transform: scale(1.1);
+}
+
+/* PODIUM 5  */
+.podium-5 {
+    gap: 14px;
+}
+
+.place-1 { transform: scale(1.15); z-index: 5; }
+.place-2 { transform: scale(1.05); z-index: 4; }
+.place-3 { transform: scale(0.95); z-index: 3; }
+.place-4 { transform: scale(0.85); z-index: 2; }
+.place-5 { transform: scale(0.8);  z-index: 1; }
+
+.place-4 .pillar-block,
+.place-5 .pillar-block {
+    border-top-color: #555;
+    opacity: 0.7;
+}
+
+.place-4 .avatar-circle,
+.place-5 .avatar-circle {
+    filter: grayscale(30%);
 }
 
 

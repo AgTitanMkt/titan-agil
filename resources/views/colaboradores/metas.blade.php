@@ -30,12 +30,33 @@
                     <div class="card-glow"></div>
                     <h3 class="goal-title" style="color: #fff;">META DIÁRIA</h3>
                     <div class="goal-values">
-                        <div class="val-row"><span class="plat fb">FB</span> <span class="money"
-                                id="val-diaria-fb">@dollarK($metasDiaria['facebook'])</span></div>
-                        <div class="val-row"><span class="plat yt">YT</span> <span class="money"
-                                id="val-diaria-yt">@dollarK($metasDiaria['google'])</span></div>
-                        <div class="val-row"><span class="plat nt">NT</span> <span class="money"
-                                id="val-diaria-nt">@dollarK($metasDiaria['native'])</span></div>
+                        <div class="val-row">
+                        <span class="plat fb">FB</span>
+
+                        <div class="progress-track">
+                            <div class="progress-fill fb" style="width: 55%;"></div>
+                        </div>
+
+                        <span class="money" id="val-diaria-fb">@dollarK($metasDiaria['facebook'])</span>
+                    </div>
+                    <div class="val-row">
+                    <span class="plat yt">YT</span>
+
+                    <div class="progress-track">
+                        <div class="progress-fill yt" style="width: 40%;"></div>
+                    </div>
+
+                    <span class="money" id="val-diaria-yt">@dollarK($metasDiaria['google'])</span>
+                </div>
+                    <div class="val-row">
+                <span class="plat nt">NT</span>
+
+                <div class="progress-track">
+                    <div class="progress-fill nt" style="width: 70%;"></div>
+                </div>
+
+                <span class="money" id="val-diaria-nt">@dollarK($metasDiaria['native'])</span>
+            </div>
                     </div>
                 </div>
 
@@ -80,69 +101,100 @@
         </div>
 
 
-        {{-- RANK TITAN --}}
-        <div class="podium-section">
+            {{-- RANK TITAN --}}
+            <div class="podium-section podium-5">
 
-            {{-- 2 lugar --}}
-            <div class="podium-pillar place-2">
-                <div class="avatar-floating">
-                    <div class="avatar-circle" id="podio-2-avatar"></div>
-                    <div class="rank-badge">2</div>
+                {{-- 4 lugar --}}
+                <div class="podium-pillar place-4">
+                    <div class="avatar-floating">
+                        <div class="avatar-circle" id="podio-4-avatar"></div>
+                        <div class="rank-badge">4</div>
+                    </div>
+                    <div class="squad-name" id="podio-4-name"></div>
+                    <div class="squad-gap">Faltam 48% para o topo</div>
+                    <div class="pillar-block" id="podio-4-block">
+                        <p class="pillar-profit" id="podio-4-profit"></p>
+                    </div>
                 </div>
-                <div class="squad-name" id="podio-2-name"></div>
-                <div class="squad-gap squad-gap-2">Faltam 15% para o topo</div>
-                <div class="pillar-block" id="podio-2-block">
-                    <p class="pillar-profit" id="podio-2-profit"></p>
+
+                {{-- 2 lugar --}}
+                <div class="podium-pillar place-2">
+                    <div class="avatar-floating">
+                        <div class="avatar-circle" id="podio-2-avatar"></div>
+                        <div class="rank-badge">2</div>
+                    </div>
+                    <div class="squad-name" id="podio-2-name"></div>
+                    <div class="squad-gap">Faltam 15% para o topo</div>
+                    <div class="pillar-block" id="podio-2-block">
+                        <p class="pillar-profit" id="podio-2-profit"></p>
+                    </div>
                 </div>
+
+                {{-- 1 lugar --}}
+                <div class="podium-pillar place-1">
+                    <div class="crown-floating"><i class="fas fa-crown"></i></div>
+
+                    <div class="avatar-floating champion">
+                        <div class="avatar-circle" id="podio-1-avatar"></div>
+                        <div class="rank-badge gold">1</div>
+                    </div>
+
+                    <div class="squad-name highlight" id="podio-1-name"></div>
+                    <div class="squad-gap squad-gap-1">
+                        <i class="fas fa-fire"></i> META BATIDA!
+                    </div>
+
+                    <div class="celebrate-btn-container">
+                        <button class="btn-confetti" onclick="fireConfetti()">🎉 CELEBRAR!</button>
+                    </div>
+
+                    <div class="pillar-block champion-block" id="podio-1-block">
+                        <p class="pillar-profit" id="podio-1-profit"></p>
+                    </div>
+                </div>
+
+                {{-- 3 lugar --}}
+                <div class="podium-pillar place-3">
+                    <div class="avatar-floating">
+                        <div class="avatar-circle" id="podio-3-avatar"></div>
+                        <div class="rank-badge">3</div>
+                    </div>
+                    <div class="squad-name" id="podio-3-name"></div>
+                    <div class="squad-gap">Faltam 32% para o topo</div>
+                    <div class="pillar-block" id="podio-3-block">
+                        <p class="pillar-profit" id="podio-3-profit"></p>
+                    </div>
+                </div>
+
+                {{-- 5 lugar --}}
+                <div class="podium-pillar place-5">
+                    <div class="avatar-floating">
+                        <div class="avatar-circle" id="podio-5-avatar"></div>
+                        <div class="rank-badge">5</div>
+                    </div>
+                    <div class="squad-name" id="podio-5-name"></div>
+                    <div class="squad-gap">Faltam 60% para o topo</div>
+                    <div class="pillar-block" id="podio-5-block">
+                        <p class="pillar-profit" id="podio-5-profit"></p>
+                    </div>
+                </div>
+
             </div>
 
-            {{-- 1 lugar --}}
-            <div class="podium-pillar place-1">
-                <div class="crown-floating"><i class="fas fa-crown"></i></div>
-                <div class="avatar-floating champion">
-                    <div class="avatar-circle" id="podio-1-avatar"></div>
-                    <div class="rank-badge gold">1</div>
-                </div>
-                <div class="squad-name" id="podio-1-name"></div>
-
-                <div class="squad-gap-1 squad-gap"><i class="fas fa-fire"></i> META BATIDA!</div>
-
-                {{-- BOTAO CELEBRAR --}}
-                <div class="celebrate-btn-container">
-                    <button class="btn-confetti" onclick="fireConfetti()">🎉 CELEBRAR!</button>
-                </div>
-
-                <div class="pillar-block champion-block" id="podio-1-block">
-                    <p class="pillar-profit" id="podio-1-profit"></p>
-                </div>
-            </div>
-
-            {{-- 3 lugar --}}
-            <div class="podium-pillar place-3">
-                <div class="avatar-floating">
-                    <div class="avatar-circle" id="podio-3-avatar"></div>
-                    <div class="rank-badge">3</div>
-                </div>
-                <div class="squad-name" id="podio-3-name"></div>
-                <div class="squad-gap squad-gap-3">Faltam 32% para o topo</div>
-                <div class="pillar-block" id="podio-3-block">
-                    <p class="pillar-profit" id="podio-3-profit"></p>
-                </div>
-            </div>
-
-        </div>
 
 
 
         {{-- TABELA DE RANKING DETALHADA --}}
         <div class="ranking-table-container glass-panel">
             <div class="table-header-row">
-                <div class="col-pos">Progresso (%)</div>
-                <div class="col-squad">Squad (Vencedor)</div>
-                <div class="col-profit text-right">Profit Atual</div>
-                <div class="col-meta text-right">Meta Alvo</div>
-                <div class="col-status text-center">Status</div>
-            </div>
+            <div class="col-pos">Progresso (%)</div>
+            <div class="col-squad">Squad</div>
+            <div class="col-profit text-right">Profit Atual</div>
+            <div class="col-meta text-right">Meta Alvo</div>
+            {{-- <div class="col-missing text-right">Profit Faltante</div>  --}}
+            <div class="col-status text-center">Status</div>
+        </div>
+
 
             <div class="table-body-rows" id="rankingTableBody">
                 {{-- dados via JS --}}
