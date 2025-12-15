@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nicho;
 use App\Models\SubTask;
 use App\Models\TagUsers;
 use App\Models\Task;
@@ -97,6 +98,9 @@ class ImportCSVController extends Controller
 
             $nicho_id = $nicho->id ?? null;
 
+            if(!$nicho){
+                $nicho = Nicho::find(18);
+            }
 
             /**
              * 🔥 2. Criar/atualizar TASK com nicho preenchido

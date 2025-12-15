@@ -171,6 +171,15 @@ class User extends Authenticatable
                 THEN 100 ELSE 0
             END AS win_rate,
 
+            /* ============================================================
+              ⚡ EM POTENCIAL
+            ============================================================ */
+            CASE 
+                WHEN SUM(rr.conversions) >= 1
+                AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1
+                THEN 1 ELSE 0
+            END AS em_potencial,
+
             CASE 
                 WHEN SUM(rr.clicks) > 0 
                 THEN SUM(rr.cost) / SUM(rr.clicks)
