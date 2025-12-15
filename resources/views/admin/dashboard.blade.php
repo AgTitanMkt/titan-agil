@@ -1208,7 +1208,6 @@
             --color-tiktok: #000000;
             --color-tiktok-bg: #252525;
             --color-google: #e0043b;
-            --color-native: #9C4DFF;
         }
 
         .chart-dashboard-wrapper-vertical {
@@ -1381,7 +1380,7 @@
         }
 
         .legend-pill.native .dot {
-            background: var(--color-native);
+            background: var(--native-collor);
         }
 
         .legend-pill.google .dot {
