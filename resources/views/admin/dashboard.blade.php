@@ -1619,7 +1619,7 @@
         }
 
         .native-segment {
-            background: var(--color-native);
+            background: var(--native-collor);
         }
 
         .inner-value {
