@@ -71,8 +71,8 @@
                                 <span class="fw-bold">{{ $editor->name }}</span>
                             </td>
                             <td>{{ count($editor->metrics) }}
-                            <td>@int_number($editor->metrics->sum('validados'))</td>
                             <td>@int_number($editor->metrics->sum('em_potencial'))</td>
+                            <td>@int_number($editor->metrics->sum('validados'))</td>
                             <td>@percent($editor->metrics->sum('validados')/count($editor->metrics))</td>
                             <td>@int_number($editor->metrics->sum('total_clicks'))</td>
                             <td>@int_number($editor->metrics->sum('total_conversions'))</td>

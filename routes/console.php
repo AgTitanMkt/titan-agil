@@ -10,7 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('sync:redtrack --from="'.Carbon::now()->format('Y-m-d').'" --to="'.Carbon::now()->format('Y-m-d').'"')
-    ->everyFiveMinutes()
+    ->everyTenMinutes()
     ->withoutOverlapping()
     ->runInBackground()
     ->sendOutputTo(storage_path('logs/sync_redtrack.log'));
