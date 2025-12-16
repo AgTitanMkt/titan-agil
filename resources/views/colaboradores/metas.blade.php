@@ -7,11 +7,100 @@
 
     <div class="metas-page-container">
 
+        {{--  NOVO HERO COM BACKGOUND ESTILO CARTPANDA E O NOVO CONTEINER/CARROSSEL COM IMAGENS DE ROTACAO AUTOMATICA + DEGRADE AZUL--}}
+        <div class="cinematic-header-wrapper">
+
+    <div class="hero-background-section">
+        
+        <div class="hero-bg-image">
+            <img src="https://i.im.ge/2025/12/16/BX3kj4.bg-titan.png" 
+                 alt="Background Tech" 
+                 class="bg-img-fit">
+            <div class="hero-overlay-dark"></div> </div>
+
+        <div class="hero-content-layer">
+            <span class="welcome-text">O palco onde nascem os novos campeões.</span>
+            <h1 class="main-title">
+                AQUI, CADA META BATIDA<br>
+                ESCREVE O NOME DOS<br>
+                <span class="highlight-text">VENCEDORES</span>
+            </h1>
+            <p class="quote-text">"Somente quem escolhe ser visto alcança o topo — como diz o provérbio: ‘Quem mira alto, chega mais longe.’"</p>
+        </div>
+
+        <div class="fade-gradient-bottom"></div>
+    </div>
+
+    <div class="full-width-carousel-container" id="fwCarousel">
+        
+        <div class="fade-gradient-top"></div>
+
+        <div class="fw-slide active">
+            <img src="https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812" 
+                 alt="Informativo 1" 
+                 class="carousel-img">
+        </div>
+
+        <div class="fw-slide">
+            <img src="https://framerusercontent.com/images/q8s9d76f8g7h6j5k4l3.png?width=1978&height=812" 
+                 alt="Informativo 2" 
+                 class="carousel-img"
+                 onerror="this.src='https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812'"> 
+                 </div>
+
+        <div class="fw-slide">
+            <img src="https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812" 
+                 alt="Informativo 3" 
+                 class="carousel-img">
+        </div>
+
+    </div>
+
+</div>
+
+    {{-- SCRIPT DE ROTACAO AUTOMATICA --}}
+    <script>
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".fw-slide");
+        
+        // tempo do slide
+        const intervalTime = 10000; 
+
+        function showSlides() {
+            // remove a class active em todos
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].classList.remove("active");
+                slides[i].style.display = "none";  
+            }
+            
+            slideIndex++;
+            
+            // loop volta ao inicio
+            if (slideIndex > slides.length) {slideIndex = 1}    
+            
+            // mostra o slide atual
+            slides[slideIndex - 1].style.display = "block";  
+            slides[slideIndex - 1].classList.add("active");
+            
+            
+            setTimeout(showSlides, intervalTime); 
+        }
+
+        
+        if(slides.length > 0) {
+            showSlides();
+        }
+    });
+</script>
+        
+
         {{-- conteiner de notificacoes --}}
         <div id="motivation-toast-container" class="motivation-toast-container"></div>
 
-        {{-- CABECALHO E METAS GERAIS --}}
-        <div class="hero-header">
+        {{-- CABECALHO E METAS GERAIS - ( FOI PUXADO PARA CIMA) --}}
+        {{-- <div class="hero-header">
             <div class="header-content">
                 <span class="welcome-text">O palco onde nascem os novos campeões.</span>
                 <h1 class="main-title">
@@ -21,7 +110,7 @@
                 </h1>
                 <p class="quote-text">"Somente quem escolhe ser visto alcança o topo — como diz o provérbio: ‘Quem mira
                     alto, chega mais longe.’"</p>
-            </div>
+            </div> --}}
 
     {{-- card e animacao --}}
     <div class="goals-overview-grid">
