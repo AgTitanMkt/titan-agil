@@ -71,8 +71,8 @@
                                 <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
                                 <span class="fw-bold">{{ $copy->name }}</span>
                             </td>
-                            <td>{{ count($copy->metrics) }}
                             <td>{{ count($copy->subTasks) }}</td>
+                            <td>{{ count($copy->metrics) }}
                             <td>@int_number($copy->metrics->sum('em_potencial'))</td>
                             <td>@int_number($copy->metrics->sum('validados'))</td>
                             <td>@percent($copy->metrics->sum('validados') / count($copy->metrics))</td>
