@@ -39,6 +39,7 @@
                 <thead>
                     <tr>
                         <th class="header-editor">Editor</th>
+                        <th class="header-metrics">Produzido</th>
                         <th class="header-metrics">Testados</th> {{-- adaptado para copy --}}
                         <th class="header-metrics">Em potencial</th>
                         <th class="header-metrics">Validados</th>
@@ -70,6 +71,7 @@
                                 <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
                                 <span class="fw-bold">{{ $editor->name }}</span>
                             </td>
+                            <td>{{count($editor->subTasks)}}</td>
                             <td>{{ count($editor->metrics) }}
                             <td>@int_number($editor->metrics->sum('em_potencial'))</td>
                             <td>@int_number($editor->metrics->sum('validados'))</td>

@@ -422,4 +422,139 @@ class CopaProfitService
 
         return $result;
     }
+
+    public static function AgentsMetrics($startDate, $endDate, $agents = null)
+    {
+        /** ------------------------------------------------------------
+         * SUBQUERY: primeira ocorrência do criativo no RedTrack
+         * ------------------------------------------------------------ */
+        $firstDateSub = DB::table('redtrack_reports')
+            ->selectRaw('LOWER(ad_code) AS ad_code_norm, MIN(date) AS first_redtrack_date')
+            ->groupBy(DB::raw('LOWER(ad_code)'));
+
+        return DB::table('user_tasks AS ut')
+            ->join('users AS u', 'u.id', '=', 'ut.user_id')
+            ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
+            ->join('tasks AS t', 't.id', '=', 'st.task_id')
+            ->join('nichos AS n', 'n.id', '=', 't.nicho')
+
+            /* ============================================================
+           🔗 JOIN COM REDTRACK (MESMO DA tasks())
+           ============================================================ */
+            ->leftJoin('redtrack_reports AS rr', function ($join) {
+                $join->on(
+                    DB::raw('LOWER(rr.ad_code)'),
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
+            })
+
+            /* ============================================================
+           🔗 JOIN COM SUBQUERY DE PRIMEIRA DATA (MESMO DA tasks())
+           ============================================================ */
+            ->leftJoinSub($firstDateSub, 'fr', function ($join) {
+                $join->on(
+                    'fr.ad_code_norm',
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
+            })
+
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('rr.date', [$startDate, $endDate]);
+            })
+
+            ->when($agents, function ($q) use ($agents) {
+                $q->whereIn('u.name', (array) $agents);
+            })
+
+            ->selectRaw("
+            u.id AS user_id,
+            u.name AS agent_name,
+
+            ut.sub_task_id,
+            st.task_id,
+            t.code,
+
+            n.id AS nicho_id,
+            n.name AS nicho_name,
+
+            MAX(rr.date) AS redtrack_date,
+            fr.first_redtrack_date,
+
+            SUM(rr.clicks) AS total_clicks,
+            SUM(rr.conversions) AS total_conversions,
+            SUM(rr.cost) AS total_cost,
+            SUM(rr.profit) AS total_profit,
+
+            CASE 
+                WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
+                ELSE 0
+            END AS roi,
+
+            CASE 
+                WHEN COUNT(rr.id) = 0 THEN 'inconsistente'
+                ELSE 'ok'
+            END AS status,
+
+            CASE 
+                WHEN COUNT(rr.id) = 0 THEN 'não encontrado no redtrack'
+                ELSE NULL
+            END AS info,
+
+            /* 📦 PRODUZIDO */
+            COUNT(DISTINCT ut.sub_task_id) AS produzido,
+
+            /* 🧪 TESTADOS */
+            COUNT(DISTINCT rr.id) AS testados,
+
+            /* 🔥 VALIDAÇÃO */
+            CASE 
+                WHEN SUM(rr.conversions) >= 20
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
+                THEN 1 ELSE 0
+            END AS validados,
+
+            CASE 
+                WHEN SUM(rr.conversions) >= 20
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
+                THEN 100 ELSE 0
+            END AS win_rate,
+
+            /* ⚡ EM POTENCIAL */
+            CASE 
+                WHEN SUM(rr.conversions) >= 1
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1
+                THEN 1 ELSE 0
+            END AS em_potencial,
+
+            CASE 
+                WHEN SUM(rr.clicks) > 0 
+                THEN SUM(rr.cost) / SUM(rr.clicks)
+                ELSE NULL
+            END AS cpc,
+
+            CASE 
+                WHEN SUM(rr.clicks) > 0
+                THEN (SUM(rr.profit) + SUM(rr.cost)) / SUM(rr.clicks)
+                ELSE NULL
+            END AS epc
+        ")
+
+            ->groupBy(
+                'u.id',
+                'u.name',
+                'ut.sub_task_id',
+                'st.task_id',
+                't.code',
+                'fr.first_redtrack_date',
+                'n.id',
+                'n.name'
+            )
+
+            ->orderBy('total_profit', 'DESC')
+
+            ->get()
+            ->groupBy('user_id');
+    }
 }

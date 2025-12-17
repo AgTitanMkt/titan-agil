@@ -92,11 +92,11 @@ class User extends Authenticatable
     public function tasks()
     {
         /** ------------------------------------------------------------
-         * SUBQUERY: primeira ocorrência global do criativo no RedTrack
+         * SUBQUERY: primeira ocorrência do criativo no RedTrack
          * ------------------------------------------------------------ */
         $firstDateSub = DB::table('redtrack_reports')
-            ->selectRaw('normalized_rt_ad, MIN(date) AS first_redtrack_date')
-            ->groupBy('normalized_rt_ad');
+            ->selectRaw('LOWER(ad_code) AS ad_code_norm, MIN(date) AS first_redtrack_date')
+            ->groupBy(DB::raw('LOWER(ad_code)'));
 
         /** ------------------------------------------------------------
          * QUERY PRINCIPAL
@@ -106,13 +106,27 @@ class User extends Authenticatable
             ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
+
+            /* ============================================================
+           🔗 JOIN COM REDTRACK (por code)
+           ============================================================ */
             ->leftJoin('redtrack_reports AS rr', function ($join) {
-                $join->on('rr.normalized_rt_ad', 'LIKE', DB::raw("CONCAT(t.normalized_code, '%')"));
+                $join->on(
+                    DB::raw('LOWER(rr.ad_code)'),
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
             })
 
-
+            /* ============================================================
+           🔗 JOIN COM SUBQUERY DE PRIMEIRA DATA
+           ============================================================ */
             ->leftJoinSub($firstDateSub, 'fr', function ($join) {
-                $join->on('fr.normalized_rt_ad', '=', 't.normalized_code');
+                $join->on(
+                    'fr.ad_code_norm',
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
             })
 
             ->where('ut.user_id', $this->id)
@@ -129,9 +143,8 @@ class User extends Authenticatable
             ut.sub_task_id,
             st.task_id,
             t.code,
-            t.normalized_code,
-            n.id as nicho_id,
-            n.name as nicho_name,
+            n.id AS nicho_id,
+            n.name AS nicho_name,
             u.name AS agent_name,
 
             MAX(rr.date) AS redtrack_date,
@@ -147,36 +160,34 @@ class User extends Authenticatable
                 ELSE 0
             END AS roi,
 
-            CASE WHEN MAX(rr.id) IS NULL THEN 'inconsistente' ELSE 'ok' END AS status,
-            CASE WHEN MAX(rr.id) IS NULL THEN 'não encontrado no redtrack' ELSE NULL END AS info,
+            CASE 
+                WHEN COUNT(rr.id) = 0 THEN 'inconsistente'
+                ELSE 'ok'
+            END AS status,
 
-            COUNT(*) AS produzido,
+            CASE 
+                WHEN COUNT(rr.id) = 0 THEN 'não encontrado no redtrack'
+                ELSE NULL
+            END AS info,
+
+            COUNT(DISTINCT ut.sub_task_id) AS produzido,
             COUNT(DISTINCT rr.id) AS testados,
 
-            /* ============================================================
-               🔥 NOVA REGRA B — validação por CRIATIVO
-               ============================================================ */
             CASE 
                 WHEN SUM(rr.conversions) >= 20
                  AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
                 THEN 1 ELSE 0
             END AS validados,
 
-            /* ============================================================
-               🔥 WIN RATE INDIVIDUAL (0% ou 100%)
-               ============================================================ */
             CASE 
                 WHEN SUM(rr.conversions) >= 20
-                    AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
                 THEN 100 ELSE 0
             END AS win_rate,
 
-            /* ============================================================
-              ⚡ EM POTENCIAL
-            ============================================================ */
             CASE 
                 WHEN SUM(rr.conversions) >= 1
-                AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1
+                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1
                 THEN 1 ELSE 0
             END AS em_potencial,
 
@@ -197,7 +208,6 @@ class User extends Authenticatable
                 'ut.sub_task_id',
                 'st.task_id',
                 't.code',
-                't.normalized_code',
                 'u.name',
                 'fr.first_redtrack_date',
                 'n.id',
@@ -206,9 +216,6 @@ class User extends Authenticatable
 
             ->orderBy('total_profit', 'DESC');
     }
-
-
-
 
 
 

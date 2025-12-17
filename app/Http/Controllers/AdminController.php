@@ -93,19 +93,20 @@ class AdminController extends Controller
         $allEditors = $this->allEditorsArray();
 
         // 4️⃣ busca dos usuários com role=editor
-        $editors = User::withRole(3)->get();
+        $editors = User::withRole(3)
+            ->get();
 
-        // 5️⃣ aplica filtros corretamente
+        $metricsEditors = CopaProfitService::AgentsMetrics($startDate, $endDate, $editorFilter);
+
+
         foreach ($editors as $editor) {
-            $editor->applyFilter($startDate, $endDate, $editorFilter);
-            $editor->metrics = $editor->tasks;
+            $editor->metrics = $metricsEditors[$editor->id] ?? collect();
         }
+        $editors = $editors->filter(fn($editor) => $editor->metrics->isNotEmpty());
 
-        // 6️⃣ remove quem não tem métricas
-        $editors = $editors->filter(fn($e) => count($e->metrics));
-
-        // 7️⃣ ordena pelo lucro
-        $editors = $editors->sortByDesc(fn($e) => $e->metrics->sum('total_profit'))->values();
+        $editors = $editors->sortByDesc(function ($editor) {
+            return $editor->metrics->sum('total_profit');
+        })->values();
 
         // 8️⃣ retorna view
         return view('admin.editors', compact(
@@ -138,22 +139,22 @@ class AdminController extends Controller
         // -----------------------------------------
         $allCopywriters = $this->allCopywritersArray();
 
+        $metricsCopies = CopaProfitService::AgentsMetrics($startDate, $endDate, $copywriters);
+
+
         $copies = User::withRole(2)
             ->get();
+
         foreach ($copies as $copy) {
-            $copy->applyFilter($startDate, $endDate, $copywriters);
-            $copy->metrics = $copy->tasks;
+            $copy->metrics = $metricsCopies[$copy->id] ?? collect();
         }
 
-        $copies = $copies->filter(function ($copy) {
-            return count($copy->metrics);
-        });
-        
+        $copies = $copies->filter(fn($copy) => $copy->metrics->isNotEmpty());
+
         $copies = $copies->sortByDesc(function ($copy) {
             return $copy->metrics->sum('total_profit');
         })->values();
 
-        // dd($copies->first()->metrics);
 
         return view('admin.copy', compact(
             'copies',
@@ -523,9 +524,8 @@ class AdminController extends Controller
         return response()->json($history);
     }
 
-    public function gestores(){
+    public function gestores()
+    {
         return view("admin.gestores");
     }
-
-    
 }
