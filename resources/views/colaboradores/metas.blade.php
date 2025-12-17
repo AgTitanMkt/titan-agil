@@ -26,7 +26,47 @@
                 <span class="highlight-text">VENCEDORES</span>
             </h1>
             <p class="quote-text">"Somente quem escolhe ser visto alcança o topo — como diz o provérbio: ‘Quem mira alto, chega mais longe.’"</p>
+        
+            <div class="hero-actions">
+        <button class="btn-rank-titan" onclick="scrollToPodium()">
+            <i class="fas fa-trophy"></i> VER RANKING TITAN
+        </button>
+            </div>
         </div>
+
+            <div class="scroll-indicator" onclick="scrollToCarousel()">
+                <span class="scroll-text">Explore</span>
+                <div class="mouse-icon">
+                    <div class="wheel"></div>
+                </div>
+                <div class="arrow-down">
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            {{-- SCRIPT PARA ROLAR O BOTAO ATE O RANK --}}
+
+            <script>
+            // rolar ate o podium rank
+            function scrollToPodium() {
+                const podium = document.querySelector('.rank-controls-bar');
+                if (podium) {
+                    podium.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // rolar ate o carrossel
+            function scrollToCarousel() {
+                const carousel = document.getElementById('fwCarousel');
+                if (carousel) {
+                    carousel.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+             </script>   
+
+
+             {{-- AQUI COMECA O CARROSSEL --}}
 
         <div class="fade-gradient-bottom"></div>
     </div>
@@ -58,7 +98,7 @@
 
 </div>
 
-    {{-- SCRIPT DE ROTACAO AUTOMATICA --}}
+    {{-- SCRIPT DE ROTACAO AUTOMATICA DO CARROSSEL --}}
     <script>
     
     document.addEventListener("DOMContentLoaded", function() {
@@ -95,6 +135,8 @@
     });
 </script>
         
+        {{-- AQUI ACABA O CARROSSEL --}}
+
 
         {{-- conteiner de notificacoes --}}
         <div id="motivation-toast-container" class="motivation-toast-container"></div>

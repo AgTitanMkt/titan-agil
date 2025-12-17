@@ -31,7 +31,7 @@ html {
     min-height: 100vh;
     position: relative;
     /* background-image, cover, position, outros... */
-    background-image: url('/resources/img/img-colaboradores/metas-fundo.png');
+    background-image: url('/resources/img/img-colaboradores/metas-fundo\ 2.png');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
@@ -675,6 +675,109 @@ body {
         margin-right: -20px;
         width: calc(100% + 40px);
     }
+}
+
+/* BOTAO RANK TITAN */
+.hero-actions {
+    margin-top: 40px;
+}
+
+.btn-rank-titan {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(15, 83, 255, 0.6);
+    padding: 15px 35px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    background: rgba(15, 35, 113, 0.3);
+    backdrop-filter: blur(5px);
+    border-radius: 4px;
+}
+
+.btn-rank-titan:hover {
+    background: #0f53ff;
+    border-color: #0f53ff;
+    box-shadow: 0 0 25px rgba(15, 83, 255, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-rank-titan i {
+    margin-right: 10px;
+    color: #ffd700; /* TROFEU*/
+}
+
+/* INDICADOR DE SCROLL PARA MOSTRAR CARROSSEL */
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.scroll-text {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.mouse-icon {
+    width: 24px;
+    height: 38px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    position: relative;
+}
+
+.wheel {
+    width: 4px;
+    height: 8px;
+    background: #0f53ff;
+    border-radius: 2px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: scrollWheel 2s infinite;
+}
+
+.arrow-down span {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    border-right: 2px solid rgba(255, 255, 255, 0.3);
+    transform: rotate(45deg);
+    margin: -4px;
+    animation: arrowScroll 2s infinite;
+}
+
+.arrow-down span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+/* ANIMACOES */
+@keyframes scrollWheel {
+    0% { opacity: 1; top: 6px; }
+    100% { opacity: 0; top: 18px; }
+}
+
+@keyframes arrowScroll {
+    0% { opacity: 0; transform: rotate(45deg) translate(-5px, -5px); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(45deg) translate(5px, 5px); }
 }
 
 /* PROGRESSO */
