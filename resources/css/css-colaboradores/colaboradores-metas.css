@@ -1407,13 +1407,12 @@ body {
 
 /* PODIO RANK TITAN */
 .podium-section {
+    margin-top: 100px; /* espaco do podium estava colado */
+    margin-bottom: 60px;
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    height: 350;
     gap: 20px;
-    margin-bottom: 60px;
-    perspective: 1000px;
 }
 
 .podium-pillar {
@@ -1613,7 +1612,8 @@ body {
 
 .table-header-row {
     display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr 1.5fr 1.5fr;
+    grid-template-columns: 1.2fr 2.5fr 1.2fr 1.2fr 1.2fr 1.2fr;
+    gap: 15px;
     padding: 0 20px 15px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-muted);
@@ -1624,7 +1624,8 @@ body {
 
 .rank-row {
     display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr 1.5fr 1.5fr;
+    grid-template-columns: 1.2fr 2.5fr 1.2fr 1.2fr 1.2fr 1.2fr;
+    gap: 15px;
     padding: 20px;
     align-items: center;
     background: rgba(255, 255, 255, 0.02);
@@ -1652,6 +1653,22 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+.col-missing {
+    color: #ff4d4d;
+    font-weight: 600;
+}
+
+.col-squad { 
+    color: #0099ff;
+    text-align: left; 
+}
+
+
+.col-profit, .col-meta, .col-missing {
+    font-variant-numeric: tabular-nums; 
+    font-weight: 600;
 }
 
 .percentage-val {
@@ -1861,5 +1878,9 @@ body {
     .col-meta,
     .col-status {
         display: none;
+    }
+
+    .table-header-row {
+        grid-template-columns: 1fr 2fr 1fr; 
     }
 }

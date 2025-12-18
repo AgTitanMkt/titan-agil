@@ -399,7 +399,7 @@
             <div class="col-squad">Squad</div>
             <div class="col-profit text-right">Profit Atual</div>
             <div class="col-meta text-right">Meta Alvo</div>
-            {{-- <div class="col-missing text-right">Profit Faltante</div>  --}}
+            <div class="col-missing text-right">Profit Faltante</div> {{-- ADICIONADO PROFIT FALTANDO EM VERMELHO --}}
             <div class="col-status text-center">Status</div>
         </div>
 

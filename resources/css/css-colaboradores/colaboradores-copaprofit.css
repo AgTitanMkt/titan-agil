@@ -25,6 +25,7 @@
             box-shadow: 0 0 50px rgba(15, 83, 255, 0.15);
             overflow: hidden;
             margin-bottom: 30px;
+            padding-top: 60px; /* espaco porque estava colado */
         }
 
         /* fundo padarao - da para adicionar um backgorund */
