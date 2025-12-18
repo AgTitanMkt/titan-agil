@@ -67,72 +67,69 @@
 
 
              {{-- AQUI COMECA O CARROSSEL --}}
-
         <div class="fade-gradient-bottom"></div>
     </div>
 
     <div class="full-width-carousel-container" id="fwCarousel">
-        
         <div class="fade-gradient-top"></div>
 
+        <button class="carousel-prev" onclick="changeSlide(-1)">
+               <i class="fas fa-chevron-left"></i>&#10094;</button>
+        <button class="carousel-next" onclick="changeSlide(1)">
+             <i class="fas fa-chevron-right"></i>&#10095;</button>
+
         <div class="fw-slide active">
-            <img src="https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812" 
-                 alt="Informativo 1" 
-                 class="carousel-img">
+            <img src="https://i.im.ge/2025/12/18/BF3HBc.carrossel-1-1.png" 
+                 alt="Informativo 1" class="carousel-img">
         </div>
 
         <div class="fw-slide">
-            <img src="https://framerusercontent.com/images/q8s9d76f8g7h6j5k4l3.png?width=1978&height=812" 
-                 alt="Informativo 2" 
-                 class="carousel-img"
-                 onerror="this.src='https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812'"> 
-                 </div>
-
-        <div class="fw-slide">
-            <img src="https://framerusercontent.com/images/XZJ141qJAUu7CctJJLNHhvseTmE.png?width=1978&height=812" 
-                 alt="Informativo 3" 
-                 class="carousel-img">
+            <img src="https://i.im.ge/2025/12/18/BF3vaL.carrossel-2-1.png" 
+                 alt="Informativo 2" class="carousel-img"
+                 onerror="this.src='https://i.im.ge/2025/12/18/BFY6eT.carrossel-3-1.png'"> 
         </div>
 
+        <div class="fw-slide">
+            <img src="https://i.im.ge/2025/12/18/BFY6eT.carrossel-3-1.png" 
+                 alt="Informativo 3" class="carousel-img">
+        </div>
     </div>
-
 </div>
 
-    {{-- SCRIPT DE ROTACAO AUTOMATICA DO CARROSSEL --}}
-    <script>
-    
+<script>
+    let slideIndex = 1;
+    let slideTimer;
+
     document.addEventListener("DOMContentLoaded", function() {
-        let slideIndex = 0;
-        const slides = document.querySelectorAll(".fw-slide");
-        
-        // tempo do slide
-        const intervalTime = 10000; 
-
-        function showSlides() {
-            // remove a class active em todos
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.remove("active");
-                slides[i].style.display = "none";  
-            }
-            
-            slideIndex++;
-            
-            // loop volta ao inicio
-            if (slideIndex > slides.length) {slideIndex = 1}    
-            
-            // mostra o slide atual
-            slides[slideIndex - 1].style.display = "block";  
-            slides[slideIndex - 1].classList.add("active");
-            
-            
-            setTimeout(showSlides, intervalTime); 
-        }
-
-        
-        if(slides.length > 0) {
-            showSlides();
-        }
+        showSlides(slideIndex);
+        startAutoSlide();
     });
+
+    function startAutoSlide() {
+        slideTimer = setInterval(() => {
+            changeSlide(1);
+        }, 10000); // 10 segundos ate trocar para outra imagem
+    }
+
+    function changeSlide(n) {
+        clearInterval(slideTimer); // reseta ao clicar manualmente
+        showSlides(slideIndex += n);
+        startAutoSlide(); // reinicia
+    }
+
+    function showSlides(n) {
+        const slides = document.querySelectorAll(".fw-slide");
+        if (n > slides.length) { slideIndex = 1 }
+        if (n < 1) { slideIndex = slides.length }
+
+        slides.forEach(slide => {
+            slide.style.display = "none";
+            slide.classList.remove("active");
+        });
+
+        slides[slideIndex - 1].style.display = "block";
+        slides[slideIndex - 1].classList.add("active");
+    }
 </script>
         
         {{-- AQUI ACABA O CARROSSEL --}}
@@ -281,14 +278,28 @@
 
     {{-- A ANIMACAO JA estA no CSS (transition: width 0.6s ease) --}}
 
+        {{-- ABA DE NAVEGACAO PARA ALTERNAR ENTRE METAS/COPAPROFIT --}}
+                <div class="main-view-selector">
+            <div class="selector-pills">
+                <button class="view-btn active" onclick="switchMainView('metas')" id="btn-view-metas">
+                    <i class="fas fa-chart-line"></i> METAS
+                </button>
+                <button class="view-btn" onclick="switchMainView('copa')" id="btn-view-copa">
+                    <i class="fas fa-trophy"></i> COPA PROFIT
+                </button>
+            </div>
+        </div>
+
 
         {{-- RANK CONTOLS COM ABA E ANIMACAO --}}
-        <div class="rank-controls-bar animated-border-controls">
-            <div class="season-tabs">
-                <button class="tab-btn active" onclick="switchTab('diaria')" id="btn-diaria">Meta Diária</button>
-                <button class="tab-btn" onclick="switchTab('semanal')" id="btn-semanal">Meta Semanal</button>
-                <button class="tab-btn" onclick="switchTab('quinzenal')" id="btn-quinzenal">Meta Quinzenal</button>
-                <div class="tab-glider"></div>
+                <div id="wrapper-metas" class="view-content active">
+            <div class="rank-controls-bar animated-border-controls">
+                <div class="season-tabs">
+                    <button class="tab-btn active" onclick="switchTab('diaria')" id="btn-diaria">Meta Diária</button>
+                    <button class="tab-btn" onclick="switchTab('semanal')" id="btn-semanal">Meta Semanal</button>
+                    <button class="tab-btn" onclick="switchTab('quinzenal')" id="btn-quinzenal">Meta Quinzenal</button>
+                    <div class="tab-glider"></div>
+                </div>
             </div>
 
             {{-- <div class="search-wrapper">
@@ -392,6 +403,193 @@
             <div class="col-status text-center">Status</div>
         </div>
 
+        {{-- COPA PROFIT VISUAL AAA/BATTLE PASS  --}}
+        <div id="wrapper-copa" class="view-content">
+            <div class="chart-dashboard-wrapper-vertical">
+                <div class="copa-profit-section">
+                    {{-- button --}}
+                    <button class="close-copa" onclick="switchMainView('metas')">&times;</button>
+                    
+                    {{-- header da copa --}}
+                    <div class="copa-header">
+                        <div class="copa-title-wrapper">
+                            <h1 class="copa-main-title">COPA PROFIT <span class="year">{{ $copaYear }}</span></h1>
+                            <p class="copa-subtitle">{{ implode(' • ', $copaMonths) }}</p>
+                        </div>
+                        <div class="total-prize-pool">
+                            <span class="prize-label">PREMIAÇÃO TOTAL EM JOGO</span>
+                            <span class="prize-value">@real($copaPrize)</span>
+                        </div>
+                    </div>
+
+            {{-- PODIO 1: plataformas --}}
+            <div class="podium-grid-container">
+
+                @php
+                    // Reorganiza visualmente o pódio
+                    $orderedPlatforms = [
+                        $podium[1], // 2º lugar
+                        $podium[0], // 1º lugar
+                        $podium[2], // 3º lugar
+                    ];
+                @endphp
+
+                <div class="podium-structure">
+
+                    @foreach ($orderedPlatforms as $item)
+                        @php
+                            $placeClass = match ($item['rank']) {
+                                1 => 'place-1 champion',
+                                2 => 'place-2',
+                                3 => 'place-3',
+                                default => '',
+                            };
+                        @endphp
+
+                        <div class="podium-place {{ $placeClass }}">
+
+                            @if ($item['rank'] === 1)
+                                <div class="champion-crown-floater"><i class="fas fa-crown"></i></div>
+                            @endif
+
+                            <div class="avatar-container @if ($item['rank'] === 1) champion-avatar @endif">
+                                <i class="fas fa-dragon"></i>
+                            </div>
+
+                            <div class="place-info">
+                                <span class="place-rank">
+                                    @if ($item['rank'] === 1)
+                                        #1 CAMPEÃO
+                                    @else
+                                        #{{ $item['rank'] }}
+                                    @endif
+                                </span>
+
+                                <span class="place-name">{{ $item['name'] }}</span>
+                                <div class="flex price-podio">
+                                    <span class="place-profit @if ($item['rank'] === 1) gold-text @endif">
+                                        @dollar($item['profit'])
+                                    </span>
+                                    <span class="roi-badge positive">{{ $item['roi'] * 100 }}% <i
+                                            class="fas fa-caret-up"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="pedestal-block @if ($item['rank'] === 1) champion-pedestal @endif">
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+
+                {{-- PODIO 2: COPYS (R$ 20K) --}}
+                <div class="podium-category copy-category">
+                    <div class="category-header-podium">
+                        <h3 class="category-title"><i class="fas fa-pen-nib"></i> MELHOR COPY</h3>
+                        <div class="category-prize silver">@real($copiePrize)</div>
+                    </div>
+
+                    <div class="podium-structure compact-podium">
+                        <div class="podium-flat-list">
+
+                            @foreach ($copiesPodium as $copy)
+                                <div class="flat-item rank-{{ $copy['rank'] }}">
+
+                                    {{-- Ícone apenas para o primeiro lugar --}}
+                                    @if ($copy['rank'] === 1)
+                                        <i class="fas fa-crown gold-icon"></i>
+                                    @else
+                                        <div class="flat-rank">#{{ $copy['rank'] }}</div>
+                                    @endif
+
+                                    <div class="flat-avatar gen-avatar">
+                                        {{ $copy['avatar'] }}
+                                    </div>
+
+                                    <div class="flat-info">
+                                        <strong>{{ $copy['name'] }}</strong>
+                                        <span>@dollar($copy['profit'])</span>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+                </div>
+
+
+                {{-- PODIO 3: EDITORES --}}
+                <div class="podium-category editor-category">
+                    <div class="category-header-podium">
+                        <h3 class="category-title"><i class="fas fa-video"></i> MELHOR EDITOR</h3>
+                        <div class="category-prize bronze">@real($editorPrize)</div>
+                    </div>
+
+                    <div class="podium-structure compact-podium">
+                        <div class="podium-flat-list">
+
+                            @foreach ($editorsPodium as $editor)
+                                <div class="flat-item rank-{{ $editor['rank'] }}">
+
+                                    @if ($editor['rank'] === 1)
+                                        <i class="fas fa-crown gold-icon"></i>
+                                    @else
+                                        <div class="flat-rank">#{{ $editor['rank'] }}</div>
+                                    @endif
+
+                                    <div class="flat-avatar gen-avatar editor-av">
+                                        {{ $editor['avatar'] }}
+                                    </div>
+
+                                    <div class="flat-info">
+                                        <strong>{{ $editor['name'] }}</strong>
+                                        <span>@dollar($editor['profit'])</span>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            {{-- Fim--}}
+    </div> {{-- fim copa profit --}}
+
+            {{-- SCRIPT DA COPA PROFIT (TROCA DE SELECAO) --}}
+            <script>
+            function switchMainView(view) {
+            // elementos
+            const btnMetas = document.getElementById('btn-view-metas');
+            const btnCopa = document.getElementById('btn-view-copa');
+            
+            // conteiners
+            const wrapperMetas = document.getElementById('wrapper-metas');
+            const wrapperCopa = document.getElementById('wrapper-copa');
+
+            if (view === 'metas') {
+                // ativacao
+                btnMetas.classList.add('active');
+                btnCopa.classList.remove('active');
+                
+                wrapperMetas.classList.add('active');
+                wrapperCopa.classList.remove('active');
+            } else {
+                
+                btnCopa.classList.add('active');
+                btnMetas.classList.remove('active');
+                
+                wrapperCopa.classList.add('active');
+                wrapperMetas.classList.remove('active');
+                
+                // confester ao abrir 
+                fireConfetti();
+            }
+        }
+            </script>
+            {{-- FINAL DO SCRITP DA COPA PROFIT  --}}
+
+            
 
             <div class="table-body-rows" id="rankingTableBody">
                 {{-- dados via JS --}}

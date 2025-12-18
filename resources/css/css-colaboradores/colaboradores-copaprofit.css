@@ -1,0 +1,379 @@
+/* COMECO COPA PROFIT */
+        :root {
+
+
+            /* CORES VISUAL COPA PROFIT */
+            --gold-1: #FFD700;
+            --gold-2: #FFA500;
+            --gold-glow: rgba(255, 215, 0, 0.5);
+            --silver-1: #E0E0E0;
+            --silver-2: #B0B0B0;
+            --bronze-1: #CD7F32;
+            --bronze-2: #A0522D;
+            --neon-purple: #ff7300;
+            --neon-blue: #0f53ff;
+            --bg-copa: linear-gradient(135deg, rgba(10, 10, 15, 0.8) 0%, rgba(20, 20, 30, 0.6) 100%);
+        }
+
+        /* COPA PROFIT CONTEINER/SECTITON */
+        .copa-profit-section {
+            background: var(--bg-copa);
+            border-radius: 30px;
+            padding: 40px;
+            position: relative;
+            border: 1px solid rgba(15, 83, 255, 0.3);
+            box-shadow: 0 0 50px rgba(15, 83, 255, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* fundo padarao - da para adicionar um backgorund */
+        .copa-profit-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(15, 83, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .copa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+
+        .copa-main-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -2px;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(15, 83, 255, 0.8);
+        }
+
+        .copa-main-title .year {
+            color: transparent;
+            -webkit-text-stroke: 2px var(--color-primary);
+            font-style: italic;
+            margin-left: 10px;
+        }
+
+        .copa-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 5px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .total-prize-pool {
+            text-align: right;
+        }
+
+        .prize-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--color-success);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .prize-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(90deg, #fff, var(--color-success));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* grid dos podios */
+        .price-podio {
+            display: flex;
+            column-gap: 0.5rem;
+        }
+
+        .price-podio .roi-badge {
+            font-size: 7pt;
+            color: white !important;
+            align-items: center;
+        }
+
+        .podium-grid-container {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-header-podium {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px;
+            border-radius: 12px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title i {
+            color: var(--color-primary);
+        }
+
+        .category-prize {
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #000;
+        }
+
+        .category-prize.gold {
+            background: var(--gold-1);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .category-prize.silver {
+            background: var(--silver-1);
+        }
+
+        .category-prize.bronze {
+            background: var(--bronze-1);
+        }
+
+        /* estrutura do podium dos squads */
+        .podium-structure {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 300px;
+            gap: 10px;
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+            position: relative;
+        }
+
+        /* avatares para representar o squad/nome de todo mundo */
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #333;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+
+        .champion-avatar {
+            width: 80px;
+            height: 80px;
+            border-color: var(--gold-1);
+            background: linear-gradient(135deg, #000, #333);
+            font-size: 2.5rem;
+            box-shadow: 0 0 25px var(--gold-glow);
+        }
+
+        .place-info {
+            text-align: center;
+            margin-bottom: 10px;
+            z-index: 2;
+        }
+
+        .place-rank {
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .place-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+            white-space: nowrap;
+        }
+
+        .place-profit {
+            font-size: 0.8rem;
+            color: var(--color-success);
+            font-weight: 600;
+        }
+
+        .gold-text {
+            color: var(--gold-1);
+        }
+
+        /* pedestral */
+        .pedestal-block {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(15, 83, 255, 0.6) 0%, rgba(15, 83, 255, 0.1) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+        }
+
+        .place-2 .pedestal-block {
+            height: 100px;
+        }
+
+        .place-3 .pedestal-block {
+            height: 70px;
+        }
+
+        .champion-pedestal {
+            height: 140px;
+            background: linear-gradient(180deg, var(--color-primary) 0%, rgba(15, 83, 255, 0.3) 100%);
+            box-shadow: 0 0 30px rgba(15, 83, 255, 0.4);
+        }
+
+        .champion-crown-floater {
+            position: absolute;
+            top: -40px;
+            color: var(--gold-1);
+            font-size: 2.5rem;
+            animation: floatCrown 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px var(--gold-1));
+        }
+
+        /* copy e editores flat list*/
+        .podium-flat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .flat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flat-item.rank-1 {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .flat-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .gold-icon {
+            color: var(--gold-1);
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .flat-rank {
+            width: 30px;
+            font-weight: 800;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .gen-avatar {
+            width: 35px;
+            height: 35px;
+            background: #333;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .flat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .flat-info strong {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .flat-info span {
+            color: var(--color-success);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* animacao padrao */
+        @keyframes floatCrown {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes pulseGold {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+
+        /* responsividade */
+        @media (max-width: 1200px) {
+            .chart-dashboard-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .podium-grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+/* FINAL COPA PROFIT */

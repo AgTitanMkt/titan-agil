@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Dashboard\CopaProfitService;
+use App\Services\Dashboard\SquadService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -59,7 +60,20 @@ class ColaboradoresController extends Controller
         // dd($metricasQuinzenal);
 
         $metrics = new CopaProfitService(Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth())->getPlatformsMetricsGroup();
-                
+        $copaService = new CopaProfitService();
+        $copaData = $copaService->make();
+        $podium = $copaData['podium'];
+        $copiesPodium = $copaData['copiesPodium'];
+        $editorsPodium = $copaData['editorsPodium'];
+        $copaYear = $copaData['copaYear'];
+        $copaMonths = $copaData['copaMonths'];
+        $copaPrize = $copaData['copaPrize'];
+        $editorPrize = $copaData['editorPrize'];
+        $copiePrize = $copaData['copiePrize'];
+        $aliasRanking = new SquadService()->rankByAlias(4);
+        $aliasRanking = $aliasRanking->filter(function ($item) {
+            return $item['profit'] > 0;
+        });      
         return view('colaboradores.metas', compact([
             'metasSemanal',
             'metasDiaria',
@@ -70,6 +84,16 @@ class ColaboradoresController extends Controller
             'metricasQuinzenal',
             'metricasDiariaSources',
             'metricasSemanaSources',
+            'copaData',
+            'podium',
+            'copiesPodium',
+            'editorsPodium',
+            'copaYear',
+            'copaMonths',
+            'copaPrize',
+            'editorPrize',
+            'copiePrize',
+            'aliasRanking',
             'metricasQuinzSources',
         ]));
     }

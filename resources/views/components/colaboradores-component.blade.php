@@ -22,7 +22,7 @@
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORS //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES // 
         'resources/css/css-colaboradores/colaboradores-metas.css', // CSS DAS METAS // 
-        // CSS DA COPA PROFIT  'resources/css/css-colaboradores/colaboradores-copaprofit.css', // CSS DA COPA PROFIT // // 
+        'resources/css/css-colaboradores/colaboradores-copaprofit.css', // CSS COPA PROFIT NOVO // 
         'resources/js/app.js',
     ])
     @stack('styles')
