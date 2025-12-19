@@ -7,7 +7,7 @@
         <header class="titan-header-container">
             <div class="header-content">
                 <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                <span class="brand-name">Titan</span>
+                <span class="brand-name">Agência Titan</span>
             </div>
         </header>
 
@@ -38,17 +38,101 @@
         </div>
 
         <section id="section-dashboard" class="content-section">
-            <div class="placeholder-content">
-                <h3>Dashboard Carregado</h3>
-                <p>Área de métricas individuais e squads.</p>
-            </div>
-        </section>
+    
+    <div class="filter-control-panel">
+        <div class="filter-inner-box">
+            <h3 class="filter-main-title">Seleção de Filtro</h3>
+            <p class="filter-sub-title">Escolha o período desejado e veja as novas métricas.</p>
+            
+            <form class="filters-grid filters-grid-production">
+                <div class="filter-group">
+                    <x-date-range 
+                        name="date" 
+                        :from="$startDate" 
+                        :to="$endDate" 
+                        label="Intervalo de Datas" 
+                    />
+                </div>
+                <button type="button" class="btn-filter-action">Filtrar</button>
+            </form>
+        </div>
+    </div>
 
-        <section id="section-creatives" class="content-section" style="display: none;">
-            <div class="placeholder-content">
-                <h3>Seção de Criativos Carregada</h3>
+    <div class="section-divider">
+        <h2 class="display-title">Performance Geral</h2>
+        <p class="display-subtitle">Nicho: Mrm, Ed, Wl</p>
+    </div>
+
+    <div class="main-metrics-row">
+        <div class="metric-card-primary glow-blue">
+            <div class="card-icon-top">
+                <i class="fas fa-briefcase"></i>
             </div>
-        </section>
+            <div class="internal-stack">
+                <div class="mini-card-outline">
+                    <span class="mini-label">Total Produzido</span>
+                    <span class="mini-value">x.xxx Ads</span>
+                </div>
+                <div class="mini-card-outline">
+                    <span class="mini-label">Total Testado</span>
+                    <span class="mini-value">x.xxx Ads</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card-secondary">
+            <div class="card-icon-top">
+                <i class="fas fa-percent"></i>
+            </div>
+            <div class="internal-stack">
+                <div class="mini-card-outline secondary-border">
+                    <span class="mini-label">Em validação</span>
+                    <span class="mini-value">xx% | xx Ads</span>
+                </div>
+                <div class="mini-card-outline secondary-border">
+                    <span class="mini-label">Taxa de Acerto</span>
+                    <span class="mini-value">xx% | xx Ads</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="secondary-metrics-grid">
+        <div class="small-metric-card">
+            <span class="small-label">Melhor Nicho</span>
+            <span class="small-data">MM | <span class="highlight-roi">xx% ROI</span></span>
+        </div>
+        <div class="small-metric-card">
+            <span class="small-label">Maior Nicho</span>
+            <span class="small-data">MM | <span class="highlight-profit">xx% do Profit</span></span>
+        </div>
+
+        <div class="small-metric-card">
+            <span class="small-label">Melhor Copy</span>
+            <span class="small-data">Nome | <span class="highlight-roi">xx% ROI</span></span>
+        </div>
+        <div class="small-metric-card">
+            <span class="small-label">Maior Copy</span>
+            <span class="small-data">Nome | <span class="highlight-profit">xx% do Profit</span></span>
+        </div>
+
+        <div class="small-metric-card">
+            <span class="small-label">Melhor Dupla</span>
+            <span class="small-data">RB e JP | <span class="highlight-roi">xx% ROI</span></span>
+        </div>
+        <div class="small-metric-card">
+            <span class="small-label">Maior Dupla</span>
+            <span class="small-data">RB e JP | <span class="highlight-profit">xx% do Profit</span></span>
+        </div>
+    </div>
+
+</section>
+
+        {{-- <section id="section-creatives" class="content-section" style="display: none;">
+            <div class="placeholder-content">
+                <h3>Seção de Criativos Aqui (vou adicionar o codigo antigo) </h3>
+            </div>
+        </section> --}}
 
     </div>
 

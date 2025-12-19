@@ -1,6 +1,6 @@
 :root {
     --titan-blue-dark: #050a1a;
-    --titan-blue-vibrant: #0055ff;
+    --titan-blue-vibrant: #0075FF;
     --titan-blue-glow: rgba(0, 85, 255, 0.4);
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
@@ -13,7 +13,7 @@
     min-height: 100vh;
     position: relative;
     /* background-image, cover, position, outros... */
-    background-image: url('/resources/img/img-admin/BackgroundAzulCopy.png');
+    background-image: url('/resources/img/img-admin/BackgroundAzulCopy.png'); /* trocar depois antes de enviar para o repositorio */
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
@@ -32,11 +32,11 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* HEADER BRANDING */
+/* HEADER */
 .titan-header-container {
     width: 100%;
     max-width: 1100px;
-    background: linear-gradient(90deg, #001a4d 0%, #0044cc 100%);
+    background: linear-gradient(90deg, #001a4d 0%, #0075FF 100%);
     border-radius: 20px;
     padding: 15px 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -50,8 +50,9 @@
 }
 
 .sidebar-logo {
-    height: 40px;
+    height: 60px;
     filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+    align-items: center;
 }
 
 .brand-name {
@@ -111,7 +112,7 @@
 .circle-icon {
     width: 50px;
     height: 50px;
-    background: #0044cc;
+    background: #0075FF;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -157,13 +158,13 @@
 
 /* ESTADO NAO SELECIONADO */
 .btn-toggle.inactive {
-    background-color: #0044cc;
+    background-color: #0075FF;
     color: #ffffff;
     opacity: 0.9;
 }
 
 .btn-toggle.inactive:hover {
-    background-color: #0055ff;
+    background-color: #0075FF;
     opacity: 1;
 }
 
@@ -186,3 +187,214 @@
     padding: 100px;
     text-align: center;
 }
+
+/* FILTRO DE PERIODO */
+.filter-control-panel {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 50px;
+     background: radial-gradient(
+        circle at top,
+        rgba(25, 40, 120, 0.35),
+        rgba(5, 15, 40, 0.9) 70%
+    );
+    border: 1px solid rgba(80, 120, 255, 0.25);
+    border-radius: 20px;
+    padding: 35px 30px;
+     box-shadow:
+        0 0 40px rgba(90, 120, 255, 0.25),
+        inset 0 0 25px rgba(90, 120, 255, 0.15);
+    text-align: center;
+}
+
+/* TITULO PERIODO */
+.filter-main-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* SUBTITULO PERIODO */
+.filter-sub-title {
+    font-size: 0.9rem;
+    opacity: 0.55;
+    margin-bottom: 25px;
+}
+
+/* COLUNAS, PERIODO EM CIMA ABAIXO BUTTON  */
+.filters-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+/* CONTAINER DO DATE RANGE */
+.filter-group {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* BUTTON FILTRAR */
+.btn-filter-action {
+    margin-top: 8px;
+    background: #3a3a3a;
+    color: #cfcfcf;
+    border: none;
+    padding: 10px 45px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+/* HOVER */
+.btn-filter-action:hover {
+    background: #ffffff;
+    color: #0075FF;
+     box-shadow:
+        0 0 40px rgba(2, 171, 238, 0.25),
+        inset 0 0 25px rgba(1, 192, 250, 0.15);
+}
+
+.btn-filter-action:hover::after {
+    background: #ffffff;
+    color: #0075FF;
+    box-shadow:
+        0 0 40px rgba(2, 171, 238, 0.25),
+        inset 0 0 25px rgba(1, 192, 250, 0.15);
+}
+
+
+/* PERFOMANCE GERAL */
+.section-divider {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.display-title {
+    font-size: 2.5rem;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.display-subtitle {
+    color: #888;
+    font-style: italic;
+}
+
+/* CONTEINER DE METRICAS DO PERFOMANCE GERAL */
+.main-metrics-row {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.metric-card-primary {
+    flex: 1;
+    min-width: 450px;
+    max-width: 600px;
+    height: 350px;
+    border-radius: 25px;
+    position: relative;
+    padding: 40px;
+    background-image: linear-gradient(rgba(5, 10, 26, 0.6), rgba(5, 10, 26, 0.6)), 
+                      url('/resources/img/img-colaboradores/metas-fundo.png');
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(0, 85, 255, 0.5);
+    box-shadow: 0 0 40px rgba(0, 85, 255, 0.4); 
+}
+
+.metric-card-secondary {
+    width: 250px;
+    background: rgba(5, 10, 26, 0.9);
+    border: 1px solid rgba(0, 85, 255, 0.2);
+    border-radius: 25px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0 20px rgba(0, 85, 255, 0.1);
+}
+
+.card-icon-top {
+    font-size: 2rem;
+    color: #00d9ff;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.internal-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.mini-card-outline {
+    border: 1px solid #0055ff;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.secondary-border {
+    border-color: rgba(0, 85, 255, 0.3);
+}
+
+.mini-label {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.mini-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* GRID INFERIOR - METRICAS SEGUNDARIAS DO PERFOMANCE GERAL */
+.secondary-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.small-metric-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.small-metric-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.small-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.small-data {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.highlight-roi { color: #00d9ff; }
+.highlight-profit { color: #00ff88; }
