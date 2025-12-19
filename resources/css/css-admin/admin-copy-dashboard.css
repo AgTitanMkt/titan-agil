@@ -1,0 +1,188 @@
+:root {
+    --titan-blue-dark: #050a1a;
+    --titan-blue-vibrant: #0055ff;
+    --titan-blue-glow: rgba(0, 85, 255, 0.4);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* CSS DO LAYOUT PARA BACKGROUND */
+.admin-page-wrapper {
+    display: flex;
+    /* ajustado para min-height: 100vh; */
+    min-height: 100vh;
+    position: relative;
+    /* background-image, cover, position, outros... */
+    background-image: url('/resources/img/img-admin/BackgroundAzulCopy.png');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+}
+
+
+
+.copy-main-wrapper {
+    min-height: 100vh;
+    /* background: radial-gradient(circle at top center, #0a1633 0%, #050a1a 100%);  achei melhor trocar o background da tela toda nao so dessa secao */ 
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+/* HEADER BRANDING */
+.titan-header-container {
+    width: 100%;
+    max-width: 1100px;
+    background: linear-gradient(90deg, #001a4d 0%, #0044cc 100%);
+    border-radius: 20px;
+    padding: 15px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-bottom: 60px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.sidebar-logo {
+    height: 40px;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* TITULOS */
+.title-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.main-title {
+    font-size: 3rem;
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.sub-title {
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.6;
+    font-weight: 300;
+}
+
+/* SELETOR */
+.selector-container {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 50px;
+}
+
+.glass-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.glass-box::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, rgba(0,85,255,0.3), transparent);
+    z-index: -1;
+}
+
+/* ICONE DE SETA */
+.circle-icon {
+    width: 50px;
+    height: 50px;
+    background: #0044cc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 20px var(--titan-blue-glow);
+    font-size: 1.2rem;
+}
+
+.instruction-text {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+}
+
+/* BOTOES DE ESTADO */
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-toggle {
+    padding: 12px 30px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* ESTADO SELECIONADO */
+.btn-toggle.active {
+    background-color: #ffffff;
+    color: #050a1a;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ESTADO NAO SELECIONADO */
+.btn-toggle.inactive {
+    background-color: #0044cc;
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+.btn-toggle.inactive:hover {
+    background-color: #0055ff;
+    opacity: 1;
+}
+
+/* PLACEHOLDER PARA CONTEUDO */
+.content-section {
+    width: 100%;
+    max-width: 1200px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.placeholder-content {
+    background: var(--glass-bg);
+    border: 1px dashed var(--glass-border);
+    border-radius: 20px;
+    padding: 100px;
+    text-align: center;
+}
