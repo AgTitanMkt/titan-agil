@@ -384,6 +384,209 @@
         }
     </style>
 
+        {{-- ADICIONADO OS PRINCIPIOS TITAN  --}}
+        <div class="titan-portal-container">
+    <div class="portal-card">
+        <div class="divine-light"></div>
+        
+        <div class="portal-content">
+            <div class="portal-header">
+                <div class="line"></div>
+                <span class="portal-title"><i class="fas fa-crown"></i> OS PRINCÍPIOS DA TITAN <i class="fas fa-crown"></i></span>
+                <div class="line"></div>
+            </div>
+
+            <div class="principle-display">
+                <h2 id="rotating-principle" class="golden-text">Velocidade acima de conforto</h2>
+            </div>
+
+            <div class="portal-footer">
+                <div class="progress-track">
+                    <div id="principle-progress" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        {{-- CSS DO PRINCIPIO TITAN --}}
+        <style>
+        :root {
+            --gold-primary: #0075FF;
+            --gold-dark: #1395ff;
+            --glass-bg: rgba(10, 10, 20, 0.85);
+        }
+
+        .titan-portal-container {
+            margin-bottom: 40px;
+            padding: 2px; 
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.15);
+        }
+
+        .portal-card {
+            background: var(--glass-bg);
+            border-radius: 13px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px;
+            border: 1px solid rgba(0, 162, 255, 0.2);
+        }
+
+        /* luz atras do texto */
+        .divine-light {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(0, 162, 255, 0.2) 0%, transparent 70%);
+            filter: blur(30px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .portal-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            text-align: center;
+        }
+
+        .portal-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .portal-title {
+            color: var(--gold-primary);
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .line {
+            height: 1px;
+            width: 50px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary));
+        }
+
+        .line:last-child {
+            background: linear-gradient(270deg, transparent, var(--gold-primary));
+        }
+
+        /* PRINCIPIO TITAN */
+        .golden-text {
+            color: #ffffff;
+            font-size: 2.2rem !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 15px 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'serif', 'Cinzel', Georgia; 
+        }
+
+        /* animacao de transicao */
+        .principle-hide {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+            filter: blur(10px);
+        }
+
+        .principle-show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+        }
+
+        /* barra de progresso */
+        .progress-track {
+            width: 200px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px auto 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px var(--gold-primary);
+        }
+        </style>
+       
+
+{{-- SCRIPT QUE VAI COLOCAR TODOS OS PRINCIPIOS TROCANDO AUTOMATICAMENTE --}}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const principles = [
+        "Velocidade acima de conforto",
+        "Lucro é a bússola, ego nunca",
+        "Autorresponsabilidade é o motor",
+        "Performance sem caráter não tem espaço"
+    ];
+
+    let currentIndex = 0;
+    const textElement = document.getElementById('rotating-principle');
+    const progressBar = document.getElementById('principle-progress');
+    const displayTime = 8000; // 8 SEGUNDOS PARA LER
+
+    function updatePrinciple() {
+        // sai o texto e entra o outro
+        textElement.classList.add('principle-hide');
+        textElement.classList.remove('principle-show');
+        
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % principles.length;
+            textElement.textContent = principles[currentIndex];
+            
+            
+            textElement.classList.remove('principle-hide');
+            textElement.classList.add('principle-show');
+            
+            startProgress();
+        }, 800);
+    }
+
+    function startProgress() {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        
+        setTimeout(() => {
+            progressBar.style.transition = `width ${displayTime - 800}ms linear`;
+            progressBar.style.width = '100%';
+        }, 50);
+    }
+
+    // inicia
+    textElement.classList.add('principle-show');
+    startProgress();
+    setInterval(updatePrinciple, displayTime);
+});
+</script>
+
+{{-- fIM DE TODO O PRINCIPIO TITAN --}}
+
+
+
     <h2 class="dashboard-page-title">Faturamento</h2>
     <p class="dashboard-page-subtitle">Monitoramento completo da saúde financeira da Titan de
         <b>{{ $startDate->format('d/m/Y') }} à {{ $endDate->format('d/m/Y') }}</b>.
