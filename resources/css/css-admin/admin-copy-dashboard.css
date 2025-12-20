@@ -398,3 +398,132 @@
 
 .highlight-roi { color: #00d9ff; }
 .highlight-profit { color: #00ff88; }
+
+/* SECAO GRAFICOS - PERFOMANCE INDIVIDUAL + SINERGIA DO TIME */
+.mt-80 { margin-top: 80px; }
+.title-italic-light { font-weight: 300; opacity: 0.7; font-style: italic; }
+
+.display-title-performance {
+    font-size: 2.5rem;
+    font-style: italic;
+    font-weight: 600;
+    margin-top: 60px;
+    margin-bottom: 60px; 
+    text-align: center;
+}
+
+/* SELETOR DE NICHO */
+.niche-selector-bar {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+    height: 80px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.niche-block {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    filter: saturate(0.5) brightness(0.7);
+}
+
+.niche-block.active { filter: saturate(1) brightness(1); flex: 1.5; }
+
+/* CORES DE TODOS OS NICHOS */
+.niche-block[data-niche="mrm"] { background-color: #0055ff; }
+.niche-block[data-niche="ed"] { background-color: #cc0000; }
+.niche-block[data-niche="wl"] { background-color: #00aa00; }
+.niche-block[data-niche="tn"] { background-color: #666666; }
+
+.niche-badge {
+    background: #fff;
+    padding: 5px 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.niche-badge .perc { 
+    color: #000; 
+    font-weight: 800; 
+    font-size: 0.9rem; 
+}
+
+.niche-badge .name { 
+    color: #666; 
+    font-size: 0.65rem; 
+    text-transform: uppercase; 
+    font-weight: 700; 
+}
+
+/* CONTAINER DO GRAFICO*/
+.graph-main-container {
+    width: 100%;
+    max-width: 1100px;
+    height: 550px;
+    background: #050a1a;
+    border-radius: 20px;
+    margin: 0 auto;
+    padding: 40px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: box-shadow 0.5s ease;
+}
+
+/* GLOWS */
+.glow-mrm { box-shadow: 0 0 40px rgba(0, 85, 255, 0.3); border-color: rgba(0, 85, 255, 0.4); }
+.glow-ed { box-shadow: 0 0 40px rgba(204, 0, 0, 0.3); border-color: rgba(204, 0, 0, 0.4); }
+.glow-wl { box-shadow: 0 0 40px rgba(0, 170, 0, 0.3); border-color: rgba(0, 170, 0, 0.4); }
+.glow-tn { box-shadow: 0 0 40px rgba(102, 102, 102, 0.3); border-color: rgba(102, 102, 102, 0.4); }
+
+/* QUADRANTES*/
+.quadrant-labels span {
+    position: absolute;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.label-tl { top: 50px; left: 50px; }
+.label-tr { top: 50px; right: 50px; }
+.label-bl { bottom: 80px; left: 100px; }
+.label-br { bottom: 80px; right: 50px; }
+
+/* BUTTON DE SELECAO */
+.toggle-buttons-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-synergy {
+    padding: 10px 25px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.btn-synergy.active { 
+    background: #fff; 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(255,255,255,0.3); 
+}
+
+.btn-synergy.inactive { 
+    background: #0055ff; 
+    color: #fff; 
+}

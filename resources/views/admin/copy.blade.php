@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-
+        {{-- COMECO DASHBOARD --}}
         <section id="section-dashboard" class="content-section">
     
     <div class="filter-control-panel">
@@ -126,8 +126,76 @@
         </div>
     </div>
 
-</section>
+        <div class="analytics-charts-section">
 
+    <div class="section-divider">
+        <h2 class="display-title-performance">Performance Individual <span class="title-italic-light">Geral</span></h2>
+    </div>
+
+    <div class="niche-selector-bar">
+        <div class="niche-block active" data-niche="mrm" onclick="updateNiche('mrm')">
+            <div class="niche-badge">
+                <span class="perc">49.65%</span>
+                <span class="name">Mister M</span>
+            </div>
+        </div>
+        <div class="niche-block ed" data-niche="ed" onclick="updateNiche('ed')">
+            <div class="niche-badge">
+                <span class="perc">45.20%</span>
+                <span class="name">Ed</span>
+            </div>
+        </div>
+        <div class="niche-block wl" data-niche="wl" onclick="updateNiche('wl')">
+            <div class="niche-badge">
+                <span class="perc">51.10%</span>
+                <span class="name">WL</span>
+            </div>
+        </div>
+        <div class="niche-block tn" data-niche="tn" onclick="updateNiche('tn')">
+            <div class="niche-badge">
+                <span class="perc">38.00%</span>
+                <span class="name">TN</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="container-graph-individual" class="graph-main-container glow-mrm">
+        <div class="quadrant-labels">
+            <span class="label-tl">Metralhadora</span>
+            <span class="label-tr">Estrelas</span>
+            <span class="label-bl">Gargalo</span>
+            <span class="label-br">Sniper</span>
+        </div>
+        <canvas id="chartIndividual"></canvas>
+    </div>
+
+    <div class="section-divider mt-80">
+        <h2 class="display-title">Sinergia do Time</h2>
+        
+        <div class="toggle-buttons-row">
+            <button class="btn-synergy active">Selecionar Copy</button>
+            <button class="btn-synergy inactive">Selecionar Editor</button>
+        </div>
+    </div>
+
+    <div id="container-graph-synergy" class="graph-main-container glow-mrm">
+        <div class="quadrant-labels">
+            <span class="label-tl">Alto Custo</span>
+            <span class="label-tr">Duplas Estrela</span>
+            <span class="label-bl">Baixa Perf.</span>
+            <span class="label-br">Boa Qualidade</span>
+        </div>
+        <canvas id="chartSynergy"></canvas>
+    </div>
+</div>
+
+{{-- GRAFICO --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
+</section> {{-- FIM DA SECTION DASHBOARD --}}
+
+
+        {{-- COMECO CRIATIVOS --}}
         {{-- <section id="section-creatives" class="content-section" style="display: none;">
             <div class="placeholder-content">
                 <h3>Seção de Criativos Aqui (vou adicionar o codigo antigo) </h3>
@@ -136,6 +204,8 @@
 
     </div>
 
+
+    {{-- SCRIPT PARA ALTERNAR ENTRE DASHBOARD E CRIATIVOS --}}
     <script>
         function switchView(view) {
             const btnDash = document.getElementById('btn-dashboard');
@@ -160,4 +230,113 @@
             }
         }
     </script>
+
+    {{-- SCRIPT PARA TROCAR DE NICHO E CONFIGURAR AS BOLHAS CONFOME O ROI --}}
+    <script>
+
+        // cores e estados
+        const nicheConfigs = {
+            mrm: { color: '#0055ff', class: 'glow-mrm' },
+            ed: { color: '#cc0000', class: 'glow-ed' },
+            wl: { color: '#00aa00', class: 'glow-wl' },
+            tn: { color: '#666666', class: 'glow-tn' }
+        };
+
+        // exemplos 
+        const dataExample = [
+            { x: 4.2, y: 32, r: 25, label: 'JT', name: 'Julia Tavares' },
+            { x: 1.8, y: 22, r: 15, label: 'RB', name: 'Rogerio Barenco' },
+            { x: 1.1, y: 16, r: 10, label: 'VG', name: 'Vinicius Gomes' },
+            { x: 3.5, y: 12, r: 20, label: 'XX', name: 'Bruna Aguiar' }
+        ];
+
+        function initCharts() {
+            const ctx1 = document.getElementById('chartIndividual').getContext('2d');
+            const ctx2 = document.getElementById('chartSynergy').getContext('2d');
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { 
+                title: { display: true, text: 'Y Quantidade', color: '#fff' },
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: '#fff' },
+                min: 0, max: 40
+            },
+            x: { 
+                title: { display: true, text: 'x ROI', color: '#fff' },
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: '#fff' },
+                min: 0, max: 6
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const d = context.raw;
+                        return [
+                            `${d.name} (Copy)`,
+                            `Produzidos: ${d.y} Ads`,
+                            `ROI: ${d.x}x`,
+                            `Profit: $${d.r * 10}K`
+                        ];
+                    }
+                }
+            }
+        }
+    };
+
+    window.chart1 = new Chart(ctx1, {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                data: dataExample,
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                hoverBackgroundColor: '#fff'
+            }]
+        },
+        options: commonOptions
+    });
+
+    window.chart2 = new Chart(ctx2, {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                data: dataExample,
+                backgroundColor: '#00aa00',
+                label: 'Sinergia'
+            }]
+        },
+        options: commonOptions
+    });
+}
+
+// funcao para trocar de nicho e glow
+    function updateNiche(nicheKey) {
+        // atualiza os botoes
+        document.querySelectorAll('.niche-block').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-niche="${nicheKey}"]`).classList.add('active');
+
+        // troca glow dos conteiners
+        const containers = document.querySelectorAll('.graph-main-container');
+        const config = nicheConfigs[nicheKey];
+        
+        containers.forEach(c => {
+            c.className = 'graph-main-container ' + config.class;
+        });
+
+        // dados do grafico
+        window.chart1.data.datasets[0].backgroundColor = config.color;
+        window.chart1.update();
+    }
+
+    // incia
+    document.addEventListener('DOMContentLoaded', initCharts);
+
+    </script>
+
+
 </x-layout>
