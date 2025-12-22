@@ -259,11 +259,65 @@ body {
     text-shadow: 0 0 8px rgba(15, 83, 255, 0.3);
 }
 
+/* COLUNAS DO MODAL DE CRIATIVOS  */
 .nested-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
+    table-layout: fixed;
+    border-collapse: collapse; 
 }
+
+.nested-table tbody td {
+    padding: 14px 12px;
+}
+
+.nested-table thead th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.nested-table th,
+.nested-table td {
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.nested-table th:nth-child(1),
+.nested-table td:nth-child(1) { width: 160px; text-align: left; }
+
+.nested-table th:nth-child(2),
+.nested-table td:nth-child(2) { width: 120px; }
+
+.nested-table th:nth-child(3),
+.nested-table td:nth-child(3) { width: 120px; }
+
+.nested-table th:nth-child(4),
+.nested-table td:nth-child(4) { width: 100px; }
+
+.nested-table th:nth-child(5),
+.nested-table td:nth-child(5) { width: 120px; }
+
+.nested-table th:nth-child(6),
+.nested-table td:nth-child(6),
+.nested-table th:nth-child(7),
+.nested-table td:nth-child(7),
+.nested-table th:nth-child(8),
+.nested-table td:nth-child(8),
+.nested-table th:nth-child(9),
+.nested-table td:nth-child(9),
+.nested-table th:nth-child(10),
+.nested-table td:nth-child(10),
+.nested-table th:nth-child(11),
+.nested-table td:nth-child(11) {
+    width: 110px;
+    text-align: right;
+}
+
+.nested-table th:nth-child(12),
+.nested-table td:nth-child(12) {
+    width: 90px;
+    text-align: center;
+}
+
 
 .nested-table th {
     background: var(--color-secondary); 
@@ -274,7 +328,7 @@ body {
     text-transform: uppercase;
     border: none;
     letter-spacing: 0.7px;
-    cursor: pointer; /* adicionado para indicar ordenacao da coluna */
+    cursor: pointer; 
     transition: background-color 0.2s;
 }
 
@@ -282,8 +336,15 @@ body {
     background-color: var(--color-hover-bg-intensity);
 }
 
-.nested-table thead tr th:first-child { border-top-left-radius: 10px; }
-.nested-table thead tr th:last-child { border-top-right-radius: 10px; }
+.nested-table thead tr th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.nested-table thead tr th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* FINALIZADO ALTERACOES */
 
 .creative-detail-row {
     background: rgba(255, 255, 255, 0.05);
