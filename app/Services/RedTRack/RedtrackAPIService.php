@@ -33,7 +33,7 @@ class RedtrackAPIService
         string $dateFrom,
         string $dateTo,
         ?string $group = 'source,rt_ad',
-        ?int $per = 1000,
+        ?int $per = 100,
         ?array $extra = []
     ) {
         $page = 1;
@@ -183,6 +183,8 @@ class RedtrackAPIService
                         ]);
                         throw new Exception($innerEx->getMessage());
                     }
+
+                    return $items;
                 }
 
                 Log::info("RedTrack → Página {$page} processada", [

@@ -47,15 +47,7 @@ class ColaboradoresController extends Controller
         $metricasSemanaSources  = (new CopaProfitService(Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()))->getPlatformsMetricsSources();
         $metricasQuinzSources   = (new CopaProfitService($inicio, $fim))->getPlatformsMetricsSources();
 
-        $metricasDiariaSources = collect($metricasDiariaSources)->filter(function($data){
-            return $data['total_profit'] > 0;
-        });
-        $metricasSemanaSources = collect($metricasSemanaSources)->filter(function($data){
-            return $data['total_profit'] > 0;
-        });
-        // $metricasQuinzSources = collect($metricasQuinzSources)->filter(function($data){
-        //     return $data['total_profit'] > 0;
-
+       
         $metricasQuinzSources = collect($metricasQuinzSources)->sum('total_profit');
         // dd($metricasQuinzenal);
 
@@ -70,10 +62,37 @@ class ColaboradoresController extends Controller
         $copaPrize = $copaData['copaPrize'];
         $editorPrize = $copaData['editorPrize'];
         $copiePrize = $copaData['copiePrize'];
-        $aliasRanking = new SquadService()->rankByAlias(4);
-        $aliasRanking = $aliasRanking->filter(function ($item) {
-            return $item['profit'] > 0;
-        });      
+        $aliasRanking = new SquadService(Carbon::now()->startOfDay(),Carbon::now()->endOfDay())->rankByAlias(4);
+
+        $squadsRanking = new SquadService(Carbon::now()->startOfDay(),Carbon::now()->endOfDay())->profit();
+        dd($squadsRanking);
+        
+        // dd($aliasRanking);
+
+        $groupedDiaria = collect($metricasDiariaSources)->groupBy(function ($item) {
+            if ($item['alias'] === 'google') {
+                return 'google';
+            }
+
+            if ($item['alias'] === 'facebook') {
+                return 'facebook';
+            }
+
+            return 'native';
+        });
+
+        $groupedSemanal = collect($metricasSemanaSources)->groupBy(function ($item) {
+            if ($item['alias'] === 'google') {
+                return 'google';
+            }
+
+            if ($item['alias'] === 'facebook') {
+                return 'facebook';
+            }
+
+            return 'native';
+        });
+
         return view('colaboradores.metas', compact([
             'metasSemanal',
             'metasDiaria',
@@ -82,8 +101,10 @@ class ColaboradoresController extends Controller
             'metricasDiaria',
             'metricasSemana',
             'metricasQuinzenal',
-            'metricasDiariaSources',
+            'groupedDiaria',
+            'groupedSemanal',
             'metricasSemanaSources',
+            'metricasDiariaSources',
             'copaData',
             'podium',
             'copiesPodium',

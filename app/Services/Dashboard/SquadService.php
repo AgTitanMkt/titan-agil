@@ -28,7 +28,7 @@ class SquadService
     /**
      * Retorna métricas de profit conforme o tipo do squad.
      *
-     * - top  : top 3 squads (facebook, tiktok, native, google_* se existirem)
+     * - top  : top 5 squads (facebook, tiktok, native, google_* se existirem...)
      * - all  : todos os squads agregados
      * - google: sempre segmentado em google_dime, google_ary, google_david
      * - outro: um squad específico (facebook, tiktok, native, google_*)
@@ -65,7 +65,7 @@ class SquadService
 
         return $grouped
             ->sortByDesc('profit')
-            ->take(3)
+            ->take(5)
             ->values();
     }
 
@@ -160,16 +160,19 @@ class SquadService
 
         if ($alias === 'google') {
             if (stripos($source, 'Dime') !== false) {
-                return 'google_dime';
+                return 'yt_fenix';
             }
             if (stripos($source, 'Ary') !== false) {
-                return 'google_ary';
+                return 'yt_shenlong';
             }
             if (stripos($source, 'David') !== false) {
-                return 'google_david';
+                return 'yt_shenlong';
+            }
+            if (stripos($source, 'Bryan') !== false) {
+                return 'yt_shenlong';
             }
 
-            // google sem Dime/Ary/David é descartado
+            // google sem Dime/Ary/David/Bryan é descartado
             return null;
         }
 

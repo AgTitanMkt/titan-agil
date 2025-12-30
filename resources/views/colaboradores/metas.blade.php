@@ -155,13 +155,13 @@
     <div class="goals-overview-grid">
     @php
         // VALORES MOCKADOS 
-        $progressDiariaFb = 115; // 115%
-        $progressDiariaYt = 75;  // 75%
-        $progressDiariaNt = 99;  // 99%
-        $progressSemanalFb = 100; // 100%
-        $progressSemanalYt = 60; // 60%
-        $progressSemanalNt = 85; // 85%
-        $progressQuinzenal = 55; // 55%
+        $progressDiariaFb = number_format(($groupedDiaria['facebook']->sum('total_profit')/$metasDiaria['facebook'])*100,0);
+        $progressDiariaYt = number_format(($groupedDiaria['google']->sum('total_profit')/$metasDiaria['google'])*100,0);
+        $progressDiariaNt = number_format(($groupedDiaria['native']->sum('total_profit')/$metasDiaria['native'])*100,0);
+        $progressSemanalFb = number_format(($groupedSemanal['facebook']->sum('total_profit')/$metasSemanal['facebook'])*100,0);
+        $progressSemanalYt = number_format(($groupedSemanal['google']->sum('total_profit')/$metasSemanal['google'])*100,0);
+        $progressSemanalNt = number_format(($groupedSemanal['native']->sum('total_profit')/$metasSemanal['native'])*100,0);
+        $progressQuinzenal = number_format(($metricasQuinzSources/$metaQuinzenal)*100,0);
     @endphp
 
     {{-- META DIARIA --}}
@@ -261,7 +261,7 @@
         <div class="card-glow"></div>
         <h3 class="goal-title" style="color: #fff;">META QUINZENAL</h3>
         
-        <div class="val-row consolidated-row">
+        <div class="consolidated-row">
             <span class="goal-sub" style="color: #fff; margin-right: 15px;">Consolidado Geral</span>
             <div class="progress-track">
                 <div class="progress-fill consolidated @if($progressQuinzenal >= 100) success @endif" 
@@ -636,6 +636,9 @@
             semanal: @json($metricasSemana),
             quinzenal: @json($metricasQuinzenal),
         };
+
+        console.log(window.metricas);
+        
     </script>
 
     {{-- Atualizar podio --}}
