@@ -9,9 +9,16 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Comand para sincrinizar dados redtrack
 Schedule::command('sync:redtrack --from="'.Carbon::now()->format('Y-m-d').'" --to="'.Carbon::now()->format('Y-m-d').'"')
     ->everyTenMinutes()
     ->withoutOverlapping()
     ->runInBackground()
     ->sendOutputTo(storage_path('logs/sync_redtrack.log'));
 
+// Command para validação de criativos'
+Schedule::command('creatives:validate')
+    ->everyTwoHours()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->sendOutputTo(storage_path('logs/creatives_validate.log'));
