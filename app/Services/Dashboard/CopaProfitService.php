@@ -213,7 +213,7 @@ class CopaProfitService
     private function getAgentsPodiums()
     {
         $agents = new AgentsService($this->quarterStart, $this->quarterEnd);
-        $copies = $agents->rankCopies(2);
+        $copies = $agents->rankCopies(3);
         $editors = $agents->rankEditors(3);
 
         return [

@@ -123,6 +123,7 @@ class AgentsService
 
             // ⚠️ role opcional (recomendo mover para fora)
             ->whereBetween('rt.date', [$this->startAt, $this->finishAt])
+            ->where('ur.role_id', $roleId)
 
             ->select(
                 'u.id AS user_id',
