@@ -42,7 +42,7 @@
             <h3 class="filter-main-title">Seleção de Filtro</h3>
             <p class="filter-sub-title">Escolha o período desejado e veja as novas métricas.</p>
             
-            <form class="filters-grid filters-grid-production">
+            <form action="{{ route('admin.copywriters') }}" class="filters-grid filters-grid-production">
                 <div class="filter-group">
                     <x-date-range 
                         name="date" 
@@ -51,7 +51,7 @@
                         label="Intervalo de Datas" 
                     />
                 </div>
-                <button type="button" class="btn-filter-action">Filtrar</button>
+                <button type="submit" class="btn-filter-action">Filtrar</button>
             </form>
         </div>
     </div>
@@ -80,7 +80,6 @@
 
     <div class="section-divider">
         <h2 class="display-title">Performance Geral</h2>
-        <p class="display-subtitle">Nicho: Mrm, Ed, Wl</p>
     </div>
 
     <div class="main-metrics-row">
@@ -91,11 +90,11 @@
             <div class="internal-stack">
                 <div class="mini-card-outline">
                     <span class="mini-label">Total Produzido</span>
-                    <span class="mini-value">x.xxx Ads</span>
+                    <span class="mini-value">{{ $totalProduzido }} Ads</span>
                 </div>
                 <div class="mini-card-outline">
                     <span class="mini-label">Total Testado</span>
-                    <span class="mini-value">x.xxx Ads</span>
+                    <span class="mini-value">{{ $totalTestado }} Ads</span>
                 </div>
             </div>
         </div>
@@ -156,7 +155,7 @@
         <div class="niche-block active" data-niche="mrm" onclick="updateNiche('mrm')">
             <div class="niche-badge">
                 <span class="perc">49.65%</span>
-                <span class="name">Mister M</span>
+                <span class="name">MM</span>
             </div>
         </div>
         <div class="niche-block ed" data-niche="ed" onclick="updateNiche('ed')">

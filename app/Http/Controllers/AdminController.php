@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RedtrackReport;
+use App\Models\Task;
 use App\Models\User;
 use App\Services\Dashboard\AgentsService;
 use App\Services\Dashboard\CopaProfitService;
@@ -155,12 +156,34 @@ class AdminController extends Controller
             return $copy->metrics->sum('total_profit');
         })->values();
 
+        //dados para dashboard
+
+        $totalProduzido = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])->count();
+
+        $totalTestado = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])
+            ->whereHas('redtrackReports', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [
+                    $startDate->startOfDay(),
+                    $endDate->endOfDay()
+                ]);
+            })
+            ->count();
+
+        $emPotencial =     
 
         return view('admin.copy', compact(
             'copies',
             'allCopywriters',
             'startDate',
             'endDate',
+            'totalProduzido',
+            'totalTestado'
         ));
     }
 
