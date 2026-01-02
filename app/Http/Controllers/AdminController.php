@@ -443,7 +443,7 @@ class AdminController extends Controller
             ->get()
             ->groupBy('alias');
 
-        $copaService = new CopaProfitService();
+        $copaService = new CopaProfitService(null,null,4,2025);
         $copaData = $copaService->make();
         $podium = $copaData['podium'];
         $copiesPodium = $copaData['copiesPodium'];

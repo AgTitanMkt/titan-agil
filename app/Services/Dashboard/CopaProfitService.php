@@ -10,6 +10,7 @@ class CopaProfitService
 {
     private Carbon $startDate;
     private Carbon $endDate;
+    private int $dayOfStart;
     private Carbon $quarterStart;
     private Carbon $quarterEnd;
     private array $aliases = ['facebook', 'tiktok', 'google', 'native'];
@@ -18,17 +19,41 @@ class CopaProfitService
      * Construtor do serviço
      * - Se datas forem enviadas → usa as datas
      * - Se NÃO forem enviadas → usa o trimestre atual
+     * - dayOfStart é a data de inicio no ciclo, isso evita que ja no dia primeiro rode para o novo 
+     *      ciclo e perca os dados do ciclo anterior, isso dara uma gordura para obter os dados.
      */
-    public function __construct(?Carbon $startDate = null, ?Carbon $endDate = null)
-    {
+    public function __construct(
+        ?Carbon $startDate = null,
+        ?Carbon $endDate = null,
+        ?int $cycle = null,
+        ?int $year = null
+    ) {
+        // Se ciclo foi informado → ignora datas manuais
+        if ($cycle) {
+            [$cycleStart, $cycleEnd] = $this->getCyclePeriod(
+                $cycle,
+                $year ?? now()->year
+            );
+
+            $this->startDate = $cycleStart;
+            $this->endDate   = $cycleEnd;
+
+            $this->quarterStart = $cycleStart;
+            $this->quarterEnd   = $cycleEnd;
+
+            return;
+        }
+
+        // Comportamento atual (default)
         [$defaultStart, $defaultEnd] = $this->getQuarter();
 
-        $this->startDate  = $startDate  ? $startDate->copy()->startOfDay()  : $defaultStart;
-        $this->endDate    = $endDate    ? $endDate->copy()->endOfDay()      : $defaultEnd;
+        $this->startDate  = $startDate ? $startDate->copy()->startOfDay() : $defaultStart;
+        $this->endDate    = $endDate   ? $endDate->copy()->endOfDay()     : $defaultEnd;
 
         $this->quarterStart = $defaultStart;
         $this->quarterEnd   = $defaultEnd;
     }
+
 
     /* ============================================================
        TRIMESTRE AUTOMÁTICO
@@ -188,7 +213,6 @@ class CopaProfitService
     private function getAgentsPodiums()
     {
         $agents = new AgentsService($this->quarterStart, $this->quarterEnd);
-
         $copies = $agents->rankCopies(3);
         $editors = $agents->rankEditors(3);
 
@@ -223,7 +247,6 @@ class CopaProfitService
             $this->quarterStart->copy()->addMonth()->translatedFormat('F'),
             $this->quarterEnd->translatedFormat('F'),
         ];
-
         return [
             'totals'            => $this->getTotals(),
             'startDate'         => $this->startDate,
@@ -556,5 +579,28 @@ class CopaProfitService
 
             ->get()
             ->groupBy('user_id');
+    }
+
+    private function getCyclePeriod(int $cycle, int $year): array
+    {
+        return match ($cycle) {
+            1 => [
+                Carbon::create($year, 1, 1)->startOfMonth(),
+                Carbon::create($year, 3, 1)->endOfMonth(),
+            ],
+            2 => [
+                Carbon::create($year, 4, 1)->startOfMonth(),
+                Carbon::create($year, 6, 1)->endOfMonth(),
+            ],
+            3 => [
+                Carbon::create($year, 7, 1)->startOfMonth(),
+                Carbon::create($year, 9, 1)->endOfMonth(),
+            ],
+            4 => [
+                Carbon::create($year, 10, 1)->startOfMonth(),
+                Carbon::create($year, 12, 1)->endOfMonth(),
+            ],
+            default => throw new \InvalidArgumentException('Ciclo inválido'),
+        };
     }
 }
