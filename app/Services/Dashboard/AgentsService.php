@@ -105,10 +105,19 @@ class AgentsService
      */
     private function baseSubQuery(int $roleId)
     {
-        return DB::table('redtrack_reports AS rt')
+        return DB::table('tasks AS t')
 
-            // 🔗 Match correto
-            ->join('tasks AS t', function ($join) {
+            // 🔗 ATRIBUIÇÃO (quem produziu)
+            ->join('sub_tasks AS st', 'st.task_id', '=', 't.id')
+            ->join('user_tasks AS ut', 'ut.sub_task_id', '=', 'st.id')
+            ->join('users AS u', 'u.id', '=', 'ut.user_id')
+            ->join('user_roles AS ur', function ($join) use ($roleId) {
+                $join->on('ur.user_id', '=', 'u.id')
+                    ->where('ur.role_id', '=', $roleId);
+            })
+
+            // 🔗 RESULTADO FINANCEIRO (criativo inteiro)
+            ->join('redtrack_reports AS rt', function ($join) {
                 $join->on(
                     DB::raw('LOWER(rt.ad_code)'),
                     '=',
@@ -116,19 +125,13 @@ class AgentsService
                 );
             })
 
-            // 🔗 Quem produziu
-            ->join('sub_tasks AS st', 'st.task_id', '=', 't.id')
-            ->join('user_tasks AS ut', 'ut.sub_task_id', '=', 'st.id')
-            ->join('users AS u', 'u.id', '=', 'ut.user_id')
-
-            // ⚠️ role opcional (recomendo mover para fora)
             ->whereBetween('rt.date', [$this->startAt, $this->finishAt])
-            ->where('ur.role_id', $roleId)
 
             ->select(
                 'u.id AS user_id',
                 'u.name AS user_name',
                 't.code AS creative_code',
+
                 DB::raw('SUM(rt.clicks) AS rt_clicks'),
                 DB::raw('SUM(rt.conversions) AS rt_conversions'),
                 DB::raw('SUM(rt.cost) AS rt_cost'),
@@ -136,7 +139,7 @@ class AgentsService
                 DB::raw('SUM(rt.cost + rt.profit) AS rt_revenue')
             )
 
-            // 🔥 AGRUPA NO NÍVEL CERTO
+            // 🔥 AGREGAÇÃO NO NÍVEL CORRETO
             ->groupBy(
                 'u.id',
                 'u.name',
