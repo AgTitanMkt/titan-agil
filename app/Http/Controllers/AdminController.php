@@ -261,7 +261,6 @@ class AdminController extends Controller
         $endDate = $request->input('date_to')
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
-
         // filtros opcionais
         $aliasFilter = $request->input('alias', []);
 
@@ -315,14 +314,18 @@ class AdminController extends Controller
         // =====================================================================
 
         $monthlyProfit = RedtrackReport::selectRaw("
-            MONTH(date) as month_number,
-            DATE_FORMAT(date, '%b') as month_name,
-            LOWER(alias) as alias,
-            SUM(profit) as profit,
-            SUM(cost) as cost
-        ")
-            ->groupBy('month_number', 'month_name', 'alias')
+                YEAR(date)  AS year,
+                MONTH(date) AS month_number,
+                DATE_FORMAT(date, '%b') AS month_name,
+                LOWER(alias) AS alias,
+                SUM(profit) AS profit,
+                SUM(cost) AS cost
+            ")
+            ->whereBetween('date', [$startDate, $endDate])
+            ->groupBy('year', 'month_number', 'month_name', 'alias')
+            ->orderBy('year')
             ->orderBy('month_number');
+
 
         if ($aliasFilter) {
             $monthlyProfit->whereIn('alias', $aliasFilter);
@@ -443,7 +446,7 @@ class AdminController extends Controller
             ->get()
             ->groupBy('alias');
 
-        $copaService = new CopaProfitService(null,null,4,2025);
+        $copaService = new CopaProfitService(null, null, 4, 2025);
         $copaData = $copaService->make();
         $podium = $copaData['podium'];
         $copiesPodium = $copaData['copiesPodium'];
@@ -468,6 +471,7 @@ class AdminController extends Controller
             return $data['profit'];
         });
         $target = number_format($total / $expectedMonthlyProfit, 2) * 100;
+
 
         // =====================================================================
         // 🔹 RETORNO FINAL PARA A VIEW
