@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RedtrackReport;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\ValidatedCreative;
 use App\Services\Dashboard\AgentsService;
 use App\Services\Dashboard\CopaProfitService;
 use App\Services\Dashboard\SquadService;
@@ -163,7 +164,7 @@ class AdminController extends Controller
             $endDate->endOfDay()
         ])->count();
 
-        $totalTestado = Task::whereBetween('created_at', [
+        $testadas = Task::whereBetween('created_at', [
             $startDate->startOfDay(),
             $endDate->endOfDay()
         ])
@@ -173,9 +174,11 @@ class AdminController extends Controller
                     $endDate->endOfDay()
                 ]);
             })
-            ->count();
+            ->get();
+        $totalTestado = $testadas->count();
+            dd($testadas->first());
+        $emPotencial =  ValidatedCreative::whereIn('ad_code',$testadas->pluck('code'))    
 
-        $emPotencial =     
 
         return view('admin.copy', compact(
             'copies',

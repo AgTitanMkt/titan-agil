@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('ad_code')->unique();
+            // $table->unsignedBigInteger()
 
             // métricas consolidadas
             $table->integer('total_conversions');
