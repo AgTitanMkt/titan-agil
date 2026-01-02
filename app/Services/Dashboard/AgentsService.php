@@ -29,7 +29,6 @@ class AgentsService
     public function rank(int $roleId, $limit = null): Collection
     {
         $sub = $this->baseSubQuery($roleId);
-
         $baseQuery = DB::query()
             ->fromSub($sub, 'c')
             ->select(
@@ -107,37 +106,43 @@ class AgentsService
     private function baseSubQuery(int $roleId)
     {
         return DB::table('redtrack_reports AS rt')
-            ->join('tasks AS t', 't.normalized_code', '=', 'rt.normalized_rt_ad')
+
+            // 🔗 Match correto
+            ->join('tasks AS t', function ($join) {
+                $join->on(
+                    DB::raw('LOWER(rt.ad_code)'),
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
+            })
+
+            // 🔗 Quem produziu
             ->join('sub_tasks AS st', 'st.task_id', '=', 't.id')
             ->join('user_tasks AS ut', 'ut.sub_task_id', '=', 'st.id')
             ->join('users AS u', 'u.id', '=', 'ut.user_id')
-            ->join('user_roles AS ur', 'ur.user_id', '=', 'u.id')
-            ->where('ur.role_id', $roleId)
+
+            // ⚠️ role opcional (recomendo mover para fora)
             ->whereBetween('rt.date', [$this->startAt, $this->finishAt])
+
             ->select(
-                'u.id as user_id',
-                'u.name as user_name',
-                't.code as creative_code',
-                'rt.id as redtrack_id',
-                'rt.date as redtrack_date',
-                'rt.clicks as rt_clicks',
-                'rt.conversions as rt_conversions',
-                'rt.cost as rt_cost',
-                'rt.profit as rt_profit',
-                DB::raw('(rt.cost + rt.profit) as rt_revenue')
+                'u.id AS user_id',
+                'u.name AS user_name',
+                't.code AS creative_code',
+                DB::raw('SUM(rt.clicks) AS rt_clicks'),
+                DB::raw('SUM(rt.conversions) AS rt_conversions'),
+                DB::raw('SUM(rt.cost) AS rt_cost'),
+                DB::raw('SUM(rt.profit) AS rt_profit'),
+                DB::raw('SUM(rt.cost + rt.profit) AS rt_revenue')
             )
+
+            // 🔥 AGRUPA NO NÍVEL CERTO
             ->groupBy(
                 'u.id',
                 'u.name',
-                't.code',
-                'rt.id',
-                'rt.date',
-                'rt.clicks',
-                'rt.conversions',
-                'rt.cost',
-                'rt.profit'
+                't.code'
             );
     }
+
 
     /* Conveniências específicas */
     public function rankEditors($limit = null): Collection
@@ -159,7 +164,4 @@ class AgentsService
     {
         return $this->talentDetails(2, $userId);
     }
-
-    
-
 }
