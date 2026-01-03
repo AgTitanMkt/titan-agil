@@ -168,4 +168,38 @@ class AgentsService
     {
         return $this->talentDetails(2, $userId);
     }
+
+    public function duoMetrics()
+    {
+        return DB::table('redtrack_reports as rr')
+            ->selectRaw("
+        CONCAT(tc.tag, ' e ', te.tag) as dupla,
+
+        uc.id as copy_id,
+        uc.name as copy_name,
+        tc.tag as copy_tag,
+
+        ue.id as editor_id,
+        ue.name as editor_name,
+        te.tag as editor_tag,
+        COUNT(rr.id) as total_creatives,
+        SUM(rr.clicks) as total_clicks,
+        SUM(rr.conversions) as total_conversions,
+        SUM(rr.cost) as total_cost,
+        SUM(rr.profit) as total_profit,
+        (SUM(rr.profit)/NULLIF(SUM(rr.cost),0)) as roi
+    ")
+            // COPY (obrigatório)
+            ->join('tag_users as tc', 'tc.tag', '=', DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX(rr.name, '-', 2), '-', -1)"))
+            ->join('users as uc', 'uc.id', '=', 'tc.user_id')
+
+            // EDITOR (obrigatório)
+            ->join('tag_users as te', 'te.tag', '=', DB::raw("SUBSTRING_INDEX(rr.name, '-', -1)"))
+            ->join('users as ue', 'ue.id', '=', 'te.user_id')
+
+            ->whereBetween('rr.date', [$this->startAt, $this->finishAt])
+            ->groupBy('tc.tag', 'te.tag', 'uc.id', 'ue.id')
+            ->orderByDesc('total_profit')
+            ->get();
+    }
 }

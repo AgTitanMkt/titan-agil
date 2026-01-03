@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\RedtrackReport;
+use App\Models\Task;
 use App\Models\User;
+use App\Models\ValidatedCreative;
 use App\Services\Dashboard\AgentsService;
 use App\Services\Dashboard\CopaProfitService;
 use App\Services\Dashboard\SquadService;
+use App\Services\Tasks\TasksService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +80,9 @@ class AdminController extends Controller
 
     public function editors(Request $request)
     {
-        // 1️⃣ Datas
+        // -----------------------------------------
+        // 1️⃣ Intervalo de datas
+        // -----------------------------------------
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
             : Carbon::now()->startOfMonth();
@@ -86,36 +91,181 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
-        // 2️⃣ filtro (nomes) vindo do request
-        $editorFilter = $request->input('editors'); // pode ser array ou null
+        $editors = $request->input('editors');
 
-        // 3️⃣ lista de editores
+        $selectedEditorId = $request->input('editor_id');
+
+        // -----------------------------------------
+        // 2️⃣ Lista completa de copywriters (multiselect)
+        // -----------------------------------------
         $allEditors = $this->allEditorsArray();
 
-        // 4️⃣ busca dos usuários com role=editor
+        $metricsEditors = CopaProfitService::AgentsMetrics($startDate, $endDate, $editors);
+
+
         $editors = User::withRole(3)
             ->get();
-
-        $metricsEditors = CopaProfitService::AgentsMetrics($startDate, $endDate, $editorFilter);
-
-
         foreach ($editors as $editor) {
             $editor->metrics = $metricsEditors[$editor->id] ?? collect();
         }
+
         $editors = $editors->filter(fn($editor) => $editor->metrics->isNotEmpty());
 
         $editors = $editors->sortByDesc(function ($editor) {
             return $editor->metrics->sum('total_profit');
         })->values();
 
-        // 8️⃣ retorna view
+        //dados para dashboard
+
+        $totalProduzido = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])->count();
+
+        $testadas = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])
+            ->whereHas('redtrackReports', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [
+                    $startDate->startOfDay(),
+                    $endDate->endOfDay()
+                ]);
+            })
+            ->get();
+        $totalTestado = $testadas->count();
+        $emPotencial =  ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Potential', 1)
+            ->count();
+        $validados =  ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Validated', 1)
+            ->count();
+
+        $nichosService = new TasksService();
+        $dataNichos = $nichosService->dataNichos();
+        $topProfitNicho = $dataNichos->sortByDesc(function ($item) {
+            return (float) $item->total_profit;
+        })->first();
+        $topRoiNicho = $dataNichos->sortByDesc(function ($item) {
+            return (float) $item->roi;
+        })->first();
+        $totalProfitNichos = $dataNichos->sum('total_profit');
+        $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
+            $profit = (float) $nicho->total_profit;
+
+            $nicho->percent = $totalProfitNichos > 0
+                ? round(($profit / $totalProfitNichos) * 100, 2)
+                : 0;
+
+            return $nicho;
+        });
+
+        $totalProfitEditors = $editors->sum(function ($editor) {
+            return $editor->metrics->sum('total_profit');
+        });
+        $topEditorsRoi = $editors
+            ->filter(function ($editor) {
+                return $editor->metrics->sum('total_cost') > 0;
+            })
+            ->sortByDesc(function ($editor) {
+                return
+                    $editor->metrics->sum('total_profit') /
+                    $editor->metrics->sum('total_cost');
+            })
+            ->values()
+            ->first();
+
+        $topEditorsProfit = $editors->sortByDesc(function ($editor) {
+            return $editor->metrics->sum('total_profit');
+        })->values()->first();
+
+        $agentesServices = new AgentsService($startDate, $endDate);
+        $duplasData = $agentesServices->duoMetrics();
+        $topDuplaRoi = $duplasData->sortByDesc(function ($dupla) {
+            return $dupla->roi;
+        })->values()->first();
+
+        $topDuplaProfit = $duplasData->sortByDesc(function ($dupla) {
+            return $dupla->total_profit;
+        })->values()->first();
+
+        $chartIndividualData = $editors
+            ->filter(fn($editor) => $editor->metrics->count() > 0) // ignora quem não tem dados
+            ->map(function ($editor) {
+
+                $totalProfit = $editor->metrics->sum('total_profit');
+                $totalCost   = $editor->metrics->sum('total_cost');
+
+                return [
+                    'x'     => $totalCost > 0 ? round($totalProfit / $totalCost, 2) : 0, // ROI
+                    'y'     => $editor->metrics->count(),                                  // Produzidos
+                    'r'     => max(8, sqrt(abs($totalProfit)) / 15),                    // tamanho da bolha
+                    'label' => collect(explode(' ', $editor->name))
+                        ->map(fn($n) => strtoupper(substr($n, 0, 1)))
+                        ->take(2)
+                        ->implode(''),
+                    'name'  => $editor->name,
+                    'profit' => round($totalProfit, 2),
+                ];
+            })
+            ->values();
+
+        if ($selectedEditorId) {
+            $sinergyCopy = $duplasData
+                ->where('copy_id', $selectedEditorId)
+                ->first();
+        } else {
+            $sinergyCopy = $duplasData
+                ->groupBy('editor_id')
+                ->map(fn($items) => [
+                    'editor_id' => $items->first()->editor_id,
+                    'editor_name' => $items->first()->editor_name,
+                    'total_profit' => $items->sum('total_profit'),
+                ])
+                ->sortByDesc('total_profit')
+                ->first();
+        }
+        $sinergyCopy = is_array($sinergyCopy) ? $sinergyCopy['editor_id'] : $sinergyCopy->editor_id;
+        $synergyData = $duplasData
+            ->where('editor_id', $sinergyCopy)
+            ->values();
+        $chartSynergyData = $synergyData->map(fn($d) => [
+            'x' => (float) $d->roi,
+            'y' => (int) $d->total_creatives,
+            'r' => max(6, sqrt(abs($d->total_profit)) / 20),
+            'label' => $d->dupla,
+            'editor' => $d->editor_name,
+            'profit' => (float) $d->total_profit,
+            'roi' => (float) $d->roi,
+            'produced' => (int) $d->total_creatives,
+        ])->values();
+
+
         return view('admin.editors', compact(
             'editors',
             'allEditors',
             'startDate',
             'endDate',
+            'totalProduzido',
+            'totalTestado',
+            'emPotencial',
+            'validados',
+            'topProfitNicho',
+            'topRoiNicho',
+            'nichosBar',
+            'totalProfitNichos',
+            'totalProfitEditors',
+            'topEditorsProfit',
+            'topEditorsRoi',
+            'topDuplaRoi',
+            'topDuplaProfit',
+            'chartIndividualData',
+            'chartSynergyData',
+            'selectedEditorId',
+
         ));
     }
+
 
 
 
@@ -133,6 +283,8 @@ class AdminController extends Controller
             : Carbon::now()->endOfMonth();
 
         $copywriters = $request->input('copywriters');
+
+        $selectedCopyId = $request->input('copy_id');
 
         // -----------------------------------------
         // 2️⃣ Lista completa de copywriters (multiselect)
@@ -155,12 +307,155 @@ class AdminController extends Controller
             return $copy->metrics->sum('total_profit');
         })->values();
 
+        //dados para dashboard
+
+        $totalProduzido = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])->count();
+
+        $testadas = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])
+            ->whereHas('redtrackReports', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [
+                    $startDate->startOfDay(),
+                    $endDate->endOfDay()
+                ]);
+            })
+            ->get();
+        $totalTestado = $testadas->count();
+        $emPotencial =  ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Potential', 1)
+            ->count();
+        $validados =  ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Validated', 1)
+            ->count();
+
+        $nichosService = new TasksService();
+        $dataNichos = $nichosService->dataNichos();
+        $topProfitNicho = $dataNichos->sortByDesc(function ($item) {
+            return (float) $item->total_profit;
+        })->first();
+        $topRoiNicho = $dataNichos->sortByDesc(function ($item) {
+            return (float) $item->roi;
+        })->first();
+        $totalProfitNichos = $dataNichos->sum('total_profit');
+        $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
+            $profit = (float) $nicho->total_profit;
+
+            $nicho->percent = $totalProfitNichos > 0
+                ? round(($profit / $totalProfitNichos) * 100, 2)
+                : 0;
+
+            return $nicho;
+        });
+
+        $totalProfitCopies = $copies->sum(function ($copy) {
+            return $copy->metrics->sum('total_profit');
+        });
+
+        $topCopiesRoi = $copies
+            ->filter(function ($copy) {
+                return $copy->metrics->sum('total_cost') > 0;
+            })
+            ->sortByDesc(function ($copy) {
+                return
+                    $copy->metrics->sum('total_profit') /
+                    $copy->metrics->sum('total_cost');
+            })
+            ->values()
+            ->first();
+
+        $topCopiesProfit = $copies->sortByDesc(function ($copy) {
+            return $copy->metrics->sum('total_profit');
+        })->values()->first();
+
+        $agentesServices = new AgentsService($startDate, $endDate);
+        $duplasData = $agentesServices->duoMetrics();
+        $topDuplaRoi = $duplasData->sortByDesc(function ($dupla) {
+            return $dupla->roi;
+        })->values()->first();
+
+        $topDuplaProfit = $duplasData->sortByDesc(function ($dupla) {
+            return $dupla->total_profit;
+        })->values()->first();
+
+        $chartIndividualData = $copies
+            ->filter(fn($copy) => $copy->metrics->count() > 0) // ignora quem não tem dados
+            ->map(function ($copy) {
+
+                $totalProfit = $copy->metrics->sum('total_profit');
+                $totalCost   = $copy->metrics->sum('total_cost');
+
+                return [
+                    'x'     => $totalCost > 0 ? round($totalProfit / $totalCost, 2) : 0, // ROI
+                    'y'     => $copy->metrics->count(),                                  // Produzidos
+                    'r'     => max(8, sqrt(abs($totalProfit)) / 15),                    // tamanho da bolha
+                    'label' => collect(explode(' ', $copy->name))
+                        ->map(fn($n) => strtoupper(substr($n, 0, 1)))
+                        ->take(2)
+                        ->implode(''),
+                    'name'  => $copy->name,
+                    'profit' => round($totalProfit, 2),
+                ];
+            })
+            ->values();
+
+        if ($selectedCopyId) {
+            $sinergyCopy = $duplasData
+                ->where('copy_id', $selectedCopyId)
+                ->first();
+        } else {
+            $sinergyCopy = $duplasData
+                ->groupBy('copy_id')
+                ->map(fn($items) => [
+                    'copy_id' => $items->first()->copy_id,
+                    'copy_name' => $items->first()->copy_name,
+                    'total_profit' => $items->sum('total_profit'),
+                ])
+                ->sortByDesc('total_profit')
+                ->first();
+        }
+        $sinergyCopy = is_array($sinergyCopy) ? $sinergyCopy['copy_id'] : $sinergyCopy->copy_id;
+        $synergyData = $duplasData
+            ->where('copy_id', $sinergyCopy)
+            ->values();
+        $chartSynergyData = $synergyData->map(fn($d) => [
+            'x' => (float) $d->roi,
+            'y' => (int) $d->total_creatives,
+            'r' => max(6, sqrt(abs($d->total_profit)) / 20),
+            'label' => $d->dupla,
+            'editor' => $d->editor_name,
+            'profit' => (float) $d->total_profit,
+            'roi' => (float) $d->roi,
+            'produced' => (int) $d->total_creatives,
+        ])->values();
+
 
         return view('admin.copy', compact(
             'copies',
             'allCopywriters',
             'startDate',
             'endDate',
+            'totalProduzido',
+            'totalTestado',
+            'emPotencial',
+            'validados',
+            'topProfitNicho',
+            'topRoiNicho',
+            'nichosBar',
+            'totalProfitNichos',
+            'totalProfitCopies',
+            'topCopiesProfit',
+            'topCopiesRoi',
+            'topDuplaRoi',
+            'topDuplaProfit',
+            'chartIndividualData',
+            'chartSynergyData',
+            'selectedCopyId',
+
         ));
     }
 

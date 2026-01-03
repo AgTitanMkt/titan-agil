@@ -22,6 +22,7 @@
         'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES CTR (%) CPA//
+        'resources/css/css-admin/admin-copy-dashboard.css',  // CSS DO COPY PARA ABA DE DASHBOARD //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')

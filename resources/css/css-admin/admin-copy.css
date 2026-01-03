@@ -485,8 +485,153 @@
 }
 
 
+/* ALTERACOES */
+
+/* EXPANDE A SECTION DE COPY PARA FULL WIDTH */
+#section-creatives {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+#section-creatives .glass-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+#section-creatives .table-responsive {
+    width: 100%;
+}
+
+#section-creatives .metrics-main-table {
+    width: 100%;
+}
 
 
+/* FIM DAS ALTERACOES */
+
+
+/*  EM POTENCIAL BAGGE YES/NO*/
+
+.badge-yes {
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-no {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ==============================
+   RÉGUA DE NICHOS (PROFIT SHARE)
+============================== */
+
+.niche-selector-bar {
+    display: flex;
+    width: 100%;
+    height: 64px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-card-darker);
+    box-shadow: inset 0 0 0 1px var(--input-border);
+    margin-bottom: 25px;
+}
+
+/* bloco proporcional */
+.niche-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* efeito glass individual */
+.niche-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(6px);
+    z-index: 0;
+}
+
+/* hover */
+.niche-block:hover {
+    filter: brightness(1.15);
+}
+
+/* badge interno */
+.niche-badge {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: var(--text-white);
+    font-weight: 700;
+    line-height: 1.1;
+    pointer-events: none;
+}
+
+/* percentual */
+.niche-badge .perc {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+/* sigla */
+.niche-badge .name {
+    display: block;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+    .niche-selector-bar {
+        height: 56px;
+    }
+
+    .niche-badge .perc {
+        font-size: 0.7rem;
+    }
+
+    .niche-badge .name {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .niche-selector-bar {
+        height: 52px;
+    }
+
+    .niche-badge .perc {
+        display: none; /* mobile: só a sigla */
+    }
+
+    .niche-badge .name {
+        font-size: 0.95rem;
+    }
+}
+
+
+
+/* FIM */
 
 
 /* ESTA UTLIZANDO O CSS DO ADMIN-EDITORS.CSS */

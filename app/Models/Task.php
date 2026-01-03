@@ -22,6 +22,6 @@ class Task extends Model
 
     public function redtrackReports()
     {
-        return $this->hasMany(RedtrackReport::class, 'normalized_rt_ad', 'normalized_code');
+        return $this->hasMany(RedtrackReport::class, 'ad_code', 'code');
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\SubTask;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\UserDetail;
 use App\Models\UserTask;
 use Carbon\Carbon;
 use Exception;
@@ -216,14 +217,8 @@ class ClickUpAPIService
 
                 if (!empty($executedBy['email'])) {
                     $userExecutedBy = User::where('email', $executedBy['email'])->first();
-
-                    if (!$userExecutedBy) {
-                        $userExecutedBy = User::create([
-                            'name'     => $executedBy['name'] ?? 'Sem nome',
-                            'email'    => $executedBy['email'],
-                            // se seu model já tem cast 'password' => 'hashed', pode passar texto puro
-                            'password' => '12345678',
-                        ]);
+                    if($userExecutedBy == null){
+                        $userExecutedBy = UserDetail::where('personal_email',$executedBy['email'])->first()->user;
                     }
                 }
 
