@@ -425,7 +425,6 @@
 }
 
 .niche-block {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -526,4 +525,19 @@
 .btn-synergy.inactive { 
     background: #0055ff; 
     color: #fff; 
+}
+
+.copy-select {
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.copy-select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
 }

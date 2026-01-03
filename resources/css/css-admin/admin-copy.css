@@ -535,6 +535,102 @@
 }
 
 
+/* ==============================
+   RÉGUA DE NICHOS (PROFIT SHARE)
+============================== */
+
+.niche-selector-bar {
+    display: flex;
+    width: 100%;
+    height: 64px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-card-darker);
+    box-shadow: inset 0 0 0 1px var(--input-border);
+    margin-bottom: 25px;
+}
+
+/* bloco proporcional */
+.niche-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* efeito glass individual */
+.niche-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(6px);
+    z-index: 0;
+}
+
+/* hover */
+.niche-block:hover {
+    filter: brightness(1.15);
+}
+
+/* badge interno */
+.niche-badge {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: var(--text-white);
+    font-weight: 700;
+    line-height: 1.1;
+    pointer-events: none;
+}
+
+/* percentual */
+.niche-badge .perc {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+/* sigla */
+.niche-badge .name {
+    display: block;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+    .niche-selector-bar {
+        height: 56px;
+    }
+
+    .niche-badge .perc {
+        font-size: 0.7rem;
+    }
+
+    .niche-badge .name {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .niche-selector-bar {
+        height: 52px;
+    }
+
+    .niche-badge .perc {
+        display: none; /* mobile: só a sigla */
+    }
+
+    .niche-badge .name {
+        font-size: 0.95rem;
+    }
+}
+
+
+
 /* FIM */
 
 

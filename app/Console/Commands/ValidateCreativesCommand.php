@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\RedtrackReport;
+use App\Models\SubTask;
 use App\Models\ValidatedCreative;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -70,20 +71,28 @@ class ValidateCreativesCommand extends Command
          * 3️⃣ PROCESSAMENTO EM CHUNK
          * ===================================================== */
         $processed = 0;
-
         $activeCreatives->chunk(500)->each(function ($chunk) use (&$processed, $progressBar) {
 
             $creatives = RedtrackReport::select(
-                'name',
-                DB::raw('SUM(conversions) as total_conversions'),
-                DB::raw('SUM(cost) as total_cost'),
-                DB::raw('SUM(profit) as total_profit'),
-                DB::raw('SUM(profit) / NULLIF(SUM(cost), 0) as roi')
-            )
-                ->whereIn('name', $chunk)
-                ->groupBy('name')
-                ->get();
+                'tasks.id as task_id',
+                'tasks.code as creative_code',
+                'redtrack_reports.name as name',
 
+                DB::raw('SUM(redtrack_reports.conversions) as total_conversions'),
+                DB::raw('SUM(redtrack_reports.cost) as total_cost'),
+                DB::raw('SUM(redtrack_reports.profit) as total_profit'),
+                DB::raw('SUM(redtrack_reports.profit) / NULLIF(SUM(redtrack_reports.cost), 0) as roi')
+            )
+                ->join('tasks', function ($join) {
+                    $join->on(
+                        DB::raw('LOWER(tasks.code)'),
+                        '=',
+                        DB::raw('LOWER(redtrack_reports.ad_code)')
+                    );
+                })
+                ->whereIn('redtrack_reports.name', $chunk)
+                ->groupBy('tasks.id', 'tasks.code','redtrack_reports.name')
+                ->get();
             foreach ($creatives as $creative) {
                 try {
                     $roi = round($creative->roi, 4);
@@ -100,6 +109,7 @@ class ValidateCreativesCommand extends Command
 
                     $record = ValidatedCreative::firstOrNew([
                         'ad_code' => $creative->name,
+                        'ad' => $creative->creative_code,
                     ]);
 
                     // métricas consolidadas
@@ -107,13 +117,14 @@ class ValidateCreativesCommand extends Command
                     $record->total_cost        = $creative->total_cost;
                     $record->total_profit      = $creative->total_profit;
                     $record->roi               = $roi;
+                    $record->subtask_id        = SubTask::where('task_id',$creative->task_id)->first()->id;
 
                     /** 🟡 POTENCIAL */
                     if ($isPotential && !$record->is_potential) {
                         $record->is_potential = true;
                         $record->potential_at = now();
-
                         Log::info('Criativo POTENCIAL', [
+                            'ad' => $creative->creative_code,
                             'ad_code' => $creative->name,
                             'roi' => $roi,
                             'conversions' => $creative->total_conversions,
@@ -131,7 +142,6 @@ class ValidateCreativesCommand extends Command
                             'conversions' => $creative->total_conversions,
                         ]);
                     }
-
                     $record->save();
                     $processed++;
                 } catch (\Throwable $e) {
