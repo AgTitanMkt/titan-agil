@@ -18,7 +18,7 @@ Schedule::command('sync:redtrack --from="'.Carbon::now()->format('Y-m-d').'" --t
 
 // Command para validação de criativos'
 Schedule::command('creatives:validate')
-    ->everyTwoHours()
+    ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->runInBackground()
     ->sendOutputTo(storage_path('logs/creatives_validate.log'));
