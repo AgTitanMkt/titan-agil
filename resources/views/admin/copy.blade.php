@@ -8,7 +8,7 @@
             <div class="header-main-nav">
                 <div class="header-brand">
                     <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                    <span class="brand-name">Agência Titan</span>
+                    <span class="brand-name">CopyWriters</span>
                 </div>
 
                 <div class="header-metric-selector">
@@ -279,7 +279,7 @@
 
             {{-- COPIES produzidas (taabela principal) --}}
             <div class="copy-production-section glass-card table-shadow">
-                <h3 class="section-title">Copies Produzidas por Copywriter</h3>
+                <h3 class="section-title">Copies Produzidas por CopyWriters</h3>
 
                 <div class="table-responsive">
                     <table class="metrics-main-table">
