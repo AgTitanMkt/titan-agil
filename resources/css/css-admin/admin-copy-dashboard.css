@@ -32,16 +32,117 @@
     font-family: 'Inter', sans-serif;
 }
 
+/* COMECO DAS NOVAS ALTERACOES DE OTIMIZACAO */
+
 /* HEADER */
+
+/* HEADER PARA SER FULL WIDHT E FLEX */
 .titan-header-container {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1400px; /* aumentado para caber tudo na mesma linha */
     background: linear-gradient(90deg, #001a4d 0%, #0075FF 100%);
     border-radius: 20px;
-    padding: 15px 30px;
+    padding: 10px 25px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    margin-bottom: 60px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* novo NAV */
+.header-main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+/* brand */
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+/* SELECTOR */
+.header-metric-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 2;
+}
+
+.header-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.header-button-group {
+    display: flex;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-button-group .btn-toggle {
+    padding: 8px 20px;
+    min-width: 110px;
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+/* a direita o filtro */
+.header-filter-area {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.header-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* date range dentro do header */
+.filter-wrapper {
+    max-width: 250px;
+}
+
+/* removendo margens pesadas para caber no header */
+.filter-wrapper .form-group { margin-bottom: 0 !important; }
+
+.btn-header-filter {
+    background: #ffffff;
+    color: #001a4d;
+    border: none;
+    width: 35px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+
+    position: relative;
+    top: 10px; /* ajuste para abaixar o botao e ele ficar centralizado com o filtro */
+}
+
+
+.btn-header-filter:hover {
+    background: #0075FF;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* FIM DAS NOVAS ALTERACOES DE OTIMIZACAO */
 
 .header-content {
     display: flex;

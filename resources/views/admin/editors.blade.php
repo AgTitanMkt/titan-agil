@@ -5,13 +5,36 @@
     <div class="copy-main-wrapper">
 
         <header class="titan-header-container">
-            <div class="header-content">
-                <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                <span class="brand-name">Agência Titan</span>
-            </div>
-        </header>
+            <div class="header-main-nav">
+                <div class="header-brand">
+                    <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
+                    <span class="brand-name">Editores</span>
+                </div>
 
-        <div class="title-section">
+                <div class="header-metric-selector">
+                    <span class="header-label">Escolha qual métrica deseja visualizar?</span>
+                    <div class="header-button-group">
+                        <button id="btn-dashboard" class="btn-toggle active" onclick="switchView('dashboard')">Dashboard</button>
+                        <button id="btn-creatives" class="btn-toggle inactive" onclick="switchView('creatives')">Criativos</button>
+                    </div>
+                </div>
+
+                <div class="header-filter-area">
+                    <form action="{{ route('admin.copywriters') }}" class="header-filter-form">
+                <div class="filter-wrapper">
+                    <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                </div>
+                <button type="submit" class="btn-header-filter">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+
+        {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
+        {{-- <div class="title-section">
             <h1 class="main-title">Produção De Editores</h1>
             <p class="sub-title">Métricas De Editor</p>
         </div>
@@ -49,7 +72,8 @@
                     <button type="submit" class="btn-filter-action">Filtrar</button>
                 </form>
             </div>
-        </div>
+        </div> --}}
+         {{-- FIM DA SECTION QUE ESTA NO HEADER AGORA OTIMIZACAO --}}
 
         {{-- COMECO DASHBOARD --}}
         <section id="section-dashboard" class="content-section">
@@ -126,12 +150,12 @@
                 </div>
 
                 <div class="small-metric-card">
-                    <span class="small-label">Melhor Copy</span>
+                    <span class="small-label">Melhor Editor</span>
                     <span class="small-data">{{ $topEditorsRoi->name }} | <span class="highlight-roi">@percent($topEditorsRoi->metrics->sum('total_profit') / $topEditorsRoi->metrics->sum('total_cost'))
                             ROI</span></span>
                 </div>
                 <div class="small-metric-card">
-                    <span class="small-label">Maior Copy</span>
+                    <span class="small-label">Maior Editor</span>
                     <span class="small-data"> {{ $topEditorsProfit->name }} | <span
                             class="highlight-profit">@percent($topEditorsProfit->metrics->sum('total_profit') / $totalProfitEditors) do Profit</span></span>
                 </div>
