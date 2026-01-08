@@ -19,8 +19,10 @@
                     </div>
                 </div>
 
+                {{-- Andre verifica esse codigo para mim, estou com duvidas se esta correto, para copy, sim. Mas para Editors eu nao sei --}}
+
                 <div class="header-filter-area">
-                    <form action="{{ route('admin.copywriters') }}" class="header-filter-form">
+                    <form action="{{ route('admin.copywriters') }}" class="header-filter-form"> 
                 <div class="filter-wrapper">
                     <x-date-range name="date" :from="$startDate" :to="$endDate" />
                 </div>

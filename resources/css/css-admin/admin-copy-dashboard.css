@@ -83,17 +83,30 @@
 
 .header-button-group {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 4px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;              
+    gap: 12px;                          /* ESPACO NOS BUTTONS */
+    background: transparent;           /* removido BACKGROUND */
+    padding: 0;                        /* removido padding */
+    border-radius: 0;
+    border: none;                      /* remove a borda */
 }
 
+
 .header-button-group .btn-toggle {
-    padding: 8px 20px;
-    min-width: 110px;
+    padding: 8px 22px;
+    min-width: 120px;
     font-size: 0.75rem;
-    margin: 0;
+    background: transparent;           /* remove BACKGROUND nos buttons */
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    transition: 0.25s;
+}
+
+.header-button-group .btn-toggle.active {
+    background: white;
+    color: #001a4d;
+    border-color: white;
 }
 
 /* a direita o filtro */
@@ -105,36 +118,55 @@
 
 .header-filter-form {
     display: flex;
-    align-items: center;
+    align-items: center; 
     gap: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    padding: 0;
+    border: none;
+    height: 100%; 
 }
 
 /* date range dentro do header */
 .filter-wrapper {
     max-width: 250px;
+    display: flex;
+    align-items: center;
 }
 
-/* removendo margens pesadas para caber no header */
-.filter-wrapper .form-group { margin-bottom: 0 !important; }
+/* remove a margem do x-date-range que esta fazendo o button nao ficar centralizado por conta da label */
+.filter-wrapper .form-group, 
+.filter-wrapper div,
+.filter-wrapper label { 
+    margin-bottom: 0 !important; 
+    margin-top: 0 !important;
+}
 
+/* button ajustado para ficar centralizado */
 .btn-header-filter {
     background: #ffffff;
     color: #001a4d;
     border: none;
-    width: 35px;
-    height: 32px;
+    width: 36px;
+    height: 36px; 
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
-
-    position: relative;
-    top: 10px; /* ajuste para abaixar o botao e ele ficar centralizado com o filtro */
+    transition: 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* PARA FICAR CENTRALIZADO */
+    margin-top: 15px; 
+    
+    flex-shrink: 0; /* impede o button de esmagar em telas menores */
 }
 
+/* GARANTE QUE O ICONE DO BUTTON FIQUE CENTRALIZADO*/
+.btn-header-filter i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .btn-header-filter:hover {
     background: #0075FF;
