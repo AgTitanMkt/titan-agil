@@ -14,23 +14,25 @@
                 <div class="header-metric-selector">
                     <span class="header-label">Escolha qual métrica deseja visualizar?</span>
                     <div class="header-button-group">
-                        <button id="btn-dashboard" class="btn-toggle active" onclick="switchView('dashboard')">Dashboard</button>
-                        <button id="btn-creatives" class="btn-toggle inactive" onclick="switchView('creatives')">Criativos</button>
+                        <button id="btn-dashboard" class="btn-toggle active"
+                            onclick="switchView('dashboard')">Dashboard</button>
+                        <button id="btn-creatives" class="btn-toggle inactive"
+                            onclick="switchView('creatives')">Criativos</button>
                     </div>
                 </div>
 
                 <div class="header-filter-area">
                     <form action="{{ route('admin.copywriters') }}" class="header-filter-form">
-                <div class="filter-wrapper">
-                    <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                        <div class="filter-wrapper">
+                            <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                        </div>
+                        <button type="submit" class="btn-header-filter">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </form>
                 </div>
-                <button type="submit" class="btn-header-filter">
-                    <i class="fas fa-filter"></i>
-                </button>
-            </form>
-        </div>
-    </div>
-</header>
+            </div>
+        </header>
 
 
         {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
@@ -73,7 +75,7 @@
                 </form>
             </div>
         </div> --}}
-         {{-- FIM DA SECTION QUE ESTA NO HEADER AGORA OTIMIZACAO --}}
+        {{-- FIM DA SECTION QUE ESTA NO HEADER AGORA OTIMIZACAO --}}
 
         {{-- COMECO DASHBOARD --}}
         <section id="section-dashboard" class="content-section">
@@ -139,36 +141,50 @@
             <div class="secondary-metrics-grid">
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Nicho</span>
-                    <span class="small-data">{{ $topRoiNicho->sigla }} | <span
-                            class="highlight-roi">@percent0($topRoiNicho->roi) ROI</span></span>
+                    @foreach ($topRoiNicho as $topRoi)
+                        <span class="small-data">{{ $topRoi->sigla }} | <span
+                                class="highlight-roi">@percent0($topRoi->roi) ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Nicho</span>
-                    <span class="small-data">{{ $topProfitNicho->sigla }} | <span
-                            class="highlight-profit">@percent0($topProfitNicho->total_profit/$totalProfitNichos) do
-                            Profit</span></span>
+                    @foreach ($topProfitNicho as $topNicho)
+                        <span class="small-data">{{ $topNicho->sigla }} | <span
+                                class="highlight-profit">@percent0($topNicho->total_profit/$totalProfitNichos)
+                                do Profit</span></span> <br>
+                    @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Editor</span>
-                    <span class="small-data">{{ $topEditorsRoi->name }} | <span class="highlight-roi">@percent($topEditorsRoi->metrics->sum('total_profit') / $topEditorsRoi->metrics->sum('total_cost'))
-                            ROI</span></span>
+                    @foreach ($topEditorsRoi as $topRoi)
+                        <span class="small-data">{{ $topRoi->name }} | <span class="highlight-roi">@percent($topRoi->metrics->sum('total_profit') / $topRoi->metrics->sum('total_cost'))
+                                ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Editor</span>
-                    <span class="small-data"> {{ $topEditorsProfit->name }} | <span
-                            class="highlight-profit">@percent($topEditorsProfit->metrics->sum('total_profit') / $totalProfitEditors) do Profit</span></span>
+                    @foreach ($topEditorsProfit as $topProfit)
+                        <span class="small-data"> {{ $topProfit->name }} | <span
+                                class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitEditors) 
+                                do Profit</span></span> <br>
+                    @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Dupla</span>
-                    <span class="small-data">{{ $topDuplaRoi->dupla }} | <span class="highlight-roi">@percent($topDuplaRoi->roi)
-                            ROI</span></span>
+                    @foreach ($topDuplaRoi as $topRoi )
+                        <span class="small-data">{{ $topRoi->dupla }} | <span class="highlight-roi">@percent($topRoi->roi)
+                            ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Dupla</span>
-                    <span class="small-data">{{ $topDuplaProfit->dupla }} | <span
-                            class="highlight-profit">@percent($topDuplaProfit->total_profit / $totalProfitEditors) do Profit</span></span>
+                    @foreach ($topDuplaProfit as $topProfit )
+                        <span class="small-data">{{ $topProfit->dupla }} | <span
+                            class="highlight-profit">@percent($topProfit->total_profit / $totalProfitEditors) 
+                            do Profit</span></span> <br>
+                    @endforeach
                 </div>
             </div>
 
@@ -342,8 +358,8 @@
                                     {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                                     <td class="action-cell">
                                         <button class="btn-subview-cta" data-name="{{ $editor->name }}"
-                                            data-email="{{ $editor->email }}" data-json='@json($editor->metrics ?? [])'
-                                            data-clicks="@int_number($editor->metrics->sum('total_clicks'))"
+                                            data-email="{{ $editor->email }}"
+                                            data-json='@json($editor->metrics ?? [])' data-clicks="@int_number($editor->metrics->sum('total_clicks'))"
                                             data-copies="@int_number(count($editor->metrics->where('status', 'ok'))) / {{ count($editor->metrics) }}"
                                             data-profit="@dollar($editor->metrics->sum('total_profit'))"
                                             data-roi="{{ $editor->metrics->sum('total_cost') > 0

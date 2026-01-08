@@ -138,36 +138,50 @@
             <div class="secondary-metrics-grid">
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Nicho</span>
-                    <span class="small-data">{{ $topRoiNicho->sigla }} | <span
-                            class="highlight-roi">@percent0($topRoiNicho->roi) ROI</span></span>
+                    @foreach ($topRoiNicho as $topRoi )
+                        <span class="small-data">{{ $topRoi->sigla }} | <span
+                            class="highlight-roi">@percent0($topRoi->roi) ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Nicho</span>
-                    <span class="small-data">{{ $topProfitNicho->sigla }} | <span
-                            class="highlight-profit">@percent0($topProfitNicho->total_profit/$totalProfitNichos) do
-                            Profit</span></span>
+                    @foreach ($topProfitNicho as $topNicho )
+                        <span class="small-data">{{ $topNicho->sigla }} | <span
+                            class="highlight-profit">@percent0($topNicho->total_profit/$totalProfitNichos) do
+                            Profit</span></span> <br>
+                    @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Copy</span>
-                    <span class="small-data">{{ $topCopiesRoi->name }} | <span class="highlight-roi">@percent($topCopiesRoi->metrics->sum('total_profit') / $topCopiesRoi->metrics->sum('total_cost'))
-                            ROI</span></span>
+                    @foreach ($topCopiesRoi as $topRoi )
+                        <span class="small-data">{{ $topRoi->name }} | <span class="highlight-roi">@percent($topRoi->metrics->sum('total_profit') / $topRoi->metrics->sum('total_cost'))
+                            ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Copy</span>
-                    <span class="small-data"> {{ $topCopiesProfit->name }} | <span
-                            class="highlight-profit">@percent($topCopiesProfit->metrics->sum('total_profit') / $totalProfitCopies) do Profit</span></span>
+                    @foreach ($topCopiesProfit as $topProfit )
+                        <span class="small-data"> {{ $topProfit->name }} | <span
+                            class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitCopies) 
+                            do Profit</span></span> <br>
+                    @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Dupla</span>
-                    <span class="small-data">{{ $topDuplaRoi->dupla }} | <span class="highlight-roi">@percent($topDuplaRoi->roi)
-                            ROI</span></span>
+                    @foreach ($topDuplaRoi as $topRoi )
+                        <span class="small-data">{{ $topRoi->dupla }} | <span class="highlight-roi">@percent($topRoi->roi)
+                            ROI</span></span> <br>
+                    @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Dupla</span>
-                    <span class="small-data">{{ $topDuplaProfit->dupla }} | <span
-                            class="highlight-profit">@percent($topDuplaProfit->total_profit / $totalProfitCopies) do Profit</span></span>
+                    @foreach ($topDuplaProfit as $topProfit )
+                        <span class="small-data">{{ $topProfit->dupla }} | <span
+                            class="highlight-profit">@percent($topProfit->total_profit / $totalProfitCopies) 
+                            do Profit</span></span> <br>
+                    @endforeach
                 </div>
             </div>
 

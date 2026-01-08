@@ -145,10 +145,10 @@ class AdminController extends Controller
         $dataNichos = $nichosService->dataNichos();
         $topProfitNicho = $dataNichos->sortByDesc(function ($item) {
             return (float) $item->total_profit;
-        })->first();
+        })->take(3);
         $topRoiNicho = $dataNichos->sortByDesc(function ($item) {
             return (float) $item->roi;
-        })->first();
+        })->take(3);
         $totalProfitNichos = $dataNichos->sum('total_profit');
         $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
             $profit = (float) $nicho->total_profit;
@@ -173,21 +173,21 @@ class AdminController extends Controller
                     $editor->metrics->sum('total_cost');
             })
             ->values()
-            ->first();
+            ->take(3);
 
         $topEditorsProfit = $editors->sortByDesc(function ($editor) {
             return $editor->metrics->sum('total_profit');
-        })->values()->first();
+        })->values()->take(3);
 
         $agentesServices = new AgentsService($startDate, $endDate);
         $duplasData = $agentesServices->duoMetrics();
         $topDuplaRoi = $duplasData->sortByDesc(function ($dupla) {
             return $dupla->roi;
-        })->values()->first();
+        })->values()->take(3);
 
         $topDuplaProfit = $duplasData->sortByDesc(function ($dupla) {
             return $dupla->total_profit;
-        })->values()->first();
+        })->values()->take(3);
 
         $chartIndividualData = $editors
             ->filter(fn($editor) => $editor->metrics->count() > 0) // ignora quem não tem dados
@@ -337,10 +337,10 @@ class AdminController extends Controller
         $dataNichos = $nichosService->dataNichos();
         $topProfitNicho = $dataNichos->sortByDesc(function ($item) {
             return (float) $item->total_profit;
-        })->first();
+        })->take(3);
         $topRoiNicho = $dataNichos->sortByDesc(function ($item) {
             return (float) $item->roi;
-        })->first();
+        })->take(3);
         $totalProfitNichos = $dataNichos->sum('total_profit');
         $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
             $profit = (float) $nicho->total_profit;
@@ -366,21 +366,21 @@ class AdminController extends Controller
                     $copy->metrics->sum('total_cost');
             })
             ->values()
-            ->first();
+            ->take(3);
 
         $topCopiesProfit = $copies->sortByDesc(function ($copy) {
             return $copy->metrics->sum('total_profit');
-        })->values()->first();
+        })->values()->take(3);
 
         $agentesServices = new AgentsService($startDate, $endDate);
         $duplasData = $agentesServices->duoMetrics();
         $topDuplaRoi = $duplasData->sortByDesc(function ($dupla) {
             return $dupla->roi;
-        })->values()->first();
+        })->values()->take(3);
 
         $topDuplaProfit = $duplasData->sortByDesc(function ($dupla) {
             return $dupla->total_profit;
-        })->values()->first();
+        })->values()->take(3);
 
         $chartIndividualData = $copies
             ->filter(fn($copy) => $copy->metrics->count() > 0) // ignora quem não tem dados
