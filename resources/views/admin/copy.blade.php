@@ -336,7 +336,7 @@
                                     <td>{{ count($copy->metrics) }}
                                     <td>@int_number($copy->metrics->sum('em_potencial'))</td>
                                     <td>@int_number($copy->metrics->sum('validados'))</td>
-                                    <td> @if(count($copy->metrics)) ? @percent($copy->metrics->sum('validados') / count($copy->metrics)) : 0%</td>
+                                    <td> @if(count($copy->metrics)) ? @percent($copy->metrics->sum('validados') / count($copy->metrics)) : 0% @endif</td>
                                     <td>@int_number($copy->metrics->sum('total_clicks'))</td>
                                     <td>@int_number($copy->metrics->sum('total_conversions'))</td>
                                     <td>@dollar($copy->metrics->sum('total_cost'))</td>
