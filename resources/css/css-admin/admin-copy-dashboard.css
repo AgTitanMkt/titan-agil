@@ -534,7 +534,7 @@
     filter: saturate(0.5) brightness(0.7);
 }
 
-.niche-block.active { filter: saturate(1) brightness(1); flex: 1.5; }
+.niche-block.active { filter: saturate(1) brightness(1); }
 
 /* CORES DE TODOS OS NICHOS */
 .niche-block[data-niche="mrm"] { background-color: #0055ff; }

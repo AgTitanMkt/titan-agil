@@ -93,6 +93,8 @@ class AdminController extends Controller
 
         $editors = $request->input('editors');
 
+        $nicho = $request->input('nicho');
+
         $selectedEditorId = $request->input('editor_id');
 
         // -----------------------------------------
@@ -109,11 +111,32 @@ class AdminController extends Controller
             $editor->metrics = $metricsEditors[$editor->id] ?? collect();
         }
 
-        $editors = $editors->filter(fn($editor) => $editor->metrics->isNotEmpty());
+        // $editors = $editors->filter(fn($editor) => $editor->metrics->isNotEmpty());
 
         $editors = $editors->sortByDesc(function ($editor) {
             return $editor->metrics->sum('total_profit');
         })->values();
+
+        $editorsPerformance = $editors;
+
+        if ($nicho) {
+            $editorsPerformance = $editorsPerformance
+                ->map(function ($editor) use ($nicho) {
+
+                    // 🔹 mantém só métricas do nicho
+                    $editor->metrics = $editor->metrics
+                        ->where('nicho_name', $nicho)
+                        ->values();
+
+                    return $editor;
+                })
+                ->filter(function ($editor) {
+
+                    // 🔹 remove editor sem métricas
+                    return $editor->metrics->isNotEmpty();
+                })
+                ->values();
+        }
 
         //dados para dashboard
 
@@ -189,26 +212,29 @@ class AdminController extends Controller
             return $dupla->total_profit;
         })->values()->take(3);
 
-        $chartIndividualData = $editors
-            ->filter(fn($editor) => $editor->metrics->count() > 0) // ignora quem não tem dados
-            ->map(function ($editor) {
 
-                $totalProfit = $editor->metrics->sum('total_profit');
-                $totalCost   = $editor->metrics->sum('total_cost');
+        //dados garfico individuais
+        $chartIndividualData = $editors->map(function ($editor) {
 
+            $byNiche = $editor->metrics->groupBy('nicho_name')->map(function ($metrics) {
                 return [
-                    'x'     => $totalCost > 0 ? round($totalProfit / $totalCost, 2) : 0, // ROI
-                    'y'     => $editor->metrics->count(),                                  // Produzidos
-                    'r'     => max(8, sqrt(abs($totalProfit)) / 15),                    // tamanho da bolha
-                    'label' => collect(explode(' ', $editor->name))
-                        ->map(fn($n) => strtoupper(substr($n, 0, 1)))
-                        ->take(2)
-                        ->implode(''),
-                    'name'  => $editor->name,
-                    'profit' => round($totalProfit, 2),
+                    'total_profit' => $metrics->sum('total_profit'),
+                    'total_cost'   => $metrics->sum('total_cost'),
+                    'produced'     => $metrics->count(),
                 ];
-            })
-            ->values();
+            });
+
+            return [
+                'editor_id' => $editor->id,
+                'name' => $editor->name,
+                'label' => collect(explode(' ', $editor->name))
+                    ->map(fn($n) => strtoupper(substr($n, 0, 1)))
+                    ->take(2)
+                    ->implode(''),
+                'by_niche' => $byNiche, // 👈 DADO COMPLETO
+            ];
+        })->values();
+
 
         if ($selectedEditorId) {
             $sinergyCopy = $duplasData
@@ -228,13 +254,14 @@ class AdminController extends Controller
         $sinergyCopy = is_array($sinergyCopy) ? $sinergyCopy['editor_id'] : $sinergyCopy->editor_id;
         $synergyData = $duplasData
             ->where('editor_id', $sinergyCopy)
-            ->values();
+            ->values();    
         $chartSynergyData = $synergyData->map(fn($d) => [
             'x' => (float) $d->roi,
             'y' => (int) $d->total_creatives,
             'r' => max(6, sqrt(abs($d->total_profit)) / 20),
             'label' => $d->dupla,
             'editor' => $d->editor_name,
+            'copywriter' => $d->copy_name,
             'profit' => (float) $d->total_profit,
             'roi' => (float) $d->roi,
             'produced' => (int) $d->total_creatives,
@@ -301,7 +328,7 @@ class AdminController extends Controller
             $copy->metrics = $metricsCopies[$copy->id] ?? collect();
         }
 
-        $copies = $copies->filter(fn($copy) => $copy->metrics->isNotEmpty());
+        // $copies = $copies->filter(fn($copy) => $copy->metrics->isNotEmpty());
 
         $copies = $copies->sortByDesc(function ($copy) {
             return $copy->metrics->sum('total_profit');
@@ -826,5 +853,51 @@ class AdminController extends Controller
     public function gestores()
     {
         return view("admin.gestores");
+    }
+
+
+    public function synergyData(Request $request)
+    {
+        $startDate = $request->input('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+
+        $endDate = $request->input('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        $editorId = $request->input('editor_id');
+
+        $agentesServices = new AgentsService($startDate, $endDate);
+        $duplasData = $agentesServices->duoMetrics();
+
+        if ($editorId) {
+            $duplasData = $duplasData->where('editor_id', $editorId);
+        } else {
+            $bestEditor = $duplasData
+                ->groupBy('editor_id')
+                ->map(fn($items) => [
+                    'editor_id' => $items->first()->editor_id,
+                    'total_profit' => $items->sum('total_profit'),
+                ])
+                ->sortByDesc('total_profit')
+                ->first();
+
+            if ($bestEditor) {
+                $duplasData = $duplasData->where('editor_id', $bestEditor['editor_id']);
+            }
+        }
+
+        return response()->json(
+            $duplasData->map(fn($d) => [
+                'x' => (float) $d->roi,
+                'y' => (int) $d->total_creatives,
+                'label' => $d->dupla,
+                'editor' => $d->editor_name,
+                'profit' => (float) $d->total_profit,
+                'roi' => (float) $d->roi,
+                'produced' => (int) $d->total_creatives,
+            ])->values()
+        );
     }
 }

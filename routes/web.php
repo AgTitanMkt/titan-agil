@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('copywriters', [AdminController::class, 'copywriters'])->name('admin.copywriters');
         Route::get('editores', [AdminController::class, 'editors'])->name('admin.editors');
+        Route::get('editors/synergy', [AdminController::class, 'synergyData'])
+            ->name('admin.editors.synergy');
         
         // ROTA PARA GESTORES
         Route::get('gestores', [AdminController::class, 'gestores'])->name('admin.gestores');

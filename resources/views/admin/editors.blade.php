@@ -166,24 +166,24 @@
                     <span class="small-label">Maior Editor</span>
                     @foreach ($topEditorsProfit as $topProfit)
                         <span class="small-data"> {{ $topProfit->name }} | <span
-                                class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitEditors) 
+                                class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitEditors)
                                 do Profit</span></span> <br>
                     @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Dupla</span>
-                    @foreach ($topDuplaRoi as $topRoi )
+                    @foreach ($topDuplaRoi as $topRoi)
                         <span class="small-data">{{ $topRoi->dupla }} | <span class="highlight-roi">@percent($topRoi->roi)
-                            ROI</span></span> <br>
+                                ROI</span></span> <br>
                     @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Dupla</span>
-                    @foreach ($topDuplaProfit as $topProfit )
+                    @foreach ($topDuplaProfit as $topProfit)
                         <span class="small-data">{{ $topProfit->dupla }} | <span
-                            class="highlight-profit">@percent($topProfit->total_profit / $totalProfitEditors) 
-                            do Profit</span></span> <br>
+                                class="highlight-profit">@percent($topProfit->total_profit / $totalProfitEditors)
+                                do Profit</span></span> <br>
                     @endforeach
                 </div>
             </div>
@@ -196,10 +196,16 @@
                 </div>
 
                 <div class="niche-selector-bar">
+                    <div class="niche-block all active" data-niche="all" data-name="all" style="width: 10%;">
+                        <div class="niche-badge">
+                            <span class="perc">100%</span>
+                            <span class="name">Todos</span>
+                        </div>
+                    </div>
+
                     @foreach ($nichosBar as $nicho)
                         <div class="niche-block {{ strtolower($nicho->sigla) }}"
-                            data-niche="{{ strtolower($nicho->sigla) }}"
-                            onclick="updateNiche('{{ strtolower($nicho->sigla) }}')"
+                            data-niche="{{ strtolower($nicho->sigla) }}" data-name="{{ $nicho->nicho }}"
                             style="width: {{ $nicho->percent }}%;">
                             <div class="niche-badge">
                                 <span class="perc">{{ $nicho->percent }}%</span>
@@ -224,13 +230,13 @@
                     <h2 class="display-title">Sinergia do Time</h2>
 
                     <div class="toggle-buttons-row">
-                        <form method="GET" action="{{ route('admin.copywriters') }}" id="copySelectForm">
+                        <form method="GET" action="{{ route('admin.editors') }}" id="copySelectForm">
                             {{-- manter filtros de data --}}
                             <input type="hidden" name="date_from" value="{{ request('date_from') }}">
                             <input type="hidden" name="date_to" value="{{ request('date_to') }}">
 
-                            <select name="editor_id" class="copy-select"
-                                onchange="document.getElementById('copySelectForm').submit()">
+                            <select name="editor_id" class="copy-select" onchange="updateSynergyChart(this.value)">
+
                                 @foreach ($editors as $editor)
                                     <option value="{{ $editor->id }}"
                                         {{ ($selectedEditorId ?? null) == $editor->id ? 'selected' : '' }}>
@@ -339,7 +345,13 @@
                                     <td>{{ count($editor->metrics) }}
                                     <td>@int_number($editor->metrics->sum('em_potencial'))</td>
                                     <td>@int_number($editor->metrics->sum('validados'))</td>
-                                    <td>@percent($editor->metrics->sum('validados') / count($editor->metrics))</td>
+                                    <td>
+                                        @if (count($editor->metrics))
+                                            @percent($editor->metrics->sum('validados') / count($editor->metrics))
+                                        @else
+                                            @percent(0)
+                                        @endif
+                                    </td>
                                     <td>@int_number($editor->metrics->sum('total_clicks'))</td>
                                     <td>@int_number($editor->metrics->sum('total_conversions'))</td>
                                     <td>@dollar($editor->metrics->sum('total_cost'))</td>
@@ -642,6 +654,100 @@
     </div>
 
     {{-- COMECO SCRITP COPY --}}
+
+    <script>
+        function buildChartDataByNiche(nicho = null) {
+
+            // 🔹 maiores valores reais (separados)
+            const profits = rawEditorsData.flatMap(editor =>
+                Object.values(editor.by_niche || {}).map(n => n.total_profit || 0)
+            );
+
+            const maxPositiveProfit = Math.max(...profits.filter(p => p > 0), 1);
+            const maxNegativeProfit = Math.min(...profits.filter(p => p < 0), -1);
+
+            const minR = 6;
+            const maxRPositive = 50;
+            const maxRNegative = 22; // 👈 prejuízo nunca domina o gráfico
+
+            return rawEditorsData.map(editor => {
+
+                let data;
+
+                // 🔹 soma geral
+                if (!nicho || nicho === 'all') {
+
+                    const totals = Object.values(editor.by_niche || {});
+
+                    const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
+                    const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
+                    const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+
+                    data = {
+                        total_profit,
+                        total_cost,
+                        produced
+                    };
+
+                } else {
+                    data = editor.by_niche?.[nicho];
+                    if (!data) return null;
+                }
+
+                const profit = data.total_profit || 0;
+                const cost = data.total_cost || 0;
+
+                let r;
+
+                if (profit > 0) {
+                    // 🟢 lucro → escala log normalizada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(profit) / Math.log10(maxPositiveProfit),
+                            1.3
+                        ) * (maxRPositive - minR);
+
+                } else if (profit < 0) {
+                    // 🔴 prejuízo → escala própria e limitada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(Math.abs(profit)) / Math.log10(Math.abs(maxNegativeProfit)),
+                            1.1
+                        ) * (maxRNegative - minR);
+
+                } else {
+                    r = minR;
+                }
+
+                return {
+                    x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
+                    y: data.produced || 0,
+                    r,
+
+                    label: editor.label,
+                    name: editor.name,
+                    profit: +profit.toFixed(2),
+
+                    // 👇 cor por sinal
+                    backgroundColor: profit >= 0 ?
+                        'rgba(34,197,94,0.8)' // verde
+                        :
+                        'rgba(239,68,68,0.8)' // vermelho
+                };
+
+            }).filter(Boolean);
+        }
+
+        function updateIndividualChart(nicho = 'all') {
+            const newData = buildChartDataByNiche(nicho);
+
+            window.chart1.data.datasets[0].data = newData;
+            window.chart1.update();
+        }
+    </script>
+
     <script>
         // Variáveis Globais de Cores IGUAL
         const COLOR_PRIMARY_AZUL = '#0f53ff';
@@ -1418,6 +1524,9 @@
 
             // garante que o estado inicial da visualizacao de nicho esteja na tabela
             switchNicheViewCopy('table');
+
+            //iniciando grafico de sinergia
+            updateSynergyChart({{ $selectedEditorId ?? 'null' }});
         };
     </script>
     <script>
@@ -1495,11 +1604,17 @@
             tn: {
                 color: '#666666',
                 class: 'glow-tn'
+            },
+            db: {
+                color: '#0E336C',
+                class: 'glow-db'
             }
+
         };
 
         // dados individuais grafico 
-        const chartIndividualData = @json($chartIndividualData);
+        const rawEditorsData = @json($chartIndividualData);
+
         const chartSynergyData = @json($chartSynergyData);
 
         const ctx1 = document.getElementById('chartIndividual').getContext('2d');
@@ -1508,8 +1623,8 @@
             type: 'bubble',
             data: {
                 datasets: [{
-                    label: 'Copywriters',
-                    data: chartIndividualData,
+                    label: 'Editores',
+                    data: buildChartDataByNiche('all'),
                     backgroundColor: 'rgba(0,85,255,0.75)',
                     hoverBackgroundColor: '#ffffff'
                 }]
@@ -1568,12 +1683,40 @@
 
         const ctxSynergy = document.getElementById('chartSynergy').getContext('2d');
 
+        // dados para o grafico de sinergia
+        const maxSynergyProfit = Math.max(
+            ...chartSynergyData.map(d => Math.abs(d.profit || 0)),
+            1
+        );
+
+        const synergyBubbleData = chartSynergyData.map(d => {
+            const minR = 6;
+            const maxR = 42;
+
+            const profit = Math.abs(d.profit || 0);
+
+            const r =
+                profit <= 0 ?
+                minR :
+                minR +
+                Math.pow(
+                    Math.log10(profit) / Math.log10(maxSynergyProfit),
+                    1.2
+                ) * (maxR - minR);
+
+            return {
+                ...d,
+                r
+            };
+        });
+
+
         window.chartSynergy = new Chart(ctxSynergy, {
             type: 'bubble',
             data: {
                 datasets: [{
                     label: 'Duplas',
-                    data: chartSynergyData,
+                    data: synergyBubbleData,
                     backgroundColor: 'rgba(0, 170, 255, 0.75)',
                     hoverBackgroundColor: '#ffffff'
                 }]
@@ -1616,8 +1759,9 @@
                     tooltip: {
                         callbacks: {
                             label(context) {
+                                
                                 const d = context.raw;
-                                return [
+                                    return [
                                     `Dupla: ${d.label}`,
                                     `Editor: ${d.editor}`,
                                     `Produzidos: ${d.produced}`,
@@ -1632,27 +1776,178 @@
         });
 
 
+        //atualizando nichos
+        document.querySelectorAll('.niche-block').forEach(nicho => {
+            nicho.addEventListener('click', () => {
+                updateIndividualChart(nicho.dataset.name);
+                updateNiche(nicho.dataset.niche);
+            });
+        });
+
+
         // funcao para trocar de nicho e glow
         function updateNiche(nicheKey) {
-            // atualiza os botoes
-            document.querySelectorAll('.niche-block').forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-niche="${nicheKey}"]`).classList.add('active');
 
-            // troca glow dos conteiners
-            const containers = document.querySelectorAll('.graph-main-container');
-            const config = nicheConfigs[nicheKey];
+            // fallback seguro
+            const config = nicheConfigs[nicheKey] ?? {
+                color: '#888',
+                class: 'glow-mrm'
+            };
 
-            containers.forEach(c => {
+            // ativa botão correto
+            document.querySelectorAll('.niche-block')
+                .forEach(b => b.classList.remove('active'));
+
+            const active = document.querySelector(`[data-niche="${nicheKey}"]`);
+            if (active) active.classList.add('active');
+
+            // troca glow
+            document.querySelectorAll('.graph-main-container').forEach(c => {
                 c.className = 'graph-main-container ' + config.class;
             });
 
-            // dados do grafico
-            window.chart1.data.datasets[0].backgroundColor = config.color;
-            window.chart1.update();
+            // atualiza cor das bolhas
+            if (window.chart1) {
+                window.chart1.data.datasets[0].backgroundColor = config.color;
+                window.chart1.update();
+            }
+        }
+    </script>
+
+    <script>
+        function buildChartDataByNiche(nicho = null) {
+
+            // 🔹 maiores valores reais (separados)
+            const profits = rawEditorsData.flatMap(editor =>
+                Object.values(editor.by_niche || {}).map(n => n.total_profit || 0)
+            );
+
+            const maxPositiveProfit = Math.max(...profits.filter(p => p > 0), 1);
+            const maxNegativeProfit = Math.min(...profits.filter(p => p < 0), -1);
+
+            const minR = 6;
+            const maxRPositive = 50;
+            const maxRNegative = 22; // 👈 prejuízo nunca domina o gráfico
+
+            return rawEditorsData.map(editor => {
+
+                let data;
+
+                // 🔹 soma geral
+                if (!nicho || nicho === 'all') {
+
+                    const totals = Object.values(editor.by_niche || {});
+
+                    const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
+                    const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
+                    const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+
+                    data = {
+                        total_profit,
+                        total_cost,
+                        produced
+                    };
+
+                } else {
+                    data = editor.by_niche?.[nicho];
+                    if (!data) return null;
+                }
+
+                const profit = data.total_profit || 0;
+                const cost = data.total_cost || 0;
+
+                let r;
+
+                if (profit > 0) {
+                    // 🟢 lucro → escala log normalizada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(profit) / Math.log10(maxPositiveProfit),
+                            1.3
+                        ) * (maxRPositive - minR);
+
+                } else if (profit < 0) {
+                    // 🔴 prejuízo → escala própria e limitada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(Math.abs(profit)) / Math.log10(Math.abs(maxNegativeProfit)),
+                            1.1
+                        ) * (maxRNegative - minR);
+
+                } else {
+                    r = minR;
+                }
+
+                return {
+                    x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
+                    y: data.produced || 0,
+                    r,
+
+                    label: editor.label,
+                    name: editor.name,
+                    profit: +profit.toFixed(2),
+
+                    // 👇 cor por sinal
+                    backgroundColor: profit >= 0 ?
+                        'rgba(34,197,94,0.8)' // verde
+                        :
+                        'rgba(239,68,68,0.8)' // vermelho
+                };
+
+            }).filter(Boolean);
         }
 
-        // incia
-        document.addEventListener('DOMContentLoaded', initCharts);
+
+
+
+        function updateIndividualChart(nicho = 'all') {
+            const newData = buildChartDataByNiche(nicho);
+
+            window.chart1.data.datasets[0].data = newData;
+            window.chart1.update();
+        }
+    </script>
+
+    {{-- atualiza grafico de sinergia --}}
+    <script>
+        async function updateSynergyChart(editorId = null) {
+
+            const params = new URLSearchParams({
+                editor_id: editorId ?? '',
+                date_from: document.querySelector('input[name="date_from"]')?.value ?? '',
+                date_to: document.querySelector('input[name="date_to"]')?.value ?? '',
+            });
+
+            const response = await fetch(`/admin/editors/synergy?${params.toString()}`);
+            const data = await response.json();
+
+            // normaliza raio (igual você já faz)
+            const maxProfit = Math.max(...data.map(d => Math.abs(d.profit)), 1);
+
+            const bubbleData = data.map(d => {
+                const minR = 6;
+                const maxR = 42;
+
+                const profit = Math.abs(d.profit);
+
+                const r = profit <= 0 ?
+                    minR :
+                    minR + Math.pow(
+                        Math.log10(profit) / Math.log10(maxProfit),
+                        1.2
+                    ) * (maxR - minR);
+
+                return {
+                    ...d,
+                    r
+                };
+            });
+
+            window.chartSynergy.data.datasets[0].data = bubbleData;
+            window.chartSynergy.update();
+        }
     </script>
 
     {{-- FIM DE SCRIPT DASHBOARD --}}

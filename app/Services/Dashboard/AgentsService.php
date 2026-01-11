@@ -169,37 +169,75 @@ class AgentsService
         return $this->talentDetails(2, $userId);
     }
 
-    public function duoMetrics()
+    public function duoMetrics(): Collection
     {
-        return DB::table('redtrack_reports as rr')
-            ->selectRaw("
-        CONCAT(tc.tag, ' e ', te.tag) as dupla,
+        $rows = DB::table('tasks as t')
 
-        uc.id as copy_id,
-        uc.name as copy_name,
-        tc.tag as copy_tag,
+            // 🔹 lucro do criativo (nível correto)
+            ->join('redtrack_reports as rr', function ($join) {
+                $join->on(
+                    DB::raw('LOWER(rr.ad_code)'),
+                    '=',
+                    DB::raw('LOWER(t.code)')
+                );
+            })
 
-        ue.id as editor_id,
-        ue.name as editor_name,
-        te.tag as editor_tag,
-        COUNT(rr.id) as total_creatives,
-        SUM(rr.clicks) as total_clicks,
-        SUM(rr.conversions) as total_conversions,
-        SUM(rr.cost) as total_cost,
-        SUM(rr.profit) as total_profit,
-        (SUM(rr.profit)/NULLIF(SUM(rr.cost),0)) as roi
-    ")
-            // COPY (obrigatório)
-            ->join('tag_users as tc', 'tc.tag', '=', DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX(rr.name, '-', 2), '-', -1)"))
-            ->join('users as uc', 'uc.id', '=', 'tc.user_id')
+            // 🔹 sub_tasks do criativo
+            ->join('sub_tasks as st', 'st.task_id', '=', 't.id')
 
-            // EDITOR (obrigatório)
-            ->join('tag_users as te', 'te.tag', '=', DB::raw("SUBSTRING_INDEX(rr.name, '-', -1)"))
-            ->join('users as ue', 'ue.id', '=', 'te.user_id')
+            // 🔹 COPY da sub_task
+            ->join('user_tasks as utc', 'utc.sub_task_id', '=', 'st.id')
+            ->join('users as uc', 'uc.id', '=', 'utc.user_id')
+            ->join('user_roles as urc', function ($j) {
+                $j->on('urc.user_id', '=', 'uc.id')
+                    ->where('urc.role_id', 2);
+            })
+
+            // 🔹 EDITOR da sub_task
+            ->join('user_tasks as ute', 'ute.sub_task_id', '=', 'st.id')
+            ->join('users as ue', 'ue.id', '=', 'ute.user_id')
+            ->join('user_roles as ure', function ($j) {
+                $j->on('ure.user_id', '=', 'ue.id')
+                    ->where('ure.role_id', 3);
+            })
 
             ->whereBetween('rr.date', [$this->startAt, $this->finishAt])
-            ->groupBy('tc.tag', 'te.tag', 'uc.id', 'ue.id')
+
+            ->selectRaw("
+            uc.id   as copy_id,
+            uc.name as copy_name,
+
+            ue.id   as editor_id,
+            ue.name as editor_name,
+
+            CONCAT(
+                SUBSTRING_INDEX(uc.name, ' ', 1),
+                ' e ',
+                SUBSTRING_INDEX(ue.name, ' ', 1)
+            ) as dupla,
+
+            COUNT(DISTINCT t.code) as total_creatives,
+
+            SUM(rr.profit) as total_profit,
+            SUM(rr.cost)   as total_cost,
+
+            CASE 
+                WHEN SUM(rr.cost) > 0
+                THEN SUM(rr.profit) / SUM(rr.cost)
+                ELSE 0
+            END as roi
+        ")
+
+            ->groupBy(
+                'uc.id',
+                'uc.name',
+                'ue.id',
+                'ue.name'
+            )
+
             ->orderByDesc('total_profit')
             ->get();
+
+        return $rows;
     }
 }
