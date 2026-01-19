@@ -127,12 +127,20 @@
                     <div class="internal-stack">
                         <div class="mini-card-outline secondary-border">
                             <span class="mini-label">Em validação</span>
-                            <span class="mini-value">@percent0($emPotencial/$totalTestado) | @int_number($emPotencial)
-                                Ads</span>
+                            @if ($totalTestado > 0)
+                                <span class="mini-value">@percent0($emPotencial/$totalTestado) | @int_number($emPotencial)
+                                    Ads</span>
+                            @else
+                                <span class="mini-value">0% | 0 Ads</span>
+                            @endif
                         </div>
                         <div class="mini-card-outline secondary-border">
                             <span class="mini-label">Taxa de Acerto</span>
-                            <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados) Ads</span>
+                            @if ($totalTestado > 0)
+                                <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados) Ads</span>
+                            @else
+                            <span class="mini-value">0 | 0 Ads</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1759,9 +1767,9 @@
                     tooltip: {
                         callbacks: {
                             label(context) {
-                                
+
                                 const d = context.raw;
-                                    return [
+                                return [
                                     `Dupla: ${d.label}`,
                                     `Editor: ${d.editor}`,
                                     `Produzidos: ${d.produced}`,
