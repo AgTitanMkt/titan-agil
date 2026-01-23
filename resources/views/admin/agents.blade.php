@@ -184,12 +184,11 @@
                         {{ $isCopy ? 'Maior Copywriter' : 'Maior Editor' }}
                     </span>
                     @foreach ($topAgentsProfit as $topProfit)
-                        <span class="small-data"> {{ $topProfit->name }} | <span
-                                class="highlight-profit">
+                        <span class="small-data"> {{ $topProfit->name }} | <span class="highlight-profit">
                                 @if ($totalProfitAgents)
                                     @percent($topProfit->metrics->sum('total_profit') / $totalProfitAgents)
                                 @else
-                                    0%    
+                                    0%
                                 @endif
                                 do Profit
                             </span></span> <br>
@@ -206,12 +205,11 @@
                 <div class="small-metric-card">
                     <span class="small-label">Maior Dupla</span>
                     @foreach ($topDuplaProfit as $topProfit)
-                        <span class="small-data">{{ $topProfit->dupla }} | <span
-                                class="highlight-profit">
+                        <span class="small-data">{{ $topProfit->dupla }} | <span class="highlight-profit">
                                 @if ($totalProfitAgents)
                                     @percent($topProfit->total_profit / $totalProfitAgents)
                                 @else
-                                    0%    
+                                    0%
                                 @endif
                                 do Profit
                             </span></span> <br>
@@ -344,17 +342,50 @@
                     <table class="metrics-main-table">
                         <thead>
                             <tr>
-                                <th class="header-editor">Editor</th>
-                                <th class="header-metrics">Produzido</th>
-                                <th class="header-metrics">Testado</th> {{-- adaptado para copy --}}
-                                <th class="header-metrics">Potencial</th>
-                                <th class="header-metrics">Validados</th>
-                                <th class="header-metrics">Win/Rate</th>
-                                <th class="header-metrics">Cliques</th>
-                                <th class="header-metrics">Conversões</th>
-                                <th class="header-metrics">Custo</th>
-                                <th class="header-metrics">Lucro</th>
-                                <th class="header-metrics">ROI (%)</th>
+                                <th class="header-editor sortable-main" data-sort-key="name">
+                                    Nome <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="produced">
+                                    Produzido <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="tested">
+                                    Testado <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="potential">
+                                    Potencial <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="validated">
+                                    Validados <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="winrate">
+                                    Win/Rate <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="clicks">
+                                    Cliques <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="conversions">
+                                    Conversões <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="cost">
+                                    Custo <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="profit">
+                                    Lucro <i class="fas fa-sort"></i>
+                                </th>
+
+                                <th class="header-metrics sortable-main" data-sort-key="roi">
+                                    ROI (%) <i class="fas fa-sort"></i>
+                                </th>
+
                                 <th class="header-action">Detalhes</th>
                             </tr>
                         </thead>
@@ -486,8 +517,7 @@
                             {{-- loop adaptado para os criativos do agente --}}
                             @foreach ($editor->metrics as $cr)
                                 <tr
-                                    class="creative-detail-row {{ $cr->total_profit > 0 ? 'creative-green' : ($cr->total_profit < 0 ? 'creative-red' : '') }}"
-                                >
+                                    class="creative-detail-row {{ $cr->total_profit > 0 ? 'creative-green' : ($cr->total_profit < 0 ? 'creative-red' : '') }}">
                                     <td class="creative-code">{{ $cr->code }}</td>
                                     <td>{{ $cr->first_redtrack_date }}</td>
                                     <td>
@@ -1987,6 +2017,63 @@
             window.chartSynergy.update();
         }
     </script>
+
+    {{-- script de ordenação da tabela --}}
+    <script>
+        let mainSortKey = '';
+        let mainSortDirection = 'asc';
+
+        function sortMainTable(key) {
+            const table = document.querySelector('.metrics-main-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr.editor-row'));
+
+            const header = table.querySelector(`th[data-sort-key="${key}"]`);
+
+            // alterna direção
+            if (mainSortKey === key) {
+                mainSortDirection = mainSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                mainSortKey = key;
+                mainSortDirection = 'asc';
+            }
+
+            // reset ícones
+            table.querySelectorAll('th.sortable-main i').forEach(i => i.className = 'fas fa-sort');
+
+            header.querySelector('i').className =
+                mainSortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+
+            rows.sort((a, b) => {
+                const aCell = a.children[header.cellIndex].innerText.trim();
+                const bCell = b.children[header.cellIndex].innerText.trim();
+
+                let aVal, bVal;
+
+                if (key === 'name') {
+                    aVal = aCell.toLowerCase();
+                    bVal = bCell.toLowerCase();
+                } else {
+                    aVal = parseFloat(aCell.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+                    bVal = parseFloat(bCell.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+                }
+
+                if (aVal < bVal) return mainSortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return mainSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('th.sortable-main').forEach(th => {
+                th.addEventListener('click', () => sortMainTable(th.dataset.sortKey));
+            });
+        });
+    </script>
+
 
     {{-- FIM DE SCRIPT DASHBOARD --}}
 
