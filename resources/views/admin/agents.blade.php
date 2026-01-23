@@ -485,7 +485,9 @@
                         <tbody>
                             {{-- loop adaptado para os criativos do agente --}}
                             @foreach ($editor->metrics as $cr)
-                                <tr class="creative-detail-row">
+                                <tr
+                                    class="creative-detail-row {{ $cr->total_profit > 0 ? 'creative-green' : ($cr->total_profit < 0 ? 'creative-red' : '') }}"
+                                >
                                     <td class="creative-code">{{ $cr->code }}</td>
                                     <td>{{ $cr->first_redtrack_date }}</td>
                                     <td>
