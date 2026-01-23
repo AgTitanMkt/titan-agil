@@ -8,34 +8,37 @@
             <div class="header-main-nav">
                 <div class="header-brand">
                     <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                    <span class="brand-name">CopyWriters</span>
+                    <span class="brand-name">copiees</span>
                 </div>
 
                 <div class="header-metric-selector">
                     <span class="header-label">Escolha qual métrica deseja visualizar?</span>
                     <div class="header-button-group">
-                        <button id="btn-dashboard" class="btn-toggle active" onclick="switchView('dashboard')">Dashboard</button>
-                        <button id="btn-creatives" class="btn-toggle inactive" onclick="switchView('creatives')">Criativos</button>
+                        <button id="btn-dashboard" class="btn-toggle active"
+                            onclick="switchView('dashboard')">Dashboard</button>
+                        <button id="btn-creatives" class="btn-toggle inactive"
+                            onclick="switchView('creatives')">Criativos</button>
                     </div>
                 </div>
 
                 <div class="header-filter-area">
                     <form action="{{ route('admin.copywriters') }}" class="header-filter-form">
-                <div class="filter-wrapper">
-                    <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                        <div class="filter-wrapper">
+                            <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                        </div>
+                        <button type="submit" class="btn-header-filter">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </form>
                 </div>
-                <button type="submit" class="btn-header-filter">
-                    <i class="fas fa-filter"></i>
-                </button>
-            </form>
-        </div>
-    </div>
-</header>
+            </div>
+        </header>
 
-{{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
+
+        {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
         {{-- <div class="title-section">
-            <h1 class="main-title">Produção De CopyWrites</h1>
-            <p class="sub-title">Métricas De Copy</p>
+            <h1 class="main-title">Produção De copiees</h1>
+            <p class="sub-title">Métricas De copie</p>
         </div>
 
         <div class="selector-container">
@@ -128,13 +131,14 @@
                                 <span class="mini-value">@percent0($emPotencial/$totalTestado) | @int_number($emPotencial)
                                     Ads</span>
                             @else
-                                <span class="mini-value">0 | 0 Ads</span>
+                                <span class="mini-value">0% | 0 Ads</span>
                             @endif
                         </div>
                         <div class="mini-card-outline secondary-border">
                             <span class="mini-label">Taxa de Acerto</span>
                             @if ($totalTestado > 0)
-                                <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados) Ads</span>
+                                <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados)
+                                    Ads</span>
                             @else
                                 <span class="mini-value">0 | 0 Ads</span>
                             @endif
@@ -146,49 +150,49 @@
             <div class="secondary-metrics-grid">
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Nicho</span>
-                    @foreach ($topRoiNicho as $topRoi )
+                    @foreach ($topRoiNicho as $topRoi)
                         <span class="small-data">{{ $topRoi->sigla }} | <span
-                            class="highlight-roi">@percent0($topRoi->roi) ROI</span></span> <br>
+                                class="highlight-roi">@percent0($topRoi->roi) ROI</span></span> <br>
                     @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Nicho</span>
-                    @foreach ($topProfitNicho as $topNicho )
+                    @foreach ($topProfitNicho as $topNicho)
                         <span class="small-data">{{ $topNicho->sigla }} | <span
-                            class="highlight-profit">@percent0($topNicho->total_profit/$totalProfitNichos) do
-                            Profit</span></span> <br>
+                                class="highlight-profit">@percent0($topNicho->total_profit/$totalProfitNichos)
+                                do Profit</span></span> <br>
                     @endforeach
                 </div>
 
                 <div class="small-metric-card">
-                    <span class="small-label">Melhor Copy</span>
-                    @foreach ($topCopiesRoi as $topRoi )
+                    <span class="small-label">Melhor copie</span>
+                    @foreach ($topCopiesRoi as $topRoi)
                         <span class="small-data">{{ $topRoi->name }} | <span class="highlight-roi">@percent($topRoi->metrics->sum('total_profit') / $topRoi->metrics->sum('total_cost'))
-                            ROI</span></span> <br>
+                                ROI</span></span> <br>
                     @endforeach
                 </div>
                 <div class="small-metric-card">
-                    <span class="small-label">Maior Copy</span>
-                    @foreach ($topCopiesProfit as $topProfit )
+                    <span class="small-label">Maior copie</span>
+                    @foreach ($topCopiesProfit as $topProfit)
                         <span class="small-data"> {{ $topProfit->name }} | <span
-                            class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitCopies) 
-                            do Profit</span></span> <br>
+                                class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitCopies)
+                                do Profit</span></span> <br>
                     @endforeach
                 </div>
 
                 <div class="small-metric-card">
                     <span class="small-label">Melhor Dupla</span>
-                    @foreach ($topDuplaRoi as $topRoi )
+                    @foreach ($topDuplaRoi as $topRoi)
                         <span class="small-data">{{ $topRoi->dupla }} | <span class="highlight-roi">@percent($topRoi->roi)
-                            ROI</span></span> <br>
+                                ROI</span></span> <br>
                     @endforeach
                 </div>
                 <div class="small-metric-card">
                     <span class="small-label">Maior Dupla</span>
-                    @foreach ($topDuplaProfit as $topProfit )
+                    @foreach ($topDuplaProfit as $topProfit)
                         <span class="small-data">{{ $topProfit->dupla }} | <span
-                            class="highlight-profit">@percent($topProfit->total_profit / $totalProfitCopies) 
-                            do Profit</span></span> <br>
+                                class="highlight-profit">@percent($topProfit->total_profit / $totalProfitCopies)
+                                do Profit</span></span> <br>
                     @endforeach
                 </div>
             </div>
@@ -201,10 +205,15 @@
                 </div>
 
                 <div class="niche-selector-bar">
+                    <div class="niche-block all active" data-niche="all" data-name="all" style="width: 10%;">
+                        <div class="niche-badge">
+                            <span class="perc">100%</span>
+                            <span class="name">Todos</span>
+                        </div>
+                    </div>
                     @foreach ($nichosBar as $nicho)
                         <div class="niche-block {{ strtolower($nicho->sigla) }}"
-                            data-niche="{{ strtolower($nicho->sigla) }}"
-                            onclick="updateNiche('{{ strtolower($nicho->sigla) }}')"
+                            data-niche="{{ strtolower($nicho->sigla) }}" data-name="{{ $nicho->nicho }}"
                             style="width: {{ $nicho->percent }}%;">
                             <div class="niche-badge">
                                 <span class="perc">{{ $nicho->percent }}%</span>
@@ -234,18 +243,18 @@
                             <input type="hidden" name="date_from" value="{{ request('date_from') }}">
                             <input type="hidden" name="date_to" value="{{ request('date_to') }}">
 
-                            <select name="copy_id" class="copy-select"
-                                onchange="document.getElementById('copySelectForm').submit()">
-                                @foreach ($copies as $copy)
-                                    <option value="{{ $copy->id }}"
-                                        {{ ($selectedCopyId ?? null) == $copy->id ? 'selected' : '' }}>
-                                        {{ $copy->name }}
+                            <select name="copie_id" class="copy-select" onchange="updateSynergyChart(this.value)">
+
+                                @foreach ($copies as $copie)
+                                    <option value="{{ $copie->id }}"
+                                        {{ ($selectedcopieId ?? null) == $copie->id ? 'selected' : '' }}>
+                                        {{ $copie->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </form>
 
-                        <button class="btn-synergy inactive">Selecionar Editor</button>
+                        <button class="btn-synergy inactive">Selecionar copie</button>
                     </div>
                 </div>
 
@@ -280,7 +289,7 @@
 
             {{-- filtros de performance --}}
             <div class="production-filters-section glass-card filters-shadow">
-                <h3 class="section-title">Produção Copywriters</h3>
+                <h3 class="section-title">Produção copiees</h3>
 
                 <form class="filters-grid filters-grid-production">
                     {{-- <div class="filter-group">
@@ -288,8 +297,8 @@
             </div> --}}
                     <div class="filter-group">
                         {{-- Adaptado para Copywriters --}}
-                        <x-multiselect name="copywriters" label="Copywriters" :options="$allCopywriters" :selected="request('copywriters', [])"
-                            placeholder="Selecione um ou mais copywriters">
+                        <x-multiselect name="copywriters" label="copies" :options="$allCopywriters" :selected="request('copies', [])"
+                            placeholder="Selecione um ou mais copiwriters">
                         </x-multiselect>
                     </div>
 
@@ -301,13 +310,13 @@
 
             {{-- COPIES produzidas (taabela principal) --}}
             <div class="copy-production-section glass-card table-shadow">
-                <h3 class="section-title">Copies Produzidas por CopyWriters</h3>
+                <h3 class="section-title">Copies Produzidas por copiees</h3>
 
                 <div class="table-responsive">
                     <table class="metrics-main-table">
                         <thead>
                             <tr>
-                                <th class="header-editor">Copywriter</th>
+                                <th class="header-copie">copie</th>
                                 <th class="header-metrics">Produzido</th>
                                 <th class="header-metrics">Testado</th> {{-- adaptado para copy --}}
                                 <th class="header-metrics">Potencial</th>
@@ -324,51 +333,57 @@
 
                         <tbody>
                             {{-- $copies --}}
-                            @foreach ($copies as $copy)
+                            @foreach ($copies as $copie)
                                 @php
                                     // adaptando para usar as variaveis de Copywriter
 
                                     // $creativesByAgent baseado no codigo padrao usado, mas precisa verificar no controller para as info vir corretas
-                                    $creativesJson = json_encode($copy->metrics ?? collect());
-                                    $key = 'copywriter-' . $copy->id;
+                                    $creativesJson = json_encode($copie->metrics ?? collect());
+                                    $key = 'copywriter-' . $copie->id;
                                 @endphp
 
                                 {{-- linha principal --}}
-                                <tr class="editor-row clickable-row" data-editor-id="{{ $copy->id }}"
+                                <tr class="copie-row clickable-row" data-copie-id="{{ $copie->id }}"
                                     onclick="toggleDetails('{{ $key }}')">
-                                    <td class="editor-name-cell">
+                                    <td class="copie-name-cell">
                                         <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
-                                        <span class="fw-bold">{{ $copy->name }}</span>
+                                        <span class="fw-bold">{{ $copie->name }}</span>
                                     </td>
-                                    <td>{{ count($copy->subTasks) }}</td>
-                                    <td>{{ count($copy->metrics) }}
-                                    <td>@int_number($copy->metrics->sum('em_potencial'))</td>
-                                    <td>@int_number($copy->metrics->sum('validados'))</td>
-                                    <td> @if(count($copy->metrics)) ? @percent($copy->metrics->sum('validados') / count($copy->metrics)) : 0% @endif</td>
-                                    <td>@int_number($copy->metrics->sum('total_clicks'))</td>
-                                    <td>@int_number($copy->metrics->sum('total_conversions'))</td>
-                                    <td>@dollar($copy->metrics->sum('total_cost'))</td>
+                                    <td>{{ count($copie->subTasks) }}</td>
+                                    <td>{{ count($copie->metrics) }}
+                                    <td>@int_number($copie->metrics->sum('em_potencial'))</td>
+                                    <td>@int_number($copie->metrics->sum('validados'))</td>
+                                    <td>
+                                        @if (count($copie->metrics))
+                                            @percent($copie->metrics->sum('validados') / count($copie->metrics))
+                                        @else
+                                            @percent(0)
+                                        @endif
+                                    </td>
+                                    <td>@int_number($copie->metrics->sum('total_clicks'))</td>
+                                    <td>@int_number($copie->metrics->sum('total_conversions'))</td>
+                                    <td>@dollar($copie->metrics->sum('total_cost'))</td>
                                     {{-- lucro com cor condicional --}}
                                     <td
-                                        class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
-                                        @dollar($copy->metrics->sum('total_profit'))
+                                        class="{{ $copie->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
+                                        @dollar($copie->metrics->sum('total_profit'))
                                     </td>
                                     {{-- ROI com cor condicional --}}
                                     <td
-                                        class="{{ $copy->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
-                                        {{ $copy->metrics->sum('total_cost') > 0
-                                            ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) * 100, 2, ',', '.')
+                                        class="{{ $copie->metrics->sum('total_profit') >= 0 ? 'positive-value' : 'negative-value' }}">
+                                        {{ $copie->metrics->sum('total_cost') > 0
+                                            ? number_format(($copie->metrics->sum('total_profit') / $copie->metrics->sum('total_cost')) * 100, 2, ',', '.')
                                             : 0 }}%
                                     </td>
                                     {{-- Botao CTA para a Sub Visualizacao 2.0 --}}
                                     <td class="action-cell">
-                                        <button class="btn-subview-cta" data-name="{{ $copy->name }}"
-                                            data-email="{{ $copy->email }}" data-json='@json($copy->metrics ?? [])'
-                                            data-clicks="@int_number($copy->metrics->sum('total_clicks'))"
-                                            data-copies="@int_number(count($copy->metrics->where('status', 'ok'))) / {{ count($copy->metrics) }}"
-                                            data-profit="@dollar($copy->metrics->sum('total_profit'))"
-                                            data-roi="{{ $copy->metrics->sum('total_cost') > 0
-                                                ? number_format(($copy->metrics->sum('total_profit') / $copy->metrics->sum('total_cost')) * 100, 2, ',', '.')
+                                        <button class="btn-subview-cta" data-name="{{ $copie->name }}"
+                                            data-email="{{ $copie->email }}" data-json='@json($copie->metrics ?? [])'
+                                            data-clicks="@int_number($copie->metrics->sum('total_clicks'))"
+                                            data-copies="@int_number(count($copie->metrics->where('status', 'ok'))) / {{ count($copie->metrics) }}"
+                                            data-profit="@dollar($copie->metrics->sum('total_profit'))"
+                                            data-roi="{{ $copie->metrics->sum('total_cost') > 0
+                                                ? number_format(($copie->metrics->sum('total_profit') / $copie->metrics->sum('total_cost')) * 100, 2, ',', '.')
                                                 : 0 }}%"
                                             onclick="event.stopPropagation(); handleCopyModalOpen(this);"
                                             title="Ver Sub Visualização 2.0">
@@ -382,7 +397,7 @@
                                 <tr id="details-{{ $key }}" class="details-row" style="display: none;">
                                     <td colspan="13" class="details-cell"> {{-- ANTES ESTAVA COM 8 --}}
                                         <div class="nested-table-container custom-scrollbar">
-                                            <h4 class="nested-table-title">Criativos de {{ $copy->name }}</h4>
+                                            <h4 class="nested-table-title">Criativos de {{ $copie->name }}</h4>
                                             <table class="nested-table">
                                                 <thead>
                                                     <tr>
@@ -441,7 +456,7 @@
                                 </thead>
                         <tbody>
                             {{-- loop adaptado para os criativos do agente --}}
-                            @foreach ($copy->metrics as $cr)
+                            @foreach ($copie->metrics as $cr)
                                 <tr class="creative-detail-row">
                                     <td class="creative-code">{{ $cr->code }}</td>
                                     <td>{{ $cr->first_redtrack_date }}</td>
@@ -494,8 +509,8 @@
                             @endforeach
                         </tbody>
                     </table>
-                    @if (($creativesByAgent[$copy->user_id] ?? collect())->isEmpty())
-                        <p class="no-data-message">Nenhum criativo encontrado para este copywriter
+                    @if (($creativesByAgent[$copie->user_id] ?? collect())->isEmpty())
+                        <p class="no-data-message">Nenhum criativo encontrado para este copie
                             neste
                             período.</p>
                     @endif
@@ -536,17 +551,17 @@
         <div class="creative-modal-content subview-modal-content">
 
             <div class="creative-modal-header">
-                <h3 id="copyDetailsTitle" class="main-title-hidden">Detalhes do Copy: [Nome]</h3>
+                <h3 id="copyDetailsTitle" class="main-title-hidden">Detalhes do copie: [Nome]</h3>
                 <button class="creative-modal-close" onclick="closeCopyDetailsModal()">×</button>
             </div>
 
             <div class="subview-body-container">
 
                 {{-- CARD DE INFORMACOES DO COPY --}}
-                <div class="editor-info-card glass-card">
-                    <div class="editor-info-header">
-                        <h3 id="copyNameTitle" class="editor-name-title">Nome do Copywriter</h3>
-                        <p id="copyRoleEmail" class="editor-role-email">Função: Copywriter | Email: email@corp.com</p>
+                <div class="copie-info-card glass-card">
+                    <div class="copie-info-header">
+                        <h3 id="copyNameTitle" class="copie-name-title">Nome do copie</h3>
+                        <p id="copyRoleEmail" class="copie-role-email">Função: copie | Email: email@corp.com</p>
                     </div>
                 </div>
 
@@ -575,9 +590,9 @@
                 </div>
 
                 {{-- GRAFICO DIARIO IGUAL  --}}
-                <div class="editor-chart-section glass-card">
-                    <div class="editor-chart-header">
-                        <h4 class="chart-section-title">Performance Diária (Lucro vs Custo) - Por Copy</h4>
+                <div class="copie-chart-section glass-card">
+                    <div class="copie-chart-header">
+                        <h4 class="chart-section-title">Performance Diária (Lucro vs Custo) - Por copie</h4>
                         <div class="chart-controls">
                             <button id="toggleDailyChartTypeBtnCopy" class="btn-chart-control"
                                 title="Alternar para Linhas">
@@ -647,6 +662,100 @@
     </div>
 
     {{-- COMECO SCRITP COPY --}}
+
+    <script>
+        function buildChartDataByNiche(nicho = null) {
+
+            // 🔹 maiores valores reais (separados)
+            const profits = rawcopiesData.flatMap(copie =>
+                Object.values(copie.by_niche || {}).map(n => n.total_profit || 0)
+            );
+
+            const maxPositiveProfit = Math.max(...profits.filter(p => p > 0), 1);
+            const maxNegativeProfit = Math.min(...profits.filter(p => p < 0), -1);
+
+            const minR = 6;
+            const maxRPositive = 50;
+            const maxRNegative = 22; // 👈 prejuízo nunca domina o gráfico
+
+            return rawcopiesData.map(copie => {
+
+                let data;
+
+                // 🔹 soma geral
+                if (!nicho || nicho === 'all') {
+
+                    const totals = Object.values(copie.by_niche || {});
+
+                    const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
+                    const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
+                    const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+
+                    data = {
+                        total_profit,
+                        total_cost,
+                        produced
+                    };
+
+                } else {
+                    data = copie.by_niche?.[nicho];
+                    if (!data) return null;
+                }
+
+                const profit = data.total_profit || 0;
+                const cost = data.total_cost || 0;
+
+                let r;
+
+                if (profit > 0) {
+                    // 🟢 lucro → escala log normalizada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(profit) / Math.log10(maxPositiveProfit),
+                            1.3
+                        ) * (maxRPositive - minR);
+
+                } else if (profit < 0) {
+                    // 🔴 prejuízo → escala própria e limitada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(Math.abs(profit)) / Math.log10(Math.abs(maxNegativeProfit)),
+                            1.1
+                        ) * (maxRNegative - minR);
+
+                } else {
+                    r = minR;
+                }
+
+                return {
+                    x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
+                    y: data.produced || 0,
+                    r,
+
+                    label: copie.label,
+                    name: copie.name,
+                    profit: +profit.toFixed(2),
+
+                    // 👇 cor por sinal
+                    backgroundColor: profit >= 0 ?
+                        'rgba(34,197,94,0.8)' // verde
+                        :
+                        'rgba(239,68,68,0.8)' // vermelho
+                };
+
+            }).filter(Boolean);
+        }
+
+        function updateIndividualChart(nicho = 'all') {
+            const newData = buildChartDataByNiche(nicho);
+
+            window.chart1.data.datasets[0].data = newData;
+            window.chart1.update();
+        }
+    </script>
+
     <script>
         // Variáveis Globais de Cores IGUAL
         const COLOR_PRIMARY_AZUL = '#0f53ff';
@@ -671,8 +780,8 @@
         // detalhes In-line por COPY IGUAL, ajustada para 'copywriter-'
         function toggleDetails(key) {
             const row = document.getElementById(`details-${key}`);
-            // procurar pelo ID do usuario no atributo data-editor-id
-            const copyRow = document.querySelector(`tr.clickable-row[data-editor-id="${key.replace('copywriter-', '')}"]`);
+            // procurar pelo ID do usuario no atributo data-copie-id
+            const copyRow = document.querySelector(`tr.clickable-row[data-copie-id="${key.replace('copywriter-', '')}"]`);
             const icon = copyRow.querySelector('.arrow-indicator i');
 
             if (row.style.display === "none") {
@@ -682,7 +791,7 @@
                         r.style.display = "none";
                         const otherKey = r.id.replace('details-', '');
                         const otherCopyRow = document.querySelector(
-                            `tr.clickable-row[data-editor-id="${otherKey.replace('copywriter-', '')}"]`);
+                            `tr.clickable-row[data-copie-id="${otherKey.replace('copywriter-', '')}"]`);
                         if (otherCopyRow) {
                             otherCopyRow.classList.remove('details-expanded');
                             otherCopyRow.querySelector('.arrow-indicator i').classList.remove('fa-chevron-down');
@@ -1150,7 +1259,7 @@
 
 
         // ABRIR MODAL DE DETALHES DO COPY, ARRUMADA
-        function openEditorDetailsModal(copyName, clicks, copies, profit, roi, copyEmail, creativesJson) {
+        function opencopieDetailsModal(copyName, clicks, copies, profit, roi, copyEmail, creativesJson) {
 
             document.getElementById("copyDetailsModal").style.display = "flex";
             document.getElementById("copyNameTitle").innerText = copyName;
@@ -1423,6 +1532,9 @@
 
             // garante que o estado inicial da visualizacao de nicho esteja na tabela
             switchNicheViewCopy('table');
+
+            //iniciando grafico de sinergia
+            updateSynergyChart({{ $selectedcopieId ?? 'null' }});
         };
     </script>
     <script>
@@ -1435,7 +1547,7 @@
             const profit = button.dataset.profit
             const roi = button.dataset.roi
 
-            openEditorDetailsModal(name, clicks, copies, profit, roi, email, json);
+            opencopieDetailsModal(name, clicks, copies, profit, roi, email, json);
 
         }
     </script> {{-- FIM SCRIPT COPY --}}
@@ -1500,12 +1612,16 @@
             tn: {
                 color: '#666666',
                 class: 'glow-tn'
+            },
+            db: {
+                color: '#0E336C',
+                class: 'glow-db'
             }
+
         };
 
         // dados individuais grafico 
-        const chartIndividualData = @json($chartIndividualData);
-        const chartSynergyData = @json($chartSynergyData);
+        const rawcopiesData = @json($chartIndividualData);
 
         const ctx1 = document.getElementById('chartIndividual').getContext('2d');
 
@@ -1513,8 +1629,8 @@
             type: 'bubble',
             data: {
                 datasets: [{
-                    label: 'Copywriters',
-                    data: chartIndividualData,
+                    label: 'copiees',
+                    data: buildChartDataByNiche('all'),
                     backgroundColor: 'rgba(0,85,255,0.75)',
                     hoverBackgroundColor: '#ffffff'
                 }]
@@ -1571,94 +1687,301 @@
             }
         });
 
-        const ctxSynergy = document.getElementById('chartSynergy').getContext('2d');
-
-        window.chartSynergy = new Chart(ctxSynergy, {
-            type: 'bubble',
-            data: {
-                datasets: [{
-                    label: 'Duplas',
-                    data: chartSynergyData,
-                    backgroundColor: 'rgba(0, 170, 255, 0.75)',
-                    hoverBackgroundColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'ROI',
-                            color: '#fff'
-                        },
-                        ticks: {
-                            color: '#fff'
-                        },
-                        grid: {
-                            color: 'rgba(255,255,255,0.05)'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Quantidade Produzida',
-                            color: '#fff'
-                        },
-                        ticks: {
-                            color: '#fff'
-                        },
-                        grid: {
-                            color: 'rgba(255,255,255,0.05)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label(context) {
-                                const d = context.raw;
-                                return [
-                                    `Dupla: ${d.label}`,
-                                    `Editor: ${d.editor}`,
-                                    `Produzidos: ${d.produced}`,
-                                    `ROI: ${(d.roi * 100).toFixed(2)}%`,
-                                    `Profit: $${d.profit.toLocaleString('en-US')}`
-                                ];
-                            }
-                        }
-                    }
-                }
-            }
+        //atualizando nichos
+        document.querySelectorAll('.niche-block').forEach(nicho => {
+            nicho.addEventListener('click', () => {
+                updateIndividualChart(nicho.dataset.name);
+                updateNiche(nicho.dataset.niche);
+            });
         });
 
 
         // funcao para trocar de nicho e glow
         function updateNiche(nicheKey) {
-            // atualiza os botoes
-            document.querySelectorAll('.niche-block').forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-niche="${nicheKey}"]`).classList.add('active');
 
-            // troca glow dos conteiners
-            const containers = document.querySelectorAll('.graph-main-container');
-            const config = nicheConfigs[nicheKey];
+            // fallback seguro
+            const config = nicheConfigs[nicheKey] ?? {
+                color: '#888',
+                class: 'glow-mrm'
+            };
 
-            containers.forEach(c => {
+            // ativa botão correto
+            document.querySelectorAll('.niche-block')
+                .forEach(b => b.classList.remove('active'));
+
+            const active = document.querySelector(`[data-niche="${nicheKey}"]`);
+            if (active) active.classList.add('active');
+
+            // troca glow
+            document.querySelectorAll('.graph-main-container').forEach(c => {
                 c.className = 'graph-main-container ' + config.class;
             });
 
-            // dados do grafico
-            window.chart1.data.datasets[0].backgroundColor = config.color;
-            window.chart1.update();
+            // atualiza cor das bolhas
+            if (window.chart1) {
+                window.chart1.data.datasets[0].backgroundColor = config.color;
+                window.chart1.update();
+            }
+        }
+    </script>
+
+    <script>
+        function buildChartDataByNiche(nicho = null) {
+
+            // 🔹 maiores valores reais (separados)
+            const profits = rawcopiesData.flatMap(copie =>
+                Object.values(copie.by_niche || {}).map(n => n.total_profit || 0)
+            );
+
+            const maxPositiveProfit = Math.max(...profits.filter(p => p > 0), 1);
+            const maxNegativeProfit = Math.min(...profits.filter(p => p < 0), -1);
+
+            const minR = 6;
+            const maxRPositive = 50;
+            const maxRNegative = 22; // 👈 prejuízo nunca domina o gráfico
+
+            return rawcopiesData.map(copie => {
+
+                let data;
+
+                // 🔹 soma geral
+                if (!nicho || nicho === 'all') {
+
+                    const totals = Object.values(copie.by_niche || {});
+
+                    const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
+                    const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
+                    const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+
+                    data = {
+                        total_profit,
+                        total_cost,
+                        produced
+                    };
+
+                } else {
+                    data = copie.by_niche?.[nicho];
+                    if (!data) return null;
+                }
+
+                const profit = data.total_profit || 0;
+                const cost = data.total_cost || 0;
+
+                let r;
+
+                if (profit > 0) {
+                    // 🟢 lucro → escala log normalizada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(profit) / Math.log10(maxPositiveProfit),
+                            1.3
+                        ) * (maxRPositive - minR);
+
+                } else if (profit < 0) {
+                    // 🔴 prejuízo → escala própria e limitada
+                    r =
+                        minR +
+                        Math.pow(
+                            Math.log10(Math.abs(profit)) / Math.log10(Math.abs(maxNegativeProfit)),
+                            1.1
+                        ) * (maxRNegative - minR);
+
+                } else {
+                    r = minR;
+                }
+
+                return {
+                    x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
+                    y: data.produced || 0,
+                    r,
+
+                    label: copie.label,
+                    name: copie.name,
+                    profit: +profit.toFixed(2),
+
+                    // 👇 cor por sinal
+                    backgroundColor: profit >= 0 ?
+                        'rgba(34,197,94,0.8)' // verde
+                        :
+                        'rgba(239,68,68,0.8)' // vermelho
+                };
+
+            }).filter(Boolean);
         }
 
-        // incia
-        document.addEventListener('DOMContentLoaded', initCharts);
+
+
+
+        function updateIndividualChart(nicho = 'all') {
+            const newData = buildChartDataByNiche(nicho);
+
+            window.chart1.data.datasets[0].data = newData;
+            window.chart1.update();
+        }
     </script>
+
+    {{-- atualiza grafico de sinergia --}}
+    <script>
+        async function updateSynergyChart(copieId = null) {
+
+            const params = new URLSearchParams({
+                copie_id: copieId ?? '',
+                date_from: document.querySelector('input[name="date_from"]')?.value ?? '',
+                date_to: document.querySelector('input[name="date_to"]')?.value ?? '',
+            });
+
+            const response = await fetch(`/admin/copies/synergy?${params.toString()}`);
+            const data = await response.json();
+
+            // normaliza raio (igual você já faz)
+            const maxProfit = Math.max(...data.map(d => Math.abs(d.profit)), 1);
+
+            const bubbleData = data.map(d => {
+                const minR = 6;
+                const maxR = 42;
+
+                const profit = Math.abs(d.profit);
+
+                const r = profit <= 0 ?
+                    minR :
+                    minR + Math.pow(
+                        Math.log10(profit) / Math.log10(maxProfit),
+                        1.2
+                    ) * (maxR - minR);
+
+                return {
+                    ...d,
+                    r
+                };
+            });
+
+        }
+    </script>
+
+    <script>
+        let chartSynergy = null;
+
+        function normalizeSynergyData(data) {
+            const clean = data.filter(d =>
+                typeof d.x === 'number' &&
+                typeof d.y === 'number' &&
+                typeof d.profit === 'number' &&
+                !isNaN(d.x) &&
+                !isNaN(d.y) &&
+                !isNaN(d.profit)
+            );
+
+            if (!clean.length) return [];
+
+            const maxProfit = Math.max(
+                ...clean.map(d => Math.abs(d.profit)),
+                1
+            );
+
+            const MIN_R = 6;
+            const MAX_R = 42;
+
+            return clean.map(d => {
+                const profit = Math.abs(d.profit);
+
+                const r = profit === 0 ?
+                    MIN_R :
+                    MIN_R + Math.pow(
+                        Math.log10(profit) / Math.log10(maxProfit),
+                        1.2
+                    ) * (MAX_R - MIN_R);
+
+                return {
+                    ...d,
+                    r
+                };
+            });
+        }
+
+        async function updateSynergyChart(copieId = null) {
+            const params = new URLSearchParams({
+                copie_id: copieId ?? '',
+                date_from: document.querySelector('input[name="date_from"]')?.value ?? '',
+                date_to: document.querySelector('input[name="date_to"]')?.value ?? '',
+            });
+
+            const response = await fetch(`/admin/copies/synergy?${params}`);
+            const apiData = await response.json();
+
+            const bubbleData = normalizeSynergyData(apiData);
+            const ctx = document.getElementById('chartSynergy').getContext('2d');
+
+            if (chartSynergy) {
+                chartSynergy.destroy();
+                chartSynergy = null;
+            }
+
+            chartSynergy = new Chart(ctx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Duplas',
+                        data: bubbleData,
+                        backgroundColor: 'rgba(0,170,255,0.75)',
+                        hoverBackgroundColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'ROI',
+                                color: '#fff'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Quantidade Produzida',
+                                color: '#fff'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label(ctx) {
+                                    const d = ctx.raw;
+                                    return [
+                                        `Dupla: ${d.label}`,
+                                        `Copie: ${d.copie}`,
+                                        `Produzidos: ${d.produced}`,
+                                        `ROI: ${(d.roi * 100).toFixed(2)}%`,
+                                        `Profit: $${d.profit.toLocaleString('en-US')}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
 
     {{-- FIM DE SCRIPT DASHBOARD --}}
 

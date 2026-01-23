@@ -1,6 +1,8 @@
 <x-layout>
-    {{-- <link rel="stylesheet" href="{{ asset('css/admin-copy.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin-copy-dashboard.css') }}"> --}}
+
+    @php
+        $isCopy = $type === 'copywriters';
+    @endphp
 
     <div class="copy-main-wrapper">
 
@@ -8,7 +10,9 @@
             <div class="header-main-nav">
                 <div class="header-brand">
                     <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                    <span class="brand-name">Editores</span>
+                    <span class="brand-name">
+                        {{ $isCopy ? 'Copywriters' : 'Editores' }}
+                    </span>
                 </div>
 
                 <div class="header-metric-selector">
@@ -22,7 +26,7 @@
                 </div>
 
                 <div class="header-filter-area">
-                    <form action="{{ route('admin.copywriters') }}" class="header-filter-form">
+                    <form action="{{ route('admin.agents', $type) }}" class="header-filter-form">
                         <div class="filter-wrapper">
                             <x-date-range name="date" :from="$startDate" :to="$endDate" />
                         </div>
@@ -137,9 +141,10 @@
                         <div class="mini-card-outline secondary-border">
                             <span class="mini-label">Taxa de Acerto</span>
                             @if ($totalTestado > 0)
-                                <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados) Ads</span>
+                                <span class="mini-value">@percent0($validados/$totalTestado) | @int_number($validados)
+                                    Ads</span>
                             @else
-                            <span class="mini-value">0 | 0 Ads</span>
+                                <span class="mini-value">0 | 0 Ads</span>
                             @endif
                         </div>
                     </div>
@@ -164,18 +169,28 @@
                 </div>
 
                 <div class="small-metric-card">
-                    <span class="small-label">Melhor Editor</span>
-                    @foreach ($topEditorsRoi as $topRoi)
+                    <span class="small-label">
+                        {{ $isCopy ? 'Melhor Copywriter' : 'Melhor Editor' }}
+                    </span>
+                    @foreach ($topAgentsRoi as $topRoi)
                         <span class="small-data">{{ $topRoi->name }} | <span class="highlight-roi">@percent($topRoi->metrics->sum('total_profit') / $topRoi->metrics->sum('total_cost'))
                                 ROI</span></span> <br>
                     @endforeach
                 </div>
                 <div class="small-metric-card">
-                    <span class="small-label">Maior Editor</span>
-                    @foreach ($topEditorsProfit as $topProfit)
+                    <span class="small-label">
+                        {{ $isCopy ? 'Maior Copywriter' : 'Maior Editor' }}
+                    </span>
+                    @foreach ($topAgentsProfit as $topProfit)
                         <span class="small-data"> {{ $topProfit->name }} | <span
-                                class="highlight-profit">@percent($topProfit->metrics->sum('total_profit') / $totalProfitEditors)
-                                do Profit</span></span> <br>
+                                class="highlight-profit">
+                                @if ($totalProfitAgents)
+                                    @percent($topProfit->metrics->sum('total_profit') / $totalProfitAgents)
+                                @else
+                                    0%    
+                                @endif
+                                do Profit
+                            </span></span> <br>
                     @endforeach
                 </div>
 
@@ -190,8 +205,14 @@
                     <span class="small-label">Maior Dupla</span>
                     @foreach ($topDuplaProfit as $topProfit)
                         <span class="small-data">{{ $topProfit->dupla }} | <span
-                                class="highlight-profit">@percent($topProfit->total_profit / $totalProfitEditors)
-                                do Profit</span></span> <br>
+                                class="highlight-profit">
+                                @if ($totalProfitAgents)
+                                    @percent($topProfit->total_profit / $totalProfitAgents)
+                                @else
+                                    0%    
+                                @endif
+                                do Profit
+                            </span></span> <br>
                     @endforeach
                 </div>
             </div>
@@ -238,14 +259,16 @@
                     <h2 class="display-title">Sinergia do Time</h2>
 
                     <div class="toggle-buttons-row">
-                        <form method="GET" action="{{ route('admin.editors') }}" id="copySelectForm">
+                        <form method="GET" action="{{ route('admin.agents', $type) }}" id="copySelectForm">
+
                             {{-- manter filtros de data --}}
                             <input type="hidden" name="date_from" value="{{ request('date_from') }}">
                             <input type="hidden" name="date_to" value="{{ request('date_to') }}">
 
-                            <select name="editor_id" class="copy-select" onchange="updateSynergyChart(this.value)">
+                            <select name="{{ $isCopy ? 'copy_id' : 'editor_id' }}" class="copy-select"
+                                onchange="updateSynergyChart(this.value)">
 
-                                @foreach ($editors as $editor)
+                                @foreach ($agents as $editor)
                                     <option value="{{ $editor->id }}"
                                         {{ ($selectedEditorId ?? null) == $editor->id ? 'selected' : '' }}>
                                         {{ $editor->name }}
@@ -289,7 +312,9 @@
 
             {{-- filtros de performance --}}
             <div class="production-filters-section glass-card filters-shadow">
-                <h3 class="section-title">Produção Editores</h3>
+                <h3 class="section-title">
+                    Produção {{ $isCopy ? 'Copywriters' : 'Editores' }}
+                </h3>
 
                 <form class="filters-grid filters-grid-production">
                     {{-- <div class="filter-group">
@@ -297,9 +322,8 @@
             </div> --}}
                     <div class="filter-group">
                         {{-- Adaptado para Copywriters --}}
-                        <x-multiselect name="copywriters" label="Editores" :options="$allEditors" :selected="request('editors', [])"
-                            placeholder="Selecione um ou mais editores">
-                        </x-multiselect>
+                        <x-multiselect name="{{ $isCopy ? 'copywriters' : 'editors' }}"
+                            label="{{ $isCopy ? 'Copywriters' : 'Editores' }}" :options="$allAgents" />
                     </div>
 
                     <div class="filter-submit-area filter-submit-area-production">
@@ -310,7 +334,9 @@
 
             {{-- COPIES produzidas (taabela principal) --}}
             <div class="copy-production-section glass-card table-shadow">
-                <h3 class="section-title">Copies Produzidas por Editores</h3>
+                <h3 class="section-title">
+                    Copies Produzidas por {{ $isCopy ? 'Copywriters' : 'Editores' }}
+                </h3>
 
                 <div class="table-responsive">
                     <table class="metrics-main-table">
@@ -333,7 +359,7 @@
 
                         <tbody>
                             {{-- $copies --}}
-                            @foreach ($editors as $editor)
+                            @foreach ($agents as $editor)
                                 @php
                                     // adaptando para usar as variaveis de Copywriter
 
@@ -1771,7 +1797,6 @@
                                 const d = context.raw;
                                 return [
                                     `Dupla: ${d.label}`,
-                                    `Editor: ${d.editor}`,
                                     `Produzidos: ${d.produced}`,
                                     `ROI: ${(d.roi * 100).toFixed(2)}%`,
                                     `Profit: $${d.profit.toLocaleString('en-US')}`
@@ -1923,12 +1948,13 @@
         async function updateSynergyChart(editorId = null) {
 
             const params = new URLSearchParams({
-                editor_id: editorId ?? '',
+                {{ $isCopy ? 'copy_id' : 'editor_id' }}: editorId ?? '',
                 date_from: document.querySelector('input[name="date_from"]')?.value ?? '',
                 date_to: document.querySelector('input[name="date_to"]')?.value ?? '',
             });
 
-            const response = await fetch(`/admin/editors/synergy?${params.toString()}`);
+            const response = await fetch(`/admin/{{ $type }}/synergy?${params.toString()}`);
+
             const data = await response.json();
 
             // normaliza raio (igual você já faz)

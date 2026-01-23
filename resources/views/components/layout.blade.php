@@ -22,7 +22,7 @@
         'resources/css/css-admin/admin-multiselect.css', // CSS DO MULTISELECT - FILTRO //
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES CTR (%) CPA//
-        'resources/css/css-admin/admin-copy-dashboard.css',  // CSS DO COPY PARA ABA DE DASHBOARD //
+        'resources/css/css-admin/admin-copy-dashboard.css', // CSS DO COPY PARA ABA DE DASHBOARD //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')
@@ -67,13 +67,13 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.copywriters') }}" class="nav-link submenu-link">
-                                    <i class="fas fa-pen-fancy nav-icon"></i> CopyWriters
+                                <a href="{{ route('admin.agents', 'copywriters') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.editors') }}" class="nav-link submenu-link">
-                                    <i class="fas fa-edit nav-icon"></i> Editores
+                                <a href="{{ route('admin.agents', 'editors') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Editores
                                 </a>
                             </li>
                         </ul>

@@ -254,7 +254,7 @@ class AdminController extends Controller
         $sinergyCopy = is_array($sinergyCopy) ? $sinergyCopy['editor_id'] : $sinergyCopy->editor_id;
         $synergyData = $duplasData
             ->where('editor_id', $sinergyCopy)
-            ->values();    
+            ->values();
         $chartSynergyData = $synergyData->map(fn($d) => [
             'x' => (float) $d->roi,
             'y' => (int) $d->total_creatives,
@@ -292,9 +292,6 @@ class AdminController extends Controller
 
         ));
     }
-
-
-
 
     public function copywriters(Request $request)
     {
@@ -485,6 +482,227 @@ class AdminController extends Controller
 
         ));
     }
+
+    public function agents(Request $request, string $type = 'editors')
+    {
+        $isCopy = $type === 'copywriters';
+
+        $roleId        = $isCopy ? 2 : 3;
+        $idParam       = $isCopy ? 'copy_id' : 'editor_id';
+        $agentsVar     = $isCopy ? 'copywriters' : 'editors';
+
+        // -------------------------------------------------
+        // 1️⃣ Datas
+        // -------------------------------------------------
+        $startDate = $request->input('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+
+        $endDate = $request->input('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        $agentsFilter     = $request->input($agentsVar);
+        $nicho            = $request->input('nicho');
+        $selectedAgentId  = $request->input($idParam);
+
+        // -------------------------------------------------
+        // 2️⃣ Lista completa
+        // -------------------------------------------------
+        $allAgents = $isCopy
+            ? $this->allCopywritersArray()
+            : $this->allEditorsArray();
+
+        $metricsAgents = CopaProfitService::AgentsMetrics(
+            $startDate,
+            $endDate,
+            $agentsFilter
+        );
+
+        $agents = User::withRole($roleId)->get();
+
+        foreach ($agents as $agent) {
+            $agent->metrics = $metricsAgents[$agent->id] ?? collect();
+        }
+
+        $agents = $agents->sortByDesc(
+            fn($a) => $a->metrics->sum('total_profit')
+        )->values();
+
+        // -------------------------------------------------
+        // 3️⃣ Filtro por nicho (IGUAL)
+        // -------------------------------------------------
+        if ($nicho) {
+            $agents = $agents
+                ->map(function ($agent) use ($nicho) {
+                    $agent->metrics = $agent->metrics
+                        ->where('nicho_name', $nicho)
+                        ->values();
+                    return $agent;
+                })
+                ->filter(fn($agent) => $agent->metrics->isNotEmpty())
+                ->values();
+        }
+
+        // -------------------------------------------------
+        // 4️⃣ Dashboard (IGUAL)
+        // -------------------------------------------------
+        $totalProduzido = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])->count();
+
+        $testadas = Task::whereBetween('created_at', [
+            $startDate->startOfDay(),
+            $endDate->endOfDay()
+        ])->whereHas('redtrackReports', function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('date', [
+                $startDate->startOfDay(),
+                $endDate->endOfDay()
+            ]);
+        })->get();
+
+        $totalTestado = $testadas->count();
+        $emPotencial  = ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Potential', 1)->count();
+
+        $validados = ValidatedCreative::whereIn('ad', $testadas->pluck('code'))
+            ->where('is_Validated', 1)->count();
+
+        // -------------------------------------------------
+        // 5️⃣ Nichos (IGUAL)
+        // -------------------------------------------------
+        $dataNichos = (new TasksService())->dataNichos();
+
+        $topProfitNicho = $dataNichos->sortByDesc('total_profit')->take(3);
+        $topRoiNicho    = $dataNichos->sortByDesc('roi')->take(3);
+
+        $totalProfitNichos = $dataNichos->sum('total_profit');
+
+        $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
+            $nicho->percent = $totalProfitNichos > 0
+                ? round(($nicho->total_profit / $totalProfitNichos) * 100, 2)
+                : 0;
+            return $nicho;
+        });
+
+        // -------------------------------------------------
+        // 6️⃣ Top agentes (IGUAL)
+        // -------------------------------------------------
+        $totalProfitAgents = $agents->sum(
+            fn($a) => $a->metrics->sum('total_profit')
+        );
+
+        $topAgentsRoi = $agents
+            ->filter(fn($a) => $a->metrics->sum('total_cost') > 0)
+            ->sortByDesc(
+                fn($a) =>
+                $a->metrics->sum('total_profit') /
+                    $a->metrics->sum('total_cost')
+            )
+            ->take(3)
+            ->values();
+
+        $topAgentsProfit = $agents
+            ->sortByDesc(fn($a) => $a->metrics->sum('total_profit'))
+            ->take(3)
+            ->values();
+
+        // -------------------------------------------------
+        // 7️⃣ SINERGIA (IGUAL À ORIGINAL)
+        // -------------------------------------------------
+        $duplasData = (new AgentsService($startDate, $endDate))->duoMetrics();
+
+        $topDuplaRoi = $duplasData
+            ->sortByDesc('roi')
+            ->take(3)
+            ->values();
+
+        $topDuplaProfit = $duplasData
+            ->sortByDesc('total_profit')
+            ->take(3)
+            ->values();
+
+        if ($selectedAgentId) {
+            $sinergyPivot = $duplasData
+                ->where($isCopy ? 'copy_id' : 'copy_id', $selectedAgentId)
+                ->first();
+        } else {
+            $sinergyPivot = $duplasData
+                ->groupBy('editor_id')
+                ->map(fn($items) => [
+                    'editor_id' => $items->first()->editor_id,
+                    'total_profit' => $items->sum('total_profit'),
+                ])
+                ->sortByDesc('total_profit')
+                ->first();
+        }
+
+        $pivotEditorId = is_array($sinergyPivot)
+            ? $sinergyPivot['editor_id']
+            : $sinergyPivot->editor_id;
+
+        $chartSynergyData = $duplasData
+            ->where('editor_id', $pivotEditorId)
+            ->map(fn($d) => [
+                'x' => (float)$d->roi,
+                'y' => (int)$d->total_creatives,
+                'label' => $d->dupla,
+                'editor' => $d->editor_name,
+                'copywriter' => $d->copy_name,
+                'profit' => (float)$d->total_profit,
+                'roi' => (float)$d->roi,
+                'produced' => (int)$d->total_creatives,
+            ])
+            ->values();
+
+        // -------------------------------------------------
+        // 8️⃣ Gráfico individual (IGUAL)
+        // -------------------------------------------------
+        $chartIndividualData = $agents->map(function ($agent) {
+            return [
+                'editor_id' => $agent->id,
+                'name' => $agent->name,
+                'label' => collect(explode(' ', $agent->name))
+                    ->map(fn($n) => strtoupper(substr($n, 0, 1)))
+                    ->take(2)
+                    ->implode(''),
+                'by_niche' => $agent->metrics
+                    ->groupBy('nicho_name')
+                    ->map(fn($m) => [
+                        'total_profit' => $m->sum('total_profit'),
+                        'total_cost' => $m->sum('total_cost'),
+                        'produced' => $m->count(),
+                    ]),
+            ];
+        });
+
+        return view('admin.editors', compact(
+            'agents',
+            'allAgents',
+            'startDate',
+            'endDate',
+            'totalProduzido',
+            'totalTestado',
+            'emPotencial',
+            'validados',
+            'topProfitNicho',
+            'topRoiNicho',
+            'nichosBar',
+            'totalProfitNichos',
+            'totalProfitAgents',
+            'topAgentsProfit',
+            'topAgentsRoi',
+            'topDuplaRoi',
+            'topDuplaProfit',
+            'chartIndividualData',
+            'chartSynergyData',
+            'selectedAgentId',
+            'type'
+        ));
+    }
+
+
 
 
     public function allCopywritersArray()
@@ -856,7 +1074,7 @@ class AdminController extends Controller
     }
 
 
-    public function synergyData(Request $request)
+    public function synergyData(Request $request, $type = 'editors')
     {
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
@@ -866,36 +1084,67 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
-        $editorId = $request->input('editor_id');
+        /**
+         * Define o contexto dinamicamente
+         */
+        $context = match ($type) {
+            'copywriters' => [
+                'id_param'   => 'copy_id',
+                'id_field'   => 'copy_id',
+                'name_field' => 'copy_name',
+                'label'      => 'copy',
+            ],
+            default => [
+                'id_param'   => 'editor_id',
+                'id_field'   => 'editor_id',
+                'name_field' => 'editor_name',
+                'label'      => 'editor',
+            ],
+        };
 
-        $agentesServices = new AgentsService($startDate, $endDate);
-        $duplasData = $agentesServices->duoMetrics();
 
-        if ($editorId) {
-            $duplasData = $duplasData->where('editor_id', $editorId);
+        $userId = $request->input($context['id_param']);
+
+        $agentsService = new AgentsService($startDate, $endDate);
+        $duplasData = $agentsService->duoMetrics();
+
+        /**
+         * Filtra por editor/copywriter específico
+         */
+        if ($userId) {
+            $duplasData = $duplasData->where($context['id_field'], $userId);
         } else {
-            $bestEditor = $duplasData
-                ->groupBy('editor_id')
+            /**
+             * Seleciona automaticamente o melhor (maior lucro)
+             */
+            $best = $duplasData
+                ->groupBy($context['id_field'])
                 ->map(fn($items) => [
-                    'editor_id' => $items->first()->editor_id,
+                    'id' => $items->first()->{$context['id_field']},
                     'total_profit' => $items->sum('total_profit'),
                 ])
                 ->sortByDesc('total_profit')
                 ->first();
 
-            if ($bestEditor) {
-                $duplasData = $duplasData->where('editor_id', $bestEditor['editor_id']);
+            if ($best) {
+                $duplasData = $duplasData->where(
+                    $context['id_field'],
+                    $best['id']
+                );
             }
         }
 
+        /**
+         * Payload final (gráfico de sinergia)
+         */
         return response()->json(
             $duplasData->map(fn($d) => [
-                'x' => (float) $d->roi,
-                'y' => (int) $d->total_creatives,
-                'label' => $d->dupla,
-                'editor' => $d->editor_name,
-                'profit' => (float) $d->total_profit,
-                'roi' => (float) $d->roi,
+                'x'        => (float) $d->roi,
+                'y'        => (int) $d->total_creatives,
+                'label'    => $d->dupla,
+                $context['label'] => $d->{$context['name_field']},
+                'profit'   => (float) $d->total_profit,
+                'roi'      => (float) $d->roi,
                 'produced' => (int) $d->total_creatives,
             ])->values()
         );
