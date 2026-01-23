@@ -32,11 +32,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('dollar', function ($amount) {
-            return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
+            return "<?php echo '$ ' . number_format($amount, 2, ',', '.'); ?>";
         });
 
         Blade::directive('dollar', function ($amount) {
-            return "<?php echo 'USD ' . number_format($amount, 2, ',', '.'); ?>";
+            return "<?php echo '$ ' . number_format($amount, 2, ',', '.'); ?>";
         });
 
         Blade::directive('dollarK', function ($amount) {
