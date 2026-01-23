@@ -677,7 +677,7 @@ class AdminController extends Controller
             ];
         });
 
-        return view('admin.editors', compact(
+        return view('admin.agents', compact(
             'agents',
             'allAgents',
             'startDate',
