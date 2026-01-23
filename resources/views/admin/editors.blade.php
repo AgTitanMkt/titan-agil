@@ -25,6 +25,8 @@
                     </div>
                 </div>
 
+                {{-- Andre verifica esse codigo para mim, estou com duvidas se esta correto, para copy, sim. Mas para Editors eu nao sei --}}
+
                 <div class="header-filter-area">
                     <form action="{{ route('admin.agents', $type) }}" class="header-filter-form">
                         <div class="filter-wrapper">
