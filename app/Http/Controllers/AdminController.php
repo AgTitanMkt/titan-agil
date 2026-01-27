@@ -519,6 +519,7 @@ class AdminController extends Controller
             $agentsFilter
         );
 
+
         $agents = User::withRole($roleId)->get();
 
         foreach ($agents as $agent) {
@@ -528,6 +529,7 @@ class AdminController extends Controller
         $agents = $agents->sortByDesc(
             fn($a) => $a->metrics->sum('total_profit')
         )->values();
+
 
         // -------------------------------------------------
         // 3️⃣ Filtro por nicho (IGUAL)
@@ -551,6 +553,7 @@ class AdminController extends Controller
             $startDate->startOfDay(),
             $endDate->endOfDay()
         ])->count();
+
 
         $testadas = Task::whereBetween('created_at', [
             $startDate->startOfDay(),
@@ -667,15 +670,26 @@ class AdminController extends Controller
                     ->map(fn($n) => strtoupper(substr($n, 0, 1)))
                     ->take(2)
                     ->implode(''),
+
                 'by_niche' => $agent->metrics
                     ->groupBy('nicho_name')
-                    ->map(fn($m) => [
-                        'total_profit' => $m->sum('total_profit'),
-                        'total_cost' => $m->sum('total_cost'),
-                        'produced' => $m->count(),
-                    ]),
+                    ->map(function ($m) {
+                        return [
+                            'total_profit' => $m->sum('total_profit'),
+                            'total_cost'   => $m->sum('total_cost'),
+
+                            // ✅ PRODUÇÃO REAL
+                            'produced'     => $m->sum('produzido'),
+
+                            // ✅ TESTES REAIS
+                            'tested'       => $m->sum('testados'),
+                        ];
+                    }),
             ];
         });
+
+
+        // dd($agents->first()->metrics[0]);
 
         return view('admin.agents', compact(
             'agents',

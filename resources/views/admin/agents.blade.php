@@ -750,11 +750,13 @@
                     const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
                     const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
                     const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+                    const tested = totals.reduce((s, n) => s + (n.tested || 0), 0);
 
                     data = {
                         total_profit,
                         total_cost,
-                        produced
+                        produced,
+                        tested
                     };
 
                 } else {
@@ -797,6 +799,7 @@
                     label: editor.label,
                     name: editor.name,
                     profit: +profit.toFixed(2),
+                    tested: data.tested || 0,
 
                     // 👇 cor por sinal
                     backgroundColor: profit >= 0 ?
@@ -1682,7 +1685,8 @@
 
         // dados individuais grafico 
         const rawEditorsData = @json($chartIndividualData);
-
+        console.log(rawEditorsData);
+        
         const chartSynergyData = @json($chartSynergyData);
 
         const ctx1 = document.getElementById('chartIndividual').getContext('2d');
@@ -1736,9 +1740,11 @@
                         callbacks: {
                             label(context) {
                                 const d = context.raw;
+                                
                                 return [
                                     d.name,
                                     `Produzidos: ${d.y}`,
+                                    `Testados: ${d.tested}`,
                                     `ROI: ${d.x}`,
                                     `Profit: $${d.profit.toLocaleString('en-US')}`
                                 ];
@@ -1832,6 +1838,7 @@
                                 return [
                                     `Dupla: ${d.label}`,
                                     `Produzidos: ${d.produced}`,
+                                    `Testados: ${d.tested}`,
                                     `ROI: ${(d.roi * 100).toFixed(2)}%`,
                                     `Profit: $${d.profit.toLocaleString('en-US')}`
                                 ];
@@ -1908,11 +1915,13 @@
                     const total_profit = totals.reduce((s, n) => s + (n.total_profit || 0), 0);
                     const total_cost = totals.reduce((s, n) => s + (n.total_cost || 0), 0);
                     const produced = totals.reduce((s, n) => s + (n.produced || 0), 0);
+                    const tested = totals.reduce((s, n) => s + (n.tested || 0), 0);
 
                     data = {
                         total_profit,
                         total_cost,
-                        produced
+                        produced,
+                        tested,
                     };
 
                 } else {
@@ -1955,6 +1964,7 @@
                     label: editor.label,
                     name: editor.name,
                     profit: +profit.toFixed(2),
+                    tested: data.tested || 0,
 
                     // 👇 cor por sinal
                     backgroundColor: profit >= 0 ?
@@ -1970,8 +1980,7 @@
 
 
         function updateIndividualChart(nicho = 'all') {
-            const newData = buildChartDataByNiche(nicho);
-
+            const newData = buildChartDataByNiche(nicho);            
             window.chart1.data.datasets[0].data = newData;
             window.chart1.update();
         }

@@ -448,11 +448,22 @@ class CopaProfitService
 
     public static function AgentsMetrics($startDate, $endDate, $agents = null)
     {
-        /** ------------------------------------------------------------
-         * SUBQUERY: primeira ocorrência do criativo no RedTrack
-         * ------------------------------------------------------------ */
+        // 1) primeira data histórica do criativo no redtrack
         $firstDateSub = DB::table('redtrack_reports')
             ->selectRaw('LOWER(ad_code) AS ad_code_norm, MIN(date) AS first_redtrack_date')
+            ->groupBy(DB::raw('LOWER(ad_code)'));
+
+        // 2) redtrack agregado no período
+        $rrAgg = DB::table('redtrack_reports')
+            ->selectRaw("
+            LOWER(ad_code) AS ad_code_norm,
+            MAX(date) AS redtrack_date,
+            SUM(clicks) AS total_clicks,
+            SUM(conversions) AS total_conversions,
+            SUM(cost) AS total_cost,
+            SUM(profit) AS total_profit
+        ")
+            ->whereBetween('date', [$startDate, $endDate])
             ->groupBy(DB::raw('LOWER(ad_code)'));
 
         return DB::table('user_tasks AS ut')
@@ -461,125 +472,88 @@ class CopaProfitService
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
 
-            /* ============================================================
-           🔗 JOIN COM REDTRACK (MESMO DA tasks())
-           ============================================================ */
-            ->leftJoin('redtrack_reports AS rr', function ($join) {
-                $join->on(
-                    DB::raw('LOWER(rr.ad_code)'),
-                    '=',
-                    DB::raw('LOWER(t.code)')
-                );
-            })
-
-            /* ============================================================
-           🔗 JOIN COM SUBQUERY DE PRIMEIRA DATA (MESMO DA tasks())
-           ============================================================ */
-            ->leftJoinSub($firstDateSub, 'fr', function ($join) {
-                $join->on(
-                    'fr.ad_code_norm',
-                    '=',
-                    DB::raw('LOWER(t.code)')
-                );
-            })
-
+            // filtro de PRODUÇÃO
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('rr.date', [$startDate, $endDate]);
+                $q->whereBetween('t.created_at', [$startDate, $endDate]);
+            })
+
+            // redtrack agregado
+            ->leftJoinSub($rrAgg, 'rr', function ($join) {
+                $join->on('rr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
+            })
+
+            ->leftJoinSub($firstDateSub, 'fr', function ($join) {
+                $join->on('fr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
+            })
+
+            // 🔥 JOIN COM VALIDATED_CREATIVES
+            ->leftJoin('validated_creatives AS vc', function ($join) {
+                $join->on('vc.subtask_id', '=', 'st.id');
             })
 
             ->when($agents, function ($q) use ($agents) {
-                $q->whereIn('u.name', (array) $agents);
+                $q->whereIn('u.name', (array)$agents);
             })
 
             ->selectRaw("
             u.id AS user_id,
             u.name AS agent_name,
 
-            ut.sub_task_id,
-            st.task_id,
+            t.id AS task_id,
             t.code,
-
             n.id AS nicho_id,
             n.name AS nicho_name,
 
-            MAX(rr.date) AS redtrack_date,
+            rr.redtrack_date,
             fr.first_redtrack_date,
 
-            SUM(rr.clicks) AS total_clicks,
-            SUM(rr.conversions) AS total_conversions,
-            SUM(rr.cost) AS total_cost,
-            SUM(rr.profit) AS total_profit,
+            COALESCE(rr.total_clicks, 0) AS total_clicks,
+            COALESCE(rr.total_conversions, 0) AS total_conversions,
+            COALESCE(rr.total_cost, 0) AS total_cost,
+            COALESCE(rr.total_profit, 0) AS total_profit,
 
             CASE 
-                WHEN SUM(rr.cost) > 0 THEN SUM(rr.profit) / SUM(rr.cost)
+                WHEN COALESCE(rr.total_cost,0) > 0 
+                THEN COALESCE(rr.total_profit,0) / rr.total_cost
                 ELSE 0
             END AS roi,
 
-            CASE 
-                WHEN COUNT(rr.id) = 0 THEN 'inconsistente'
-                ELSE 'ok'
-            END AS status,
-
-            CASE 
-                WHEN COUNT(rr.id) = 0 THEN 'não encontrado no redtrack'
-                ELSE NULL
-            END AS info,
-
             /* 📦 PRODUZIDO */
-            COUNT(DISTINCT ut.sub_task_id) AS produzido,
+            1 AS produzido,
 
-            /* 🧪 TESTADOS */
-            COUNT(DISTINCT rr.id) AS testados,
-
-            /* 🔥 VALIDAÇÃO */
-            CASE 
-                WHEN SUM(rr.conversions) >= 20
-                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
-                THEN 1 ELSE 0
-            END AS validados,
-
-            CASE 
-                WHEN SUM(rr.conversions) >= 20
-                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1.8
-                THEN 100 ELSE 0
-            END AS win_rate,
+            /* 🧪 TESTADO */
+            CASE WHEN rr.ad_code_norm IS NULL THEN 0 ELSE 1 END AS testados,
 
             /* ⚡ EM POTENCIAL */
-            CASE 
-                WHEN SUM(rr.conversions) >= 1
-                 AND (SUM(rr.profit) / NULLIF(SUM(rr.cost), 0)) >= 1
-                THEN 1 ELSE 0
-            END AS em_potencial,
+            CASE WHEN vc.is_potential = 1 THEN 1 ELSE 0 END AS em_potencial,
 
-            CASE 
-                WHEN SUM(rr.clicks) > 0 
-                THEN SUM(rr.cost) / SUM(rr.clicks)
-                ELSE NULL
-            END AS cpc,
-
-            CASE 
-                WHEN SUM(rr.clicks) > 0
-                THEN (SUM(rr.profit) + SUM(rr.cost)) / SUM(rr.clicks)
-                ELSE NULL
-            END AS epc
+            /* 🔥 VALIDADO */
+            CASE WHEN vc.is_validated = 1 THEN 1 ELSE 0 END AS validado
         ")
 
             ->groupBy(
                 'u.id',
                 'u.name',
-                'ut.sub_task_id',
-                'st.task_id',
+                't.id',
                 't.code',
-                'fr.first_redtrack_date',
                 'n.id',
-                'n.name'
+                'n.name',
+                'rr.redtrack_date',
+                'fr.first_redtrack_date',
+                'rr.total_clicks',
+                'rr.total_conversions',
+                'rr.total_cost',
+                'rr.total_profit',
+                'rr.ad_code_norm',
+                'vc.is_potential',
+                'vc.is_validated'
             )
-
-            ->orderBy('total_profit', 'DESC')
 
             ->get()
             ->groupBy('user_id');
     }
+
+
 
     private function getCyclePeriod(int $cycle, int $year): array
     {
