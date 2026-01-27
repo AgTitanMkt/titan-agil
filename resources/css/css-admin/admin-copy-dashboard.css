@@ -305,8 +305,19 @@
 .content-section {
     width: 100%;
     max-width: 1200px;
+    margin: 0 auto;
     animation: fadeIn 0.5s ease;
 }
+
+
+/* ARRUMADO PARA CENTRALIZACAO class="content-section"
+ Reset remove ruído, max-width cria espaço, margin: auto distribui o espaço.
+ auto só funciona se houver espaço sobrando. 
+ Sem margin: auto, nunca centraliza.
+ DAVA PARA USAR TAMBEM margin-left: auto;
+margin-right: auto;
+*/
+
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }

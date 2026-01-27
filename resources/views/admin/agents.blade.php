@@ -1,45 +1,88 @@
 <x-layout>
-
     @php
         $isCopy = $type === 'copywriters';
     @endphp
 
-    <div class="copy-main-wrapper">
-
-        <header class="titan-header-container">
-            <div class="header-main-nav">
+    <div class="titan-dashboard-wrapper">
+        <header class="titan-unified-header">
+            <div class="header-top-row">
                 <div class="header-brand">
-                    <img src="/img/img-admin/logo titan.png" alt="Titan Logo" class="sidebar-logo">
-                    <span class="brand-name">
-                        {{ $isCopy ? 'Copywriters' : 'Editores' }}
-                    </span>
+                    <img src="/img/img-admin/logo titan.png" alt="Titan Logo">
+                    <span class="brand-name">{{ $isCopy ? 'Copywriters' : 'Editores' }}</span>
                 </div>
 
-                <div class="header-metric-selector">
-                    <span class="header-label">Escolha qual métrica deseja visualizar?</span>
-                    <div class="header-button-group">
-                        <button id="btn-dashboard" class="btn-toggle active"
-                            onclick="switchView('dashboard')">Dashboard</button>
-                        <button id="btn-creatives" class="btn-toggle inactive"
-                            onclick="switchView('creatives')">Criativos</button>
+                <div class="view-selector-wrapper">
+                    <span class="selector-label">Escolha uma view:</span>
+                    <div class="toggle-group">
+                        <button id="btn-dashboard" class="btn-nav active" 
+                        onclick="switchView('dashboard')">Dashboard
+                        </button>
+                        <button id="btn-creatives" class="btn-nav inactive" 
+                        onclick="switchView('creatives')">Criativos
+                        </button>
                     </div>
                 </div>
-
-                {{-- Andre verifica esse codigo para mim, estou com duvidas se esta correto, para copy, sim. Mas para Editors eu nao sei --}}
-
-                <div class="header-filter-area">
-                    <form action="{{ route('admin.agents', $type) }}" class="header-filter-form">
-                        <div class="filter-wrapper">
-                            <x-date-range name="date" :from="$startDate" :to="$endDate" />
-                        </div>
-                        <button type="submit" class="btn-header-filter">
-                            <i class="fas fa-filter"></i>
-                        </button>
-                    </form>
-                </div>
             </div>
-        </header>
 
+                
+
+            <nav class="filter-toolbar-container">
+                <form action="{{ route('admin.agents', $type) }}" method="GET" class="filter-main-form">
+                    
+                    <div class="filter-item item-date">
+                        <label>Escolha o Filtro Desejado:</label>
+                        <x-date-range name="date" :from="$startDate" :to="$endDate" />
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Nicho</label>
+                        <select name="niche" class="titan-select">
+                            <option value="TOTAL">TOTAL</option>
+                            <option value="MM">MM</option>
+                            <option value="ED">ED</option>
+                            <option value="WL">WL</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Fonte</label>
+                        <select name="source" class="titan-select">
+                            <option value="TOTAL">TOTAL</option>
+                            <option value="FACEBOOK">FACEBOOK</option>
+                            <option value="YOUTUBE">YOUTUBE</option>
+                            <option value="NATIVE">NATIVE</option>
+                            <option value="TIKTOK">TIKTOK</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Tipo</label>
+                        <select name="creation_type" class="titan-select">
+                            <option value="TOTAL">TOTAL</option>
+                            <option value="original">Original</option>
+                            <option value="variation">Variação</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item item-agent">
+                        <label>{{ $isCopy ? 'Copywriter' : 'Editor' }}</label>
+                        <x-multiselect 
+                            name="{{ $isCopy ? 'copywriters' : 'editors' }}" 
+                            :options="$allAgents" 
+                            placeholder="Buscar profissional..."
+                        />
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-execute-filter">
+                            <i class="fas fa-filter"></i>
+                            <span>FILTRAR</span>
+                        </button>
+                    </div>
+                </form>
+            </nav>
+        </header>
+        
 
         {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
         {{-- <div class="title-section">
@@ -83,7 +126,7 @@
         </div> --}}
         {{-- FIM DA SECTION QUE ESTA NO HEADER AGORA OTIMIZACAO --}}
 
-        {{-- COMECO DASHBOARD --}}
+        {{-- COMECO DASHBOARD - VER CSS CONTENT-SECTION - CENTRALIZADO --}}
         <section id="section-dashboard" class="content-section">
 
             {{-- <div class="filter-control-panel">
@@ -310,34 +353,40 @@
         <p class="dashboard-page-subtitle">Visão geral e filtros de performance</p>
     </div> --}}
 
-            {{-- filtros de performance --}}
+            {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. comeco das alteracoes. --}}
+            {{-- filtros de performance - removido --}}
             <div class="production-filters-section glass-card filters-shadow">
                 <h3 class="section-title">
                     Produção {{ $isCopy ? 'Copywriters' : 'Editores' }}
                 </h3>
-
+                
                 <form class="filters-grid filters-grid-production">
                     {{-- <div class="filter-group">
                 <x-date-range name="date" :from="$startDate" :to="$endDate" label="Intervalo de Datas" />
             </div> --}}
-                    <div class="filter-group">
-                        {{-- Adaptado para Copywriters --}}
+
+                    {{-- <div class="filter-group">
                         <x-multiselect name="{{ $isCopy ? 'copywriters' : 'editors' }}"
                             label="{{ $isCopy ? 'Copywriters' : 'Editores' }}" :options="$allAgents" />
-                    </div>
+                    </div> --}}
+                    {{-- removido filtro de copy/editos --}}
 
-                    <div class="filter-submit-area filter-submit-area-production">
+                    {{-- <div class="filter-submit-area filter-submit-area-production">
                         <button type="submit" class="btn-filter">FILTRAR</button>
-                    </div>
+                    </div> --}}
+                    {{-- removido botao de filtrar --}}
                 </form>
             </div>
 
             {{-- COPIES produzidas (taabela principal) --}}
             <div class="copy-production-section glass-card table-shadow">
-                <h3 class="section-title">
+                {{-- <h3 class="section-title">
                     Copies Produzidas por {{ $isCopy ? 'Copywriters' : 'Editores' }}
-                </h3>
+                </h3> --}}
+                {{-- removido titulo de copy/editores, pois esta redundante, ja tem titulo acima deles. --}}
 
+                {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. fim das alteracoes.--}}
+                
                 <div class="table-responsive">
                     <table class="metrics-main-table">
                         <thead>
