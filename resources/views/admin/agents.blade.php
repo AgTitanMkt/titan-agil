@@ -462,47 +462,47 @@
                                                     <tr>
                                                         <th data-sort-key="creative_code" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Criativo</i>
+                                                            Criativo<i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="date" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Data </i>
+                                                            Data <i class="fas fa-sort"></i>
                                                         </th>
-                                                        <th data-sort-key="em-potencial" class="sortable"
+                                                        <th data-sort-key="potential" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Potencial </i>
+                                                            Potencial <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="clicks" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Cliques </i>
+                                                            Cliques <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="conversions" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Conversões </i>
+                                                            Conversões <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="conversions" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            CPC </i>
+                                                            CPC <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="conversions" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            EPC </i>
+                                                            EPC <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="cost" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Custo </i>
+                                                            Custo <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="profit" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Lucro </i>
+                                                            Lucro <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="revenue" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            Receita </i>
+                                                            Receita <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th data-sort-key="roi" class="sortable"
                                                             style="font-size: 0.8rem;">
-                                                            ROI </i>
+                                                            ROI <i class="fas fa-sort"></i>
                                                         </th>
                                                         <th class="text-center" style="font-size: 0.8rem;">Gráfico
                                                         </th>
@@ -1278,17 +1278,64 @@
         }
 
         function sortInlineCreativesTable(key) {
-            // a tabela aninhada in-line nao tem um ID especifico no body, mas podemos encontra-lo
-            // o body da tabela in-line é o unico tbody dentro da tr.details-row visivel
+            // pega a details-row atualmente aberta
             const visibleDetailsRow = document.querySelector('.details-row[style*="table-row"]');
-            if (visibleDetailsRow) {
-                const tableBody = visibleDetailsRow.querySelector('.nested-table tbody');
-                if (tableBody) {
-                    sortDetailsTable(key, tableBody.id || 'temp-inline-table-body'); // passa um ID temporario se nao tiver
-                    // utliza o método sortDetailsTable usa `querySelector` baseado no header para encontrar a coluna
-                    // e nao e dependente do ID do tbody se o header for encontrado no contexto correto
-                }
+            if (!visibleDetailsRow) return;
+
+            const table = visibleDetailsRow.querySelector('.nested-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            const header = table.querySelector(`th[data-sort-key="${key}"]`);
+
+            // estado por tabela
+            let direction = header.dataset.sortDir === 'asc' ? 'desc' : 'asc';
+            header.dataset.sortDir = direction;
+
+            // reseta ícones só se existirem
+            table.querySelectorAll('th.sortable i').forEach(i => {
+                i.className = 'fas fa-sort';
+            });
+
+            // seta ícone apenas se o <i> existir
+            const icon = header.querySelector('i');
+            if (icon) {
+                icon.className =
+                    direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
             }
+
+
+            const colIndex = Array.from(header.parentNode.children).indexOf(header);
+
+            rows.sort((a, b) => {
+                let aVal = a.children[colIndex].innerText.trim();
+                let bVal = b.children[colIndex].innerText.trim();
+
+                // texto
+                if (key === 'creative_code' || key === 'date') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                // número
+                else {
+                    aVal = parseFloat(aVal.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+                    bVal = parseFloat(bVal.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+                }
+
+                if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function addInlineCreativesSorting() {
+            document.querySelectorAll('.nested-table th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortInlineCreativesTable(th.dataset.sortKey);
+                });
+            });
         }
 
         // listener de ordenacao para a tabela de nichos no modal (ADAPTADA para COPY)
@@ -1685,8 +1732,7 @@
 
         // dados individuais grafico 
         const rawEditorsData = @json($chartIndividualData);
-        console.log(rawEditorsData);
-        
+
         const chartSynergyData = @json($chartSynergyData);
 
         const ctx1 = document.getElementById('chartIndividual').getContext('2d');
@@ -1740,7 +1786,7 @@
                         callbacks: {
                             label(context) {
                                 const d = context.raw;
-                                
+
                                 return [
                                     d.name,
                                     `Produzidos: ${d.y}`,
@@ -1833,18 +1879,18 @@
                     tooltip: {
                         callbacks: {
                             label(context) {
-
                                 const d = context.raw;
                                 return [
                                     `Dupla: ${d.label}`,
                                     `Produzidos: ${d.produced}`,
-                                    `Testados: ${d.tested}`,
+                                    `Testados: ${d.testados}`,
                                     `ROI: ${(d.roi * 100).toFixed(2)}%`,
                                     `Profit: $${d.profit.toLocaleString('en-US')}`
                                 ];
                             }
                         }
                     }
+
                 }
             }
         });
@@ -1980,7 +2026,7 @@
 
 
         function updateIndividualChart(nicho = 'all') {
-            const newData = buildChartDataByNiche(nicho);            
+            const newData = buildChartDataByNiche(nicho);
             window.chart1.data.datasets[0].data = newData;
             window.chart1.update();
         }
@@ -2004,10 +2050,11 @@
             const maxProfit = Math.max(...data.map(d => Math.abs(d.profit)), 1);
 
             const bubbleData = data.map(d => {
+
                 const minR = 6;
                 const maxR = 42;
 
-                const profit = Math.abs(d.profit);
+                const profit = Math.abs(d.profit || 0);
 
                 const r = profit <= 0 ?
                     minR :
@@ -2017,10 +2064,21 @@
                     ) * (maxR - minR);
 
                 return {
-                    ...d,
-                    r
+                    x: d.roi,
+                    y: d.produced,
+                    r,
+
+                    label: d.label,
+                    editor: d.editor,
+
+                    produced: d.produced ?? 0,
+                    testados: d.testados ?? 0,
+
+                    profit: d.profit ?? 0,
+                    roi: d.roi ?? 0
                 };
             });
+
 
             window.chartSynergy.data.datasets[0].data = bubbleData;
             window.chartSynergy.update();

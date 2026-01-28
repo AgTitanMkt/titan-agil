@@ -171,21 +171,22 @@ class AgentsService
 
     public function duoMetrics(): Collection
     {
-        $rows = DB::table('tasks as t')
+        return DB::table('tasks as t')
 
-            // 🔹 lucro do criativo (nível correto)
-            ->join('redtrack_reports as rr', function ($join) {
+            // 🔹 RESULTADO DO CRIATIVO (RedTrack)
+            ->leftJoin('redtrack_reports as rr', function ($join) {
                 $join->on(
                     DB::raw('LOWER(rr.ad_code)'),
                     '=',
                     DB::raw('LOWER(t.code)')
-                );
+                )
+                    ->whereBetween('rr.date', [$this->startAt, $this->finishAt]);
             })
 
-            // 🔹 sub_tasks do criativo
+            // 🔹 sub_tasks
             ->join('sub_tasks as st', 'st.task_id', '=', 't.id')
 
-            // 🔹 COPY da sub_task
+            // 🔹 COPY
             ->join('user_tasks as utc', 'utc.sub_task_id', '=', 'st.id')
             ->join('users as uc', 'uc.id', '=', 'utc.user_id')
             ->join('user_roles as urc', function ($j) {
@@ -193,15 +194,13 @@ class AgentsService
                     ->where('urc.role_id', 2);
             })
 
-            // 🔹 EDITOR da sub_task
+            // 🔹 EDITOR
             ->join('user_tasks as ute', 'ute.sub_task_id', '=', 'st.id')
             ->join('users as ue', 'ue.id', '=', 'ute.user_id')
             ->join('user_roles as ure', function ($j) {
                 $j->on('ure.user_id', '=', 'ue.id')
                     ->where('ure.role_id', 3);
             })
-
-            ->whereBetween('rr.date', [$this->startAt, $this->finishAt])
 
             ->selectRaw("
             uc.id   as copy_id,
@@ -216,7 +215,8 @@ class AgentsService
                 SUBSTRING_INDEX(ue.name, ' ', 1)
             ) as dupla,
 
-            COUNT(DISTINCT t.code) as total_creatives,
+            COUNT(DISTINCT t.code)      as total_creatives,
+            COUNT(DISTINCT rr.ad_code) as tested,
 
             SUM(rr.profit) as total_profit,
             SUM(rr.cost)   as total_cost,
@@ -237,7 +237,5 @@ class AgentsService
 
             ->orderByDesc('total_profit')
             ->get();
-
-        return $rows;
     }
 }

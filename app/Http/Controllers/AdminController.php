@@ -531,6 +531,11 @@ class AdminController extends Controller
             $agent->metrics = $metricsAgents[$agent->id] ?? collect();
             }
 
+        // removendo agentes sem criativos
+        $agents = $agents->filter(function($agent){
+            return $agent->metrics->isNotEmpty();
+        });
+            
         $agents = $agents->sortByDesc(
             fn($a) => $a->metrics->sum('total_profit')
         )->values();
@@ -662,8 +667,10 @@ class AdminController extends Controller
                 'profit' => (float)$d->total_profit,
                 'roi' => (float)$d->roi,
                 'produced' => (int)$d->total_creatives,
+                'testados' => (int)$d->tested
             ])
             ->values();
+
 
         // -------------------------------------------------
         // 8️⃣ Gráfico individual (IGUAL)
@@ -1165,6 +1172,7 @@ class AdminController extends Controller
                 'profit'   => (float) $d->total_profit,
                 'roi'      => (float) $d->roi,
                 'produced' => (int) $d->total_creatives,
+                'testados' => (int)$d->tested
             ])->values()
         );
     }
