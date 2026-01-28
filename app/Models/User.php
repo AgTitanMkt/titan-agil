@@ -65,7 +65,7 @@ class User extends Authenticatable
         return in_array($role, $roles);
     }
 
-    public function userTasks()
+    public function userTasks($start)
     {
         return $this->hasMany(UserTask::class);
     }
@@ -108,8 +108,8 @@ class User extends Authenticatable
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
 
             /* ============================================================
-           🔗 JOIN COM REDTRACK (por code)
-           ============================================================ */
+         * 🔗 LEFT JOIN COM REDTRACK (NÃO elimina tasks)
+         * ============================================================ */
             ->leftJoin('redtrack_reports AS rr', function ($join) {
                 $join->on(
                     DB::raw('LOWER(rr.ad_code)'),
@@ -119,8 +119,8 @@ class User extends Authenticatable
             })
 
             /* ============================================================
-           🔗 JOIN COM SUBQUERY DE PRIMEIRA DATA
-           ============================================================ */
+         * 🔗 PRIMEIRA DATA NO REDTRACK
+         * ============================================================ */
             ->leftJoinSub($firstDateSub, 'fr', function ($join) {
                 $join->on(
                     'fr.ad_code_norm',
@@ -129,19 +129,31 @@ class User extends Authenticatable
                 );
             })
 
-            ->where('ut.user_id', $this->id)
-
-            ->when($this->startDateFilter && $this->endDateFilter, function ($q) {
-                $q->whereBetween('rr.date', [$this->startDateFilter, $this->endDateFilter]);
-            })
-
+            /* ============================================================
+         * 🎯 FILTRO DE COPYWRITER (FUNCIONAL)
+         * ============================================================ */
             ->when($this->copywriterFilter, function ($q) {
-                $q->whereIn('u.name', [$this->copywriterFilter]);
+                $q->whereIn('ut.user_id', $this->copywriterFilter);
+            }, function ($q) {
+                // fallback: usuário atual
+                $q->where('ut.user_id', $this->id);
             })
 
+            /* ============================================================
+         * 📅 FILTRO DE DATA (PRODUÇÃO)
+         * ============================================================ */
+            ->when($this->startDateFilter && $this->endDateFilter, function ($q) {
+                $q->whereBetween('t.created_at', [
+                    $this->startDateFilter,
+                    $this->endDateFilter
+                ]);
+            })
+
+            /* ============================================================
+         * 📊 SELECT FINAL (ONLY_FULL_GROUP_BY SAFE)
+         * ============================================================ */
             ->selectRaw("
-            ut.sub_task_id,
-            st.task_id,
+            t.id AS task_id,
             t.code,
             n.id AS nicho_id,
             n.name AS nicho_name,
@@ -170,7 +182,7 @@ class User extends Authenticatable
                 ELSE NULL
             END AS info,
 
-            COUNT(DISTINCT ut.sub_task_id) AS produzido,
+            COUNT(DISTINCT t.id) AS produzido,
             COUNT(DISTINCT rr.id) AS testados,
 
             CASE 
@@ -205,8 +217,7 @@ class User extends Authenticatable
         ")
 
             ->groupBy(
-                'ut.sub_task_id',
-                'st.task_id',
+                't.id',
                 't.code',
                 'u.name',
                 'fr.first_redtrack_date',
@@ -216,7 +227,6 @@ class User extends Authenticatable
 
             ->orderBy('total_profit', 'DESC');
     }
-
 
 
     // Permite $user->redtrackTasks; funcionar como atributo

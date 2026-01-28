@@ -408,8 +408,8 @@
                                         <span class="arrow-indicator"><i class="fas fa-chevron-right"></i></span>
                                         <span class="fw-bold">{{ $editor->name }}</span>
                                     </td>
-                                    <td>{{ count($editor->subTasks) }}</td>
-                                    <td>{{ count($editor->metrics) }}
+                                    <td>{{ $editor->produzidos }}</td>
+                                    <td>{{ $editor->metrics->sum('testados') }}
                                     <td>@int_number($editor->metrics->sum('em_potencial'))</td>
                                     <td>@int_number($editor->metrics->sum('validados'))</td>
                                     <td>

@@ -523,13 +523,19 @@ class AdminController extends Controller
         $agents = User::withRole($roleId)->get();
 
         foreach ($agents as $agent) {
+            $agent->applyFilter(
+                $startDate,
+                $endDate,
+            );
+            $agent->produzidos = count($agent->tasks);
             $agent->metrics = $metricsAgents[$agent->id] ?? collect();
-        }
+            }
 
         $agents = $agents->sortByDesc(
             fn($a) => $a->metrics->sum('total_profit')
         )->values();
 
+        // dd($agents);
 
         // -------------------------------------------------
         // 3️⃣ Filtro por nicho (IGUAL)
@@ -689,7 +695,6 @@ class AdminController extends Controller
         });
 
 
-        // dd($agents->first()->metrics[0]);
 
         return view('admin.agents', compact(
             'agents',
