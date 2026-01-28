@@ -504,7 +504,7 @@ class AdminController extends Controller
             } else {
                 $endDate =  Carbon::parse($request->input('date_to'))->endOfDay();
             }
-        }else{
+        } else {
             $endDate =  Carbon::now()->endOfMonth();
         }
 
@@ -539,7 +539,7 @@ class AdminController extends Controller
         }
 
         // contando produzidos no periodo
-        $agents = $agents->map(function($agent){
+        $agents = $agents->map(function ($agent) {
             $agent->produzidos = $agent->metrics->sum('produzido');
             return $agent;
         });
@@ -606,12 +606,23 @@ class AdminController extends Controller
 
         $totalProfitNichos = $dataNichos->sum('total_profit');
 
-        $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos) {
-            $nicho->percent = $totalProfitNichos > 0
-                ? round(($nicho->total_profit / $totalProfitNichos) * 100, 2)
-                : 0;
+        $minPercent = 7;
+
+        $nichosBar = $dataNichos->map(function ($nicho) use ($totalProfitNichos, $minPercent) {
+
+            if ($totalProfitNichos <= 0 || $nicho->total_profit <= 0) {
+                $nicho->percent = 0;
+                return $nicho;
+            }
+
+            $percent = round(($nicho->total_profit / $totalProfitNichos) * 100, 2);
+
+            // 🔒 piso visual
+            $nicho->percent = max($percent, $minPercent);
+
             return $nicho;
         });
+
 
         // -------------------------------------------------
         // 6️⃣ Top agentes (IGUAL)
@@ -713,6 +724,13 @@ class AdminController extends Controller
                     }),
             ];
         });
+
+        $chartIndividualData = $chartIndividualData->map(function ($agent) {
+            $agent['produceds'] = $agent['by_niche']->sum('produced');
+            return $agent;
+        })->filter(function ($agent) {
+            return $agent['produceds'] > 0;
+        })->values();
 
 
         return view('admin.agents', compact(

@@ -769,8 +769,9 @@
 
                 let r;
 
+                // 🟢 lucro → tamanho proporcional
                 if (profit > 0) {
-                    // 🟢 lucro → escala log normalizada
+
                     r =
                         minR +
                         Math.pow(
@@ -778,18 +779,11 @@
                             1.3
                         ) * (maxRPositive - minR);
 
-                } else if (profit < 0) {
-                    // 🔴 prejuízo → escala própria e limitada
-                    r =
-                        minR +
-                        Math.pow(
-                            Math.log10(Math.abs(profit)) / Math.log10(Math.abs(maxNegativeProfit)),
-                            1.1
-                        ) * (maxRNegative - minR);
-
+                    // 🔴 prejuízo ou zero → tamanho fixo
                 } else {
-                    r = minR;
+                    r = minR; // tamanho fixo (igual ao "total")
                 }
+
 
                 return {
                     x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
@@ -2002,9 +1996,14 @@
                     r = minR;
                 }
 
+                // ❌ não entra no gráfico se não foi produzido no período
+                if (!data.produced || data.produced === 0) {
+                    return null;
+                }
+
                 return {
                     x: cost > 0 ? +(profit / cost).toFixed(2) : 0,
-                    y: data.produced || 0,
+                    y: data.produced,
                     r,
 
                     label: editor.label,
@@ -2012,12 +2011,10 @@
                     profit: +profit.toFixed(2),
                     tested: data.tested || 0,
 
-                    // 👇 cor por sinal
                     backgroundColor: profit >= 0 ?
-                        'rgba(34,197,94,0.8)' // verde
-                        :
-                        'rgba(239,68,68,0.8)' // vermelho
+                        'rgba(34,197,94,0.8)' : 'rgba(239,68,68,0.8)'
                 };
+
 
             }).filter(Boolean);
         }
