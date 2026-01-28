@@ -498,9 +498,17 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('date_from'))->startOfDay()
             : Carbon::now()->startOfMonth();
 
-        $endDate = $request->input('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfMonth();
+        if ($request->input('date_from')) {
+            if (!$request->input('date_to')) {
+                $endDate =  Carbon::parse($request->input('date_from'))->endOfDay();
+            } else {
+                $endDate =  Carbon::parse($request->input('date_to'))->endOfDay();
+            }
+        }else{
+            $endDate =  Carbon::now()->endOfMonth();
+        }
+
+
 
         $agentsFilter     = $request->input($agentsVar);
         $nicho            = $request->input('nicho');
@@ -527,15 +535,20 @@ class AdminController extends Controller
                 $startDate,
                 $endDate,
             );
-            $agent->produzidos = count($agent->tasks);
             $agent->metrics = $metricsAgents[$agent->id] ?? collect();
-            }
+        }
+
+        // contando produzidos no periodo
+        $agents = $agents->map(function($agent){
+            $agent->produzidos = $agent->metrics->sum('produzido');
+            return $agent;
+        });
 
         // removendo agentes sem criativos
-        $agents = $agents->filter(function($agent){
+        $agents = $agents->filter(function ($agent) {
             return $agent->metrics->isNotEmpty();
         });
-            
+
         $agents = $agents->sortByDesc(
             fn($a) => $a->metrics->sum('total_profit')
         )->values();
@@ -700,7 +713,6 @@ class AdminController extends Controller
                     }),
             ];
         });
-
 
 
         return view('admin.agents', compact(

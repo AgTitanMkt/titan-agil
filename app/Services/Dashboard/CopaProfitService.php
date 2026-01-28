@@ -448,12 +448,43 @@ class CopaProfitService
 
     public static function AgentsMetrics($startDate, $endDate, $agents = null)
     {
-        // 1) primeira data histórica do criativo no redtrack
+        /**
+         * ============================================================
+         * 📌 REGRA GERAL DA FUNÇÃO
+         * ============================================================
+         *
+         * Para CADA criativo (task):
+         *
+         * 🔹 FILTRO DE PERÍODO
+         * - Se EXISTE RedTrack no período → filtra por rr.redtrack_date
+         * - Se NÃO EXISTE RedTrack no período → filtra por t.created_at
+         *
+         * 🔹 PRODUZIDO
+         * - Se teve RedTrack no período:
+         *     → produzido = 1 SOMENTE se a PRIMEIRA aparição no RedTrack
+         *       (fr.first_redtrack_date) estiver dentro do período
+         *
+         * - Se NÃO teve RedTrack no período:
+         *     → produzido = 1 SOMENTE se t.created_at estiver dentro do período
+         *
+         * Caso contrário → produzido = 0
+         */
+
+        /**
+         * ============================================================
+         * 1️⃣ PRIMEIRA DATA HISTÓRICA NO REDTRACK (independe do período)
+         * ============================================================
+         */
         $firstDateSub = DB::table('redtrack_reports')
             ->selectRaw('LOWER(ad_code) AS ad_code_norm, MIN(date) AS first_redtrack_date')
             ->groupBy(DB::raw('LOWER(ad_code)'));
 
-        // 2) redtrack agregado no período
+        /**
+         * ============================================================
+         * 2️⃣ REDTRACK AGREGADO NO PERÍODO
+         * ============================================================
+         * Se não existir linha aqui → criativo NÃO FOI TESTADO no período
+         */
         $rrAgg = DB::table('redtrack_reports')
             ->selectRaw("
             LOWER(ad_code) AS ad_code_norm,
@@ -466,35 +497,59 @@ class CopaProfitService
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy(DB::raw('LOWER(ad_code)'));
 
-        return DB::table('user_tasks AS ut')
+        /**
+         * ============================================================
+         * 3️⃣ QUERY PRINCIPAL
+         * ============================================================
+         */
+        $query = DB::table('user_tasks AS ut')
             ->join('users AS u', 'u.id', '=', 'ut.user_id')
             ->join('sub_tasks AS st', 'st.id', '=', 'ut.sub_task_id')
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
 
-            // filtro de PRODUÇÃO
-            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('t.created_at', [$startDate, $endDate]);
-            })
-
-            // redtrack agregado
+            /* 🔗 RedTrack agregado (performance no período) */
             ->leftJoinSub($rrAgg, 'rr', function ($join) {
                 $join->on('rr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
             })
 
+            /* 🕰️ Primeira aparição histórica no RedTrack */
             ->leftJoinSub($firstDateSub, 'fr', function ($join) {
                 $join->on('fr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
             })
 
-            // 🔥 JOIN COM VALIDATED_CREATIVES
+            /* 🧪 Validação manual */
             ->leftJoin('validated_creatives AS vc', function ($join) {
                 $join->on('vc.subtask_id', '=', 'st.id');
             })
 
-            ->when($agents, function ($q) use ($agents) {
-                $q->whereIn('u.name', (array)$agents);
+            /**
+             * ============================================================
+             * ✅ FILTRO DE PERÍODO (REGRA CORRETA)
+             * ============================================================
+             */
+            ->where(function ($q) use ($startDate, $endDate) {
+
+                // 1️⃣ Criativos COM performance no período
+                $q->whereBetween('rr.redtrack_date', [$startDate, $endDate])
+
+                    // 2️⃣ Criativos SEM performance no período
+                    ->orWhere(function ($q2) use ($startDate, $endDate) {
+                        $q2->whereNull('rr.redtrack_date')
+                            ->whereBetween('t.created_at', [$startDate, $endDate]);
+                    });
             })
 
+            /* 🎯 Filtro opcional por agente */
+            ->when($agents, function ($q) use ($agents) {
+                $q->whereIn('u.name', (array) $agents);
+            })
+
+            /**
+             * ============================================================
+             * 📊 SELECT FINAL
+             * ============================================================
+             */
             ->selectRaw("
             u.id AS user_id,
             u.name AS agent_name,
@@ -512,14 +567,27 @@ class CopaProfitService
             COALESCE(rr.total_cost, 0) AS total_cost,
             COALESCE(rr.total_profit, 0) AS total_profit,
 
-            CASE 
-                WHEN COALESCE(rr.total_cost,0) > 0 
-                THEN COALESCE(rr.total_profit,0) / rr.total_cost
+            CASE
+                WHEN COALESCE(rr.total_cost, 0) > 0
+                THEN COALESCE(rr.total_profit, 0) / rr.total_cost
                 ELSE 0
             END AS roi,
 
-            /* 📦 PRODUZIDO */
-            1 AS produzido,
+            /* 📦 PRODUZIDO (CORRIGIDO) */
+            CASE
+                -- Criativo testado no período
+                WHEN rr.ad_code_norm IS NOT NULL THEN
+                    CASE
+                        WHEN DATE(fr.first_redtrack_date) BETWEEN DATE(?) AND DATE(?) THEN 1
+                        ELSE 0
+                    END
+                -- Criativo ainda não testado no período
+                ELSE
+                    CASE
+                        WHEN DATE(t.created_at) BETWEEN DATE(?) AND DATE(?) THEN 1
+                        ELSE 0
+                    END
+            END AS produzido,
 
             /* 🧪 TESTADO */
             CASE WHEN rr.ad_code_norm IS NULL THEN 0 ELSE 1 END AS testados,
@@ -531,6 +599,19 @@ class CopaProfitService
             CASE WHEN vc.is_validated = 1 THEN 1 ELSE 0 END AS validado
         ")
 
+            /* 🔐 Bindings do CASE produzido */
+            ->addBinding([
+                $startDate,
+                $endDate,
+                $startDate,
+                $endDate
+            ], 'select')
+
+            /**
+             * ============================================================
+             * 📦 GROUP BY
+             * ============================================================
+             */
             ->groupBy(
                 'u.id',
                 'u.name',
@@ -547,11 +628,17 @@ class CopaProfitService
                 'rr.ad_code_norm',
                 'vc.is_potential',
                 'vc.is_validated'
-            )
+            );
 
-            ->get()
-            ->groupBy('user_id');
+        /**
+         * ============================================================
+         * 📤 RETORNO
+         * ============================================================
+         */
+        return $query->get()->groupBy('user_id');
     }
+
+
 
 
 
