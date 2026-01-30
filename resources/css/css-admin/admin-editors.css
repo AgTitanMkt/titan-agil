@@ -21,6 +21,14 @@
 
 :root {
     --color-primary-dark: #001b66; /* AZUL DO EDITOR */
+    /* cores novas header de filtros */
+    --titan-blue: #0066FF;
+    --titan-dark-bg: #050A18;
+    --titan-glass: rgba(255, 255, 255, 0.05);
+    --titan-border: rgba(255, 255, 255, 0.1);
+    --text-main: #FFFFFF;
+    --text-muted: #8A94A6;
+    /* fim */
 }
 
 
@@ -887,3 +895,200 @@ body {
 
 
 
+/*  NOVA ALTERACAO: ATUALIZACAO NO SISTEMA DE FILTROS DO DASHBOARD. TODOS DIRECIONADOS NO HEADER DA PAGINA: Toolbar de Performance. */
+
+.titan-unified-header {
+    background: linear-gradient(180deg, #004ecc 0%, #0066FF 100%);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--titan-border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border-radius: 20px;
+    margin-bottom: 35px;
+    position: sticky;
+    top: 0;
+    z-index: 99 !important;
+
+
+}
+
+
+/* linha superior */
+.header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-brand img {
+    height: 32px;
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+}
+
+/* toggle group */
+.view-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.selector-label {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.toggle-group {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 8px;
+    display: flex;
+}
+/* novos buttons de alternar */
+.btn-nav {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-nav.active {
+    background: white;
+    color: var(--titan-blue);
+    font-weight: 600;
+}
+
+/* toolbar de filtros */
+.filter-toolbar-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-main-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.filter-item label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.titan-select {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+}
+
+
+.item-date { flex: 1.5; }
+
+.item-agent { flex: 2; }
+
+.btn-execute-filter {
+    background: #FFFFFF;
+    color: var(--titan-blue);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    height: 42px;
+}
+
+.btn-execute-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-execute-filter i {
+    font-size: 0.9rem;
+}
+
+
+/* MEDIA QUERIES - FILTROS NO HEADER  - ainda precisa de ajustes para um responsivo melhor */
+@media (max-width: 768px) {
+    .header-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .filter-main-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-item {
+        min-width: 100%;
+    }
+
+    .btn-execute-filter {
+        width: 100%;
+    }
+}
+@media (max-width: 480px) {
+    .titan-unified-header {
+        padding: 1rem;
+        margin-bottom: 25px;
+    }
+
+    .header-brand img {
+        height: 28px;
+    }
+
+    .brand-name {
+        font-size: 1rem;
+    }
+
+    .view-selector-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .filter-main-form {
+        gap: 1rem;
+    }
+}
+/* fim das alteracoes no header dos filtros */
