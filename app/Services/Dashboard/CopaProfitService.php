@@ -479,10 +479,12 @@ class CopaProfitService
             ->whereBetween('date', [$startDate, $endDate])
             ->when($alias, function ($q) use ($alias) {
 
-                if ($alias === 'google') {
+                if ($alias === 'google' || $alias === 'youtube') {
                     $q->whereIn(DB::raw('LOWER(alias)'), ['google', 'youtube']);
                 } elseif ($alias === 'facebook') {
                     $q->where(DB::raw('LOWER(alias)'), 'facebook');
+                } elseif ($alias === 'tiktok') {
+                    $q->where(DB::raw('LOWER(alias)'), 'tiktok');
                 } elseif ($alias === 'native') {
                     $q->whereNotIn(DB::raw('LOWER(alias)'), ['facebook', 'google', 'youtube']);
                 }
