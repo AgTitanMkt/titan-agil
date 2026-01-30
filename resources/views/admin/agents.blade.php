@@ -14,21 +14,18 @@
                 <div class="view-selector-wrapper">
                     <span class="selector-label">Escolha uma view:</span>
                     <div class="toggle-group">
-                        <button id="btn-dashboard" class="btn-nav active" 
-                        onclick="switchView('dashboard')">Dashboard
+                        <button id="btn-dashboard" class="btn-nav active" onclick="switchView('dashboard')">Dashboard
                         </button>
-                        <button id="btn-creatives" class="btn-nav inactive" 
-                        onclick="switchView('creatives')">Criativos
+                        <button id="btn-creatives" class="btn-nav inactive" onclick="switchView('creatives')">Criativos
                         </button>
                     </div>
                 </div>
             </div>
 
-                
 
             <nav class="filter-toolbar-container">
                 <form action="{{ route('admin.agents', $type) }}" method="GET" class="filter-main-form">
-                    
+
                     <div class="filter-item item-date">
                         <label>Escolha o Filtro Desejado:</label>
                         <x-date-range name="date" :from="$startDate" :to="$endDate" />
@@ -36,41 +33,52 @@
 
                     <div class="filter-item">
                         <label>Nicho</label>
-                        <select name="niche" class="titan-select">
-                            <option value="TOTAL">TOTAL</option>
-                            <option value="MM">MM</option>
-                            <option value="ED">ED</option>
-                            <option value="WL">WL</option>
+                        <select name="nicho" class="titan-select">
+                            <option value="TOTAL" {{ request('nicho', 'TOTAL') === 'TOTAL' ? 'selected' : '' }}>
+                                TOTAL
+                            </option>
+
+                            @foreach ($allNiches as $niche)
+                                <option value="{{ $niche }}" {{ request('nicho') === $niche ? 'selected' : '' }}>
+                                    {{ $niche }}
+                                </option>
+                            @endforeach
                         </select>
+
                     </div>
 
                     <div class="filter-item">
                         <label>Fonte</label>
                         <select name="source" class="titan-select">
-                            <option value="TOTAL">TOTAL</option>
-                            <option value="FACEBOOK">FACEBOOK</option>
-                            <option value="YOUTUBE">YOUTUBE</option>
-                            <option value="NATIVE">NATIVE</option>
-                            <option value="TIKTOK">TIKTOK</option>
+                            @php $source = request('source', 'TOTAL'); @endphp
+
+                            <option value="TOTAL" {{ $source === 'TOTAL' ? 'selected' : '' }}>TOTAL</option>
+                            <option value="FACEBOOK" {{ $source === 'FACEBOOK' ? 'selected' : '' }}>FACEBOOK</option>
+                            <option value="YOUTUBE" {{ $source === 'YOUTUBE' ? 'selected' : '' }}>YOUTUBE</option>
+                            <option value="NATIVE" {{ $source === 'NATIVE' ? 'selected' : '' }}>NATIVE</option>
+                            <option value="TIKTOK" {{ $source === 'TIKTOK' ? 'selected' : '' }}>TIKTOK</option>
                         </select>
+
                     </div>
 
                     <div class="filter-item">
                         <label>Tipo</label>
                         <select name="creation_type" class="titan-select">
-                            <option value="TOTAL">TOTAL</option>
-                            <option value="original">Original</option>
-                            <option value="variation">Variação</option>
+                            @php $typeFilter = request('creation_type', 'TOTAL'); @endphp
+
+                            <option value="TOTAL" {{ $typeFilter === 'TOTAL' ? 'selected' : '' }}>TOTAL</option>
+                            <option value="original" {{ $typeFilter === 'original' ? 'selected' : '' }}>Original
+                            </option>
+                            <option value="variation" {{ $typeFilter === 'variation' ? 'selected' : '' }}>Variação
+                            </option>
                         </select>
+
                     </div>
 
                     <div class="filter-item item-agent">
                         <label>{{ $isCopy ? 'Copywriter' : 'Editor' }}</label>
-                        <x-multiselect 
-                            name="{{ $isCopy ? 'copywriters' : 'editors' }}" 
-                            :options="$allAgents" 
-                            placeholder="Buscar profissional..."
-                        />
+                        <x-multiselect name="{{ $isCopy ? 'copywriters' : 'editors' }}" :options="$allAgents"
+                            placeholder="Buscar profissional..." />
                     </div>
 
                     <div class="filter-actions">
@@ -82,7 +90,7 @@
                 </form>
             </nav>
         </header>
-        
+
 
         {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
         {{-- <div class="title-section">
@@ -268,7 +276,7 @@
                 </div>
 
                 <div class="niche-selector-bar">
-                    <div class="niche-block all active" data-niche="all" data-name="all" style="width: 10%;">
+                    <div class="niche-block all active" data-niche="all" data-name-nicho="all" style="width: 10%;">
                         <div class="niche-badge">
                             <span class="perc">100%</span>
                             <span class="name">Todos</span>
@@ -277,7 +285,7 @@
 
                     @foreach ($nichosBar as $nicho)
                         <div class="niche-block {{ strtolower($nicho->sigla) }}"
-                            data-niche="{{ strtolower($nicho->sigla) }}" data-name="{{ $nicho->nicho }}"
+                            data-niche="{{ strtolower($nicho->sigla) }}" data-name-nicho="{{ $nicho->nicho }}"
                             style="width: {{ $nicho->percent }}%;">
                             <div class="niche-badge">
                                 <span class="perc">{{ $nicho->percent }}%</span>
@@ -359,7 +367,7 @@
                 <h3 class="section-title">
                     Produção {{ $isCopy ? 'Copywriters' : 'Editores' }}
                 </h3>
-                
+
                 <form class="filters-grid filters-grid-production">
                     {{-- <div class="filter-group">
                 <x-date-range name="date" :from="$startDate" :to="$endDate" label="Intervalo de Datas" />
@@ -385,8 +393,8 @@
                 </h3> --}}
                 {{-- removido titulo de copy/editores, pois esta redundante, ja tem titulo acima deles. --}}
 
-                {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. fim das alteracoes.--}}
-                
+                {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. fim das alteracoes. --}}
+
                 <div class="table-responsive">
                     <table class="metrics-main-table">
                         <thead>
@@ -513,6 +521,10 @@
                                                             style="font-size: 0.8rem;">
                                                             Criativo<i class="fas fa-sort"></i>
                                                         </th>
+                                                        <th data-sort-key="creative_source" class="sortable"
+                                                            style="font-size: 0.8rem;">
+                                                            Fonte <i class="fas fa-sort"></i>
+                                                        </th>
                                                         <th data-sort-key="date" class="sortable"
                                                             style="font-size: 0.8rem;">
                                                             Data <i class="fas fa-sort"></i>
@@ -568,6 +580,7 @@
                                 <tr
                                     class="creative-detail-row {{ $cr->total_profit > 0 ? 'creative-green' : ($cr->total_profit < 0 ? 'creative-red' : '') }}">
                                     <td class="creative-code">{{ $cr->code }}</td>
+                                    <td class="creative-source">{{ $cr->source }}</td>
                                     <td>{{ $cr->first_redtrack_date }}</td>
                                     <td>
                                         @if ($cr->em_potencial)
@@ -1355,7 +1368,7 @@
                 let bVal = b.children[colIndex].innerText.trim();
 
                 // texto
-                if (key === 'creative_code' || key === 'date') {
+                if (key === 'creative_code' || key === 'date' || key === 'creative_source') {
                     aVal = aVal.toLowerCase();
                     bVal = bVal.toLowerCase();
                 }
@@ -1364,6 +1377,7 @@
                     aVal = parseFloat(aVal.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
                     bVal = parseFloat(bVal.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
                 }
+
 
                 if (aVal < bVal) return direction === 'asc' ? -1 : 1;
                 if (aVal > bVal) return direction === 'asc' ? 1 : -1;
@@ -1746,6 +1760,9 @@
         }
     </script>
 
+    <script>
+        window.initialNiche = "{{ request('nicho', 'all') }}";
+    </script>
     {{-- SCRIPT PARA TROCAR DE NICHO E CONFIGURAR AS BOLHAS CONFOME O ROI --}}
     <script>
         // cores e estados
@@ -1957,10 +1974,26 @@
                 class: 'glow-mrm'
             };
 
-            // ativa botão correto
-            document.querySelectorAll('.niche-block')
-                .forEach(b => b.classList.remove('active'));
+            const isAll = nicheKey === 'all';
 
+            // percorre todos os nichos da régua
+            document.querySelectorAll('.niche-block').forEach(block => {
+
+                const blockNiche = block.dataset.niche;
+
+                // ativa/desativa visual
+                block.classList.remove('active');
+
+                if (isAll) {
+                    // 🔹 modo ALL → mostra todos
+                    block.style.display = 'flex';
+                } else {
+                    // 🔹 modo nicho específico → mostra só o selecionado
+                    block.style.display = blockNiche === nicheKey ? 'flex' : 'none';
+                }
+            });
+
+            // ativa o nicho correto
             const active = document.querySelector(`[data-niche="${nicheKey}"]`);
             if (active) active.classList.add('active');
 
@@ -2184,6 +2217,33 @@
             document.querySelectorAll('th.sortable-main').forEach(th => {
                 th.addEventListener('click', () => sortMainTable(th.dataset.sortKey));
             });
+        });
+    </script>
+
+    {{-- selecionando nicho na regua --}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const niche = (window.initialNiche || 'all');
+
+            // tenta encontrar o bloco do nicho
+            const nicheBlock = document.querySelector(
+                `.niche-block[data-name-nicho="${niche}"]`
+            );
+
+            console.log(niche);
+            console.log(nicheBlock);
+
+
+
+            if (nicheBlock) {
+                // simula clique real (mantém todos os efeitos)
+                nicheBlock.click();
+            } else {
+                // fallback seguro
+                updateNiche('all');
+            }
         });
     </script>
 

@@ -446,33 +446,14 @@ class CopaProfitService
         return $result;
     }
 
-    public static function AgentsMetrics($startDate, $endDate, $agents = null)
+    public static function AgentsMetrics($startDate, $endDate, $agents = null, $alias = null)
     {
-        /**
-         * ============================================================
-         * 📌 REGRA GERAL DA FUNÇÃO
-         * ============================================================
-         *
-         * Para CADA criativo (task):
-         *
-         * 🔹 FILTRO DE PERÍODO
-         * - Se EXISTE RedTrack no período → filtra por rr.redtrack_date
-         * - Se NÃO EXISTE RedTrack no período → filtra por t.created_at
-         *
-         * 🔹 PRODUZIDO
-         * - Se teve RedTrack no período:
-         *     → produzido = 1 SOMENTE se a PRIMEIRA aparição no RedTrack
-         *       (fr.first_redtrack_date) estiver dentro do período
-         *
-         * - Se NÃO teve RedTrack no período:
-         *     → produzido = 1 SOMENTE se t.created_at estiver dentro do período
-         *
-         * Caso contrário → produzido = 0
-         */
+
+        $alias = $alias ? strtolower(trim($alias)) : null;
 
         /**
          * ============================================================
-         * 1️⃣ PRIMEIRA DATA HISTÓRICA NO REDTRACK (independe do período)
+         * 1) PRIMEIRA DATA HISTÓRICA NO REDTRACK (independe do período)
          * ============================================================
          */
         $firstDateSub = DB::table('redtrack_reports')
@@ -481,13 +462,14 @@ class CopaProfitService
 
         /**
          * ============================================================
-         * 2️⃣ REDTRACK AGREGADO NO PERÍODO
+         * 2) REDTRACK AGREGADO NO PERÍODO
+         *    ⚠️ 1 linha por (criativo + alias)
          * ============================================================
-         * Se não existir linha aqui → criativo NÃO FOI TESTADO no período
          */
         $rrAgg = DB::table('redtrack_reports')
             ->selectRaw("
             LOWER(ad_code) AS ad_code_norm,
+            LOWER(alias) AS source,
             MAX(date) AS redtrack_date,
             SUM(clicks) AS total_clicks,
             SUM(conversions) AS total_conversions,
@@ -495,11 +477,36 @@ class CopaProfitService
             SUM(profit) AS total_profit
         ")
             ->whereBetween('date', [$startDate, $endDate])
-            ->groupBy(DB::raw('LOWER(ad_code)'));
+            ->when($alias, function ($q) use ($alias) {
+
+                if ($alias === 'google') {
+                    $q->whereIn(DB::raw('LOWER(alias)'), ['google', 'youtube']);
+                } elseif ($alias === 'facebook') {
+                    $q->where(DB::raw('LOWER(alias)'), 'facebook');
+                } elseif ($alias === 'native') {
+                    $q->whereNotIn(DB::raw('LOWER(alias)'), ['facebook', 'google', 'youtube']);
+                }
+            })
+
+            ->groupBy(DB::raw('LOWER(ad_code)'), DB::raw('LOWER(alias)'));
 
         /**
          * ============================================================
-         * 3️⃣ QUERY PRINCIPAL
+         * 3) VALIDATED AGREGADO (EVITA FAN-OUT / DUPLICAÇÃO ABSURDA)
+         *    ✅ 1 linha por subtask_id
+         * ============================================================
+         */
+        $vcAgg = DB::table('validated_creatives')
+            ->selectRaw("
+            subtask_id,
+            MAX(is_potential) AS is_potential,
+            MAX(is_validated) AS is_validated
+        ")
+            ->groupBy('subtask_id');
+
+        /**
+         * ============================================================
+         * 4) QUERY PRINCIPAL
          * ============================================================
          */
         $query = DB::table('user_tasks AS ut')
@@ -508,39 +515,37 @@ class CopaProfitService
             ->join('tasks AS t', 't.id', '=', 'st.task_id')
             ->join('nichos AS n', 'n.id', '=', 't.nicho')
 
-            /* 🔗 RedTrack agregado (performance no período) */
+            // performance no período (por source)
             ->leftJoinSub($rrAgg, 'rr', function ($join) {
                 $join->on('rr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
             })
 
-            /* 🕰️ Primeira aparição histórica no RedTrack */
+            // primeira aparição histórica
             ->leftJoinSub($firstDateSub, 'fr', function ($join) {
                 $join->on('fr.ad_code_norm', '=', DB::raw('LOWER(t.code)'));
             })
 
-            /* 🧪 Validação manual */
-            ->leftJoin('validated_creatives AS vc', function ($join) {
+            // validação agregada (sem duplicar)
+            ->leftJoinSub($vcAgg, 'vc', function ($join) {
                 $join->on('vc.subtask_id', '=', 'st.id');
             })
 
             /**
              * ============================================================
              * ✅ FILTRO DE PERÍODO (REGRA CORRETA)
+             * - se tem rr no período → entra por rr.redtrack_date
+             * - se não tem rr no período → entra por t.created_at
              * ============================================================
              */
             ->where(function ($q) use ($startDate, $endDate) {
-
-                // 1️⃣ Criativos COM performance no período
                 $q->whereBetween('rr.redtrack_date', [$startDate, $endDate])
-
-                    // 2️⃣ Criativos SEM performance no período
                     ->orWhere(function ($q2) use ($startDate, $endDate) {
                         $q2->whereNull('rr.redtrack_date')
                             ->whereBetween('t.created_at', [$startDate, $endDate]);
                     });
             })
 
-            /* 🎯 Filtro opcional por agente */
+            // filtro opcional por agente
             ->when($agents, function ($q) use ($agents) {
                 $q->whereIn('u.name', (array) $agents);
             })
@@ -561,6 +566,8 @@ class CopaProfitService
 
             rr.redtrack_date,
             fr.first_redtrack_date,
+
+            rr.source AS source,
 
             COALESCE(rr.total_clicks, 0) AS total_clicks,
             COALESCE(rr.total_conversions, 0) AS total_conversions,
@@ -593,13 +600,13 @@ class CopaProfitService
             CASE WHEN rr.ad_code_norm IS NULL THEN 0 ELSE 1 END AS testados,
 
             /* ⚡ EM POTENCIAL */
-            CASE WHEN vc.is_potential = 1 THEN 1 ELSE 0 END AS em_potencial,
+            CASE WHEN COALESCE(vc.is_potential, 0) = 1 THEN 1 ELSE 0 END AS em_potencial,
 
             /* 🔥 VALIDADO */
-            CASE WHEN vc.is_validated = 1 THEN 1 ELSE 0 END AS validado
+            CASE WHEN COALESCE(vc.is_validated, 0) = 1 THEN 1 ELSE 0 END AS validado
         ")
 
-            /* 🔐 Bindings do CASE produzido */
+            // bindings do CASE produzido
             ->addBinding([
                 $startDate,
                 $endDate,
@@ -609,7 +616,7 @@ class CopaProfitService
 
             /**
              * ============================================================
-             * 📦 GROUP BY
+             * 📦 GROUP BY (ONLY_FULL_GROUP_BY safe)
              * ============================================================
              */
             ->groupBy(
@@ -619,24 +626,24 @@ class CopaProfitService
                 't.code',
                 'n.id',
                 'n.name',
+
+                'rr.ad_code_norm',
+                'rr.source',
                 'rr.redtrack_date',
-                'fr.first_redtrack_date',
                 'rr.total_clicks',
                 'rr.total_conversions',
                 'rr.total_cost',
                 'rr.total_profit',
-                'rr.ad_code_norm',
+
+                'fr.first_redtrack_date',
+
                 'vc.is_potential',
                 'vc.is_validated'
             );
 
-        /**
-         * ============================================================
-         * 📤 RETORNO
-         * ============================================================
-         */
         return $query->get()->groupBy('user_id');
     }
+
 
 
 

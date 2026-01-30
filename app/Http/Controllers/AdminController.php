@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nicho;
 use App\Models\RedtrackReport;
 use App\Models\Task;
 use App\Models\User;
@@ -512,7 +513,12 @@ class AdminController extends Controller
 
         $agentsFilter     = $request->input($agentsVar);
         $nicho            = $request->input('nicho');
+        $source            = $request->input('source');
         $selectedAgentId  = $request->input($idParam);
+
+        $source = $source
+            ? strtolower(trim($source))
+            : null;
 
         // -------------------------------------------------
         // 2️⃣ Lista completa
@@ -521,11 +527,15 @@ class AdminController extends Controller
             ? $this->allCopywritersArray()
             : $this->allEditorsArray();
 
+        $allNiches = Nicho::groupBy('name')->pluck('name');
+
         $metricsAgents = CopaProfitService::AgentsMetrics(
             $startDate,
             $endDate,
-            $agentsFilter
+            $agentsFilter,
+            $source == 'TOTAL' ? null : $source
         );
+
 
 
         $agents = User::withRole($roleId)->get();
@@ -553,12 +563,12 @@ class AdminController extends Controller
             fn($a) => $a->metrics->sum('total_profit')
         )->values();
 
-        // dd($agents);
+        // dd($agents->first()->metrics);
 
         // -------------------------------------------------
         // 3️⃣ Filtro por nicho (IGUAL)
         // -------------------------------------------------
-        if ($nicho) {
+        if ($nicho && $nicho !== "TOTAL") {
             $agents = $agents
                 ->map(function ($agent) use ($nicho) {
                     $agent->metrics = $agent->metrics
@@ -569,6 +579,7 @@ class AdminController extends Controller
                 ->filter(fn($agent) => $agent->metrics->isNotEmpty())
                 ->values();
         }
+
 
         // -------------------------------------------------
         // 4️⃣ Dashboard (IGUAL)
@@ -754,7 +765,8 @@ class AdminController extends Controller
             'chartIndividualData',
             'chartSynergyData',
             'selectedAgentId',
-            'type'
+            'type',
+            'allNiches'
         ));
     }
 
