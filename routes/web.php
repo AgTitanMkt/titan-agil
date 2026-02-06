@@ -53,6 +53,10 @@ Route::middleware('auth')->group(function () {
         // ROTA PARA GESTORES
         Route::get('gestores', [AdminController::class, 'gestores'])->name('admin.gestores');
 
+        // NOVAS ROTAS PARA PAGINA ADMIN, CADASTRO E LISTAGEM DE TAREFAS
+        Route::get('cadastro', [AdminController::class, 'cadastro'])->name('admin.cadastro');
+        Route::get('listagem', [AdminController::class, 'listagem'])->name('admin.listagem');
+
         Route::get('time', [AdminController::class, 'time'])->name('admin.time');
         Route::get('faturamento', [AdminController::class, 'faturamento'])->name('admin.faturamento');
         Route::get('creative-history', [AdminController::class, 'creativeHistory'])->name('admin.creative.history');

@@ -1218,4 +1218,17 @@ class AdminController extends Controller
             ])->values()
         );
     }
+
+    // NOVAS ROTAS PARA PAGINA ADMIN, CADASTRO E LISTAGEM DE TAREFAS
+    public function cadastro()
+    {
+        return view('admin.cadastro');
+    }
+
+    public function listagem()
+    {
+        return view('admin.listagem');
+    }
+
+
 }

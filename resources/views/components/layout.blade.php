@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,700,900" rel="stylesheet" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+
     @vite([
         'resources/css/app.css',
         'resources/css/css-admin/admin-layout.css', // CSS DO COMPONENTE //
@@ -23,6 +26,8 @@
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES CTR (%) CPA//
         'resources/css/css-admin/admin-copy-dashboard.css', // CSS DO COPY PARA ABA DE DASHBOARD //
+        'resources/css/css-admin/admin-cadastro.css', // CSS DA ABA DE CADASTROS DE TAKS //
+        'resources/css/css-admin/admin-listagem.css', // CSS DA ABA DE LISTAGEM DE TAKS //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')
@@ -90,6 +95,32 @@
                         </a>
                     </li>
                 </ul>
+
+                <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fa fa-bars nav-icon"></i>
+                            <span class="nav-text">Tarefas</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('admin.cadastro') }}" class="nav-link submenu-link">
+                                    <i class="fa-solid fa-file-circle-plus nav-icon"></i> Cadastro
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.listagem') }}" class="nav-link submenu-link">
+                                    <i class="fa-solid fa-list nav-icon"></i> Listagem
+                                    </a>
+                                </li>
+                            <li>
+                                {{-- <a href="{{ route('admin.agents', 'editors') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Editores
+                                </a> --}}
+                            </li>
+                        </ul>
+                    </li>
 
 
                 <div class="nav-divider"></div>
