@@ -105,12 +105,12 @@
 
                         <ul class="submenu">
                             <li>
-                                <a href="{{ route('admin.cadastro') }}" class="nav-link submenu-link">
+                                <a href="{{ route('tarefas.cadastro') }}" class="nav-link submenu-link">
                                     <i class="fa-solid fa-file-circle-plus nav-icon"></i> Cadastro
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.listagem') }}" class="nav-link submenu-link">
+                                <a href="{{ route('tarefas.listagem') }}" class="nav-link submenu-link">
                                     <i class="fa-solid fa-list nav-icon"></i> Listagem
                                     </a>
                                 </li>

@@ -5,6 +5,7 @@ use App\Http\Controllers\ColaboradoresController;
 use App\Http\Controllers\ImportCSVController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RhController;
+use App\Http\Controllers\TarefasController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -53,10 +54,6 @@ Route::middleware('auth')->group(function () {
         // ROTA PARA GESTORES
         Route::get('gestores', [AdminController::class, 'gestores'])->name('admin.gestores');
 
-        // NOVAS ROTAS PARA PAGINA ADMIN, CADASTRO E LISTAGEM DE TAREFAS
-        Route::get('cadastro', [AdminController::class, 'cadastro'])->name('admin.cadastro');
-        Route::get('listagem', [AdminController::class, 'listagem'])->name('admin.listagem');
-
         Route::get('time', [AdminController::class, 'time'])->name('admin.time');
         Route::get('faturamento', [AdminController::class, 'faturamento'])->name('admin.faturamento');
         Route::get('creative-history', [AdminController::class, 'creativeHistory'])->name('admin.creative.history');
@@ -84,6 +81,13 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('colaboradores')->group(function () {
         Route::get('metas', [ColaboradoresController::class, 'metas'])->name('colaboradores.metas');
+    });
+
+    // ROTAS DE TAREFAS
+    Route::prefix('tarefas')->group(function () {
+        // NOVAS ROTAS PARA PAGINA ADMIN, CADASTRO E LISTAGEM DE TAREFAS
+        Route::get('cadastro', [TarefasController::class, 'cadastro'])->name('tarefas.cadastro');
+        Route::get('listagem', [TarefasController::class, 'listagem'])->name('tarefas.listagem');
     });
 });
 
