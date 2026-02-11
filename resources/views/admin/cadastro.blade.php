@@ -8,13 +8,22 @@
             <p class="main-subtitle">Preencha os dados para gerar o ID e iniciar a produção.</p>
         </div>
 
-        <div class="wizard-progress-centered">
+        <div class="id-preview-container-fixed">
+            <div class="animated-border-box">
+                <div class="id-content">
+                    <small>ID DA DEMANDA</small>
+                    <h2 id="generatedID">DBAD458-VG-??</h2>
+                </div>
+            </div>
+        </div>
+
+        {{-- <div class="wizard-progress-centered">
             <div class="step-bubble active" data-step="1">1</div>
             <div class="step-line"></div>
             <div class="step-bubble" data-step="2">2</div>
             <div class="step-line"></div>
             <div class="step-bubble" data-step="3">3</div>
-        </div>
+        </div> --}}
 
         <div class="production-filters-section glass-card filters-shadow">
             <h3 class="section-title">Informações da Demanda</h3>
@@ -176,14 +185,22 @@
             </form>
         </div>
 
-        <div class="id-preview-container-fixed">
+        <div class="wizard-progress-centered">
+            <div class="step-bubble active" data-step="1">1</div>
+            <div class="step-line"></div>
+            <div class="step-bubble" data-step="2">2</div>
+            <div class="step-line"></div>
+            <div class="step-bubble" data-step="3">3</div>
+        </div>
+
+        {{-- <div class="id-preview-container-fixed">
             <div class="animated-border-box">
                 <div class="id-content">
                     <small>ID DA DEMANDA</small>
                     <h2 id="generatedID">DBAD458-VG-??</h2>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     <script>

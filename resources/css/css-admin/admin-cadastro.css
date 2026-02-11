@@ -1,6 +1,6 @@
 /* container de cadastro */
 .cadastro-container {
-    padding: 40px 20px;
+    padding: 50px 50px; /* antes 40px */
     max-width: 1100px;
     margin: 0 auto;
     color: #fff;
@@ -9,16 +9,16 @@
 /* titulo e sub titulo*/
 .header-central {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 25px; /* antes 50px */
 }
 
 .main-title {
-    font-size: 2.8rem;
+    font-size: 2.2rem; /* antes 2.8rem */
+    margin-bottom: 6px; 
     font-weight: 800;
     background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
 }
 
 .main-subtitle {
@@ -33,16 +33,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin-bottom: -20px;
+    margin-bottom: 25px; /* antes 50px */
+    gap: 10px; /* antes 15px */
     position: relative;
-    z-index: 10;
-    margin-bottom: 50px;
+    /* z-index: 10; - REMOVIDO POR CONTA DO FILTRO */
 }
 
 .step-bubble {
-    width: 40px;
-    height: 40px;
+    width: 34px; /* antes 40px */
+    height: 34px;
     border-radius: 50%;
     background: #1e293b;
     border: 2px solid #334155;
@@ -62,16 +61,16 @@
 }
 
 .step-line {
-    width: 60px;
+    width: 40px; /* antes 60px */
     height: 2px;
     background: #334155;
 }
 
 /* conteiner glass */
 .production-filters-section {
-    padding: 40px !important;
+    padding: 25px !important; /* antes 40px */
+    margin-bottom: 20px !important; /* antes 30px */
     border-radius: 20px !important;
-    margin-bottom: 30px !important;
     /* background: rgba(15, 23, 42, 0.7) !important; */
     /* AJUSTE MULTISELECT - Z INDEX */
     overflow: visible !important;
@@ -89,11 +88,10 @@
 
 /* conteiner com ID */
 .id-preview-container-fixed {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
+    position: relative;
+    width: fit-content;
+    margin: 20px auto 15px auto; /* centraliza horizontalmente - FRONTAL */
+    margin-bottom: 25px !important;
 }
 
 .animated-border-box {
@@ -118,7 +116,7 @@
 .id-content {
     position: relative;
     background: #0f172a;
-    padding: 12px 40px;
+    padding: 8px 28px; /* antes 12px 40px */
     border-radius: 100px;
     text-align: center;
     display: flex;
@@ -142,7 +140,7 @@
 .filter-submit-area {
     display: flex;
     justify-content: space-between;
-    margin-top: 40px;
+    margin-top: 25px; /* antes 40px */
 }
 
 .btn-filter {
@@ -218,7 +216,7 @@
 .titan-grid {
     display: grid;
     grid-template-columns: 1fr 1fr; /* duas colunas iguais */
-    gap: 24px; 
+    gap: 18px; /* antes 24px */
     width: 100%;
     align-items: end; /* alinha os inputs na base */
     /* AJUSTE MULTISELECT - Z INDEX */

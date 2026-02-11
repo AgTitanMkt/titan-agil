@@ -18,7 +18,16 @@ class TarefasController extends Controller
 
     public function listagem()
     {
-        
-        return view('admin.listagem');
+        $copies = User::withRole(2)->get();
+        $editors = User::withRole(3)->get();
+        $nichos = Nicho::all()->pluck('name')->unique()->toArray();
+        return view('admin.listagem', compact('copies', 'editors', 'nichos'));
     }
+
+
+    // public function listagem()
+    // {
+        
+    //     return view('admin.listagem');
+    // }
 }
