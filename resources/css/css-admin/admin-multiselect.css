@@ -23,16 +23,18 @@
 }
 
 
-/* COMPONENTE PRINCIPAL */
+/* COMPONENTE PRINCIPAL - AJUSTE PARA MULTISELECT - Z INDEX */
 .custom-multiselect {
     position: relative;
     width: 100%;
     z-index: 10; 
 }
 
+
 .custom-multiselect.open {
-    z-index: 100;
+    z-index: 1000;
 }
+/* AJUSTE PARA MULTISELECT - Z INDEX. FIM */
 
 
 /* HEADER/CAMPO DE DISPLAY (tags visiveis) */
@@ -147,7 +149,7 @@
 }
 
 
-/* DROPDOWN LIST E OPCOES */
+/* DROPDOWN LIST E OPCOES - AJUSTADO */
 
 .multiselect-dropdown {
     /*  */
@@ -167,7 +169,35 @@
     transform: translateY(-5px);
     transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    /* AJUSTES PARA MULTISELECT Z INDEX */
+    position: absolute;
+    z-index: 1001;
+    /* AJUSTE PARA MULTISELECT Z INDEX. FIM */
 }
+
+        /* REMOVER qualquer *overflow: hidden* de containers acima do FILTRO MULTISELECT 
+        COLOCAR   overflow: visible !important; */
+
+        /* z-index nunca vence um stacking context pai - se o pai esta preso -> o filho nunca sobe */
+
+        /* CHECKLIST FINAL CASO DER MERDA, ATIVAR ELE */
+        /* .production-filters-section,
+        .titan-grid {
+            overflow: visible;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .custom-multiselect.open {
+            z-index: 1000;
+        }
+
+        .multiselect-dropdown {
+            z-index: 1001;
+        } */
+
 
 .custom-multiselect.open .multiselect-dropdown {
     opacity: 1;

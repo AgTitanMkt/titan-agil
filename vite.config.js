@@ -20,6 +20,8 @@ export default defineConfig({
                 'resources/css/css-admin/admin-editors.css',
                 'resources/css/css-colaboradores/colaboradores-metas.css',
                 'resources/css/css-admin/admin-copy-dashboard.css', // CSS DO COPY PARA ABA DE DASHBOARD
+                'resources/css/css-admin/admin-cadastro.css', // CSS DA ABA DE CADASTROS DE TAKS //
+                'resources/css/css-admin/admin-listagem.css', // CSS DA ABA DE LISTAGEM DE TAKS //
                 'resources/js/app.js',
             ],
             refresh: true,
