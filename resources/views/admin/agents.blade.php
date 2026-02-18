@@ -3,6 +3,8 @@
         $isCopy = $type === 'copywriters';
     @endphp
 
+    {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
+
     <div class="titan-dashboard-wrapper">
         <header class="titan-unified-header">
             <div class="header-top-row">
@@ -91,70 +93,10 @@
             </nav>
         </header>
 
-
-        {{-- SECTION NO HEADER AGORA NA OTIMIZACAO --}}
-        {{-- <div class="title-section">
-            <h1 class="main-title">Produção De Editores</h1>
-            <p class="sub-title">Métricas De Editor</p>
-        </div>
-
-        <div class="selector-container">
-            <div class="glass-box">
-                <div class="arrow-down-glow">
-                    <div class="circle-icon">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-
-                <p class="instruction-text">Escolha qual métrica deseja visualizar</p>
-
-                <div class="button-group">
-                    <button id="btn-dashboard" class="btn-toggle active" onclick="switchView('dashboard')">
-                        Dashboard
-                    </button>
-                    <button id="btn-creatives" class="btn-toggle inactive" onclick="switchView('creatives')">
-                        Criativos
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="filter-control-panel">
-            <div class="filter-inner-box">
-                <h3 class="filter-main-title">Seleção de Filtro</h3>
-                <p class="filter-sub-title">Escolha o período desejado e veja as novas métricas.</p>
-
-                <form action="{{ route('admin.copywriters') }}" class="filters-grid filters-grid-production">
-                    <div class="filter-group">
-                        <x-date-range name="date" :from="$startDate" :to="$endDate" label="Intervalo de Datas" />
-                    </div>
-                    <button type="submit" class="btn-filter-action">Filtrar</button>
-                </form>
-            </div>
-        </div> --}}
         {{-- FIM DA SECTION QUE ESTA NO HEADER AGORA OTIMIZACAO --}}
 
         {{-- COMECO DASHBOARD - VER CSS CONTENT-SECTION - CENTRALIZADO --}}
         <section id="section-dashboard" class="content-section">
-
-            {{-- <div class="filter-control-panel">
-        <div class="filter-inner-box">
-            <h3 class="filter-main-title">Seleção de Filtro</h3>
-            <p class="filter-sub-title">Escolha o período desejado e veja as novas métricas.</p>
-            
-            <form class="filters-grid filters-grid-production">
-                <div class="filter-group">
-                    <x-date-range 
-                        name="date" 
-                        :from="$startDate" 
-                        :to="$endDate" 
-                        label="Intervalo de Datas" 
-                    />
-                </div>
-                <button type="button" class="btn-filter-action">Filtrar</button>
-            </form>
-        </div>
-    </div> --}}
 
             <div class="section-divider">
                 <h2 class="display-title">Performance Geral</h2>
@@ -356,10 +298,6 @@
             <link rel="stylesheet"
                 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-            {{-- <div class="header-container">
-        <h2 class="dashboard-page-title">Produção Copywriters</h2>
-        <p class="dashboard-page-subtitle">Visão geral e filtros de performance</p>
-    </div> --}}
 
             {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. comeco das alteracoes. --}}
             {{-- filtros de performance - removido --}}
@@ -369,28 +307,14 @@
                 </h3>
 
                 <form class="filters-grid filters-grid-production">
-                    {{-- <div class="filter-group">
-                <x-date-range name="date" :from="$startDate" :to="$endDate" label="Intervalo de Datas" />
-            </div> --}}
-
-                    {{-- <div class="filter-group">
-                        <x-multiselect name="{{ $isCopy ? 'copywriters' : 'editors' }}"
-                            label="{{ $isCopy ? 'Copywriters' : 'Editores' }}" :options="$allAgents" />
-                    </div> --}}
                     {{-- removido filtro de copy/editos --}}
 
-                    {{-- <div class="filter-submit-area filter-submit-area-production">
-                        <button type="submit" class="btn-filter">FILTRAR</button>
-                    </div> --}}
                     {{-- removido botao de filtrar --}}
                 </form>
             </div>
 
             {{-- COPIES produzidas (taabela principal) --}}
             <div class="copy-production-section glass-card table-shadow">
-                {{-- <h3 class="section-title">
-                    Copies Produzidas por {{ $isCopy ? 'Copywriters' : 'Editores' }}
-                </h3> --}}
                 {{-- removido titulo de copy/editores, pois esta redundante, ja tem titulo acima deles. --}}
 
                 {{-- REMOVIDO FILTRO DA SECTION DE CRIATIVOS POIS AGORA ESTA NO HEADER. fim das alteracoes. --}}
