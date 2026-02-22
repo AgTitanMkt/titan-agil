@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
             ->whereIn('type', ['editors', 'copywriters'])
             ->name('admin.agents');
 
-
+        Route::get('creatives', [AdminController::class, 'creatives'])->name('admin.creatives');
 
         Route::get('editors/synergy', function (Request $request) {
             return app(AdminController::class)->synergyData($request, 'editors');

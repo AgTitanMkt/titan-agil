@@ -1,0 +1,64 @@
+.creative-positive {
+    border: 2px solid #00ff88;
+    background: rgba(0, 255, 136, 0.08);
+}
+
+.creative-negative {
+    border: 2px solid #ff3b3b;
+    background: rgba(255, 59, 59, 0.08);
+}
+
+.profit-positive,
+.roi-positive {
+    color: #00ff88;
+    font-weight: 700;
+}
+
+.profit-negative,
+.roi-negative {
+    color: #ff3b3b;
+    font-weight: 700;
+}
+
+
+.titan-select {
+    background: linear-gradient(145deg, #1c3f7a, #16325f);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(6px);
+}
+
+.titan-select:hover {
+    border-color: rgba(49, 97, 255, 0.18);
+}
+
+
+.titan-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+
+.titan-select option {
+    background-color: #0f1f3d; 
+    color: #ffffff;
+    padding: 10px;
+}
+
+.titan-select option:hover {
+    background-color: #1e40af; 
+    color: #ffffff;
+    border-color: rgba(49, 97, 255, 0.18);
+}
+
+
+.titan-select option:checked {
+    background-color: #1e40af;
+    color: #ffffff;
+}

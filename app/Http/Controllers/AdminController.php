@@ -1141,6 +1141,11 @@ class AdminController extends Controller
         return view("admin.gestores");
     }
 
+    public function creatives(){
+        
+        return view("admin.creatives");
+    }
+
 
     public function synergyData(Request $request, $type = 'editors')
     {

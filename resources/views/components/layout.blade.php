@@ -23,6 +23,7 @@
         'resources/css/css-admin/admin-editors.css', // CSS DOS EDITORES //
         'resources/css/css-admin/admin-gestores.css', // CSS DOS GESTORES CTR (%) CPA//
         'resources/css/css-admin/admin-copy-dashboard.css', // CSS DO COPY PARA ABA DE DASHBOARD //
+        'resources/css/css-admin/admin-creatives.css', // CSS DO CRIATIVOS - NOVO //
         'resources/js/app.js', // JS //
     ])
     @stack('styles')
@@ -74,6 +75,11 @@
                             <li>
                                 <a href="{{ route('admin.agents', 'editors') }}" class="nav-link submenu-link">
                                     <i class="fas fa-pen-fancy nav-icon"></i> Editores
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-layer-group nav-icon"></i> Criativos
                                 </a>
                             </li>
                         </ul>
