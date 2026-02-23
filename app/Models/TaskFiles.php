@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TaskFiles extends Model
 {
+    const FILE_TYPE = [
+        'DOCUMENT' => 'document',
+        'IMAGE' => 'image',
+        'OTHER' => 'other',
+        'URL' => 'url',
+    ];
+
     protected $fillable = [
         'task_id',
         'file_type',

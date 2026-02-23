@@ -22,8 +22,11 @@ class SubTask extends Model
         'description',
         'status',
         'due_date',
-        'hook'
-    ];
+        'hook',
+        'variation',
+        'variation_number',
+        'platform_id',
+    ];  
 
     /**
      * Sempre carregar a task associada
