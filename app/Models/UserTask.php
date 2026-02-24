@@ -19,7 +19,50 @@ class UserTask extends Model
         'IN_PROGRESS' => 'IN_PROGRESS',
         'DONE' => 'DONE',
         'REJECTED' => 'REJECTED',
+        'REVIEW' => 'REVIEW',
     ];
+
+    protected static function booted()
+    {
+        static::updated(function ($assignment) {
+
+            // Só executa se status mudou
+            if (!$assignment->wasChanged('status')) {
+                return;
+            }
+
+            // Só executa se virou DONE
+            if ($assignment->status !== self::STATUS['DONE']) {
+                return;
+            }
+
+            $subtask = $assignment->subTask()->with('assignments.user.roles')->first();
+
+            if (!$subtask) {
+                return;
+            }
+
+            // Pega assignments obrigatórios
+            $assignments = $subtask->assignments;
+
+            $copyDone = $assignments->contains(function ($a) {
+                return $a->status === self::STATUS['DONE'] &&
+                    $a->user->roles->contains('title', 'COPYWRITER');
+            });
+
+            $editorDone = $assignments->contains(function ($a) {
+                return $a->status === self::STATUS['DONE'] &&
+                    $a->user->roles->contains('title', 'EDITOR');
+            });
+
+            if ($subtask->status !== self::STATUS['REVIEW'] && $copyDone && $editorDone) {
+                // Atualiza SubTask
+                $subtask->update([
+                    'status' => SubTask::STATUS['REVIEW']
+                ]);
+            }
+        });
+    }
 
     public function user()
     {
@@ -30,5 +73,4 @@ class UserTask extends Model
     {
         return $this->belongsTo(SubTask::class);
     }
-
 }

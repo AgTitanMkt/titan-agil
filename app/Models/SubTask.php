@@ -12,9 +12,11 @@ class SubTask extends Model
     public const STATUS = [
         'CREATED' => 'CREATED',
         'APPROVED' => 'APPROVED',
-        'REVISED' => 'REVISED',
+        'REVIEW' => 'REVIEW',
         'CONCLUDED' => 'CONCLUDED',
         'PENDING' => 'PENDING',
+        'DONE' => 'DONE',
+        'PUBLISHED' => 'PUBLISHED',
     ];
 
     protected $fillable = [
@@ -27,6 +29,7 @@ class SubTask extends Model
         'variation_number',
         'platform_id',
     ];
+
 
     /**
      * Sempre carregar a task associada

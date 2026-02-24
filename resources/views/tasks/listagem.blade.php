@@ -185,7 +185,7 @@
                 const STATUS_MAP = {
                     CREATED: 'draft',
                     PENDING: 'pending',
-                    REVISED: 'under_review',
+                    REVIEW: 'under_review',
                     APPROVED: 'approved',
                     CONCLUDED: 'archived'
                 };
@@ -397,7 +397,7 @@
                 const hasLinkCopy = !!card.description && card.description.includes('http');
 
                 // REVISÃO
-                const isReviewed = card.status === 'REVISED' ||
+                const isReviewed = card.status === 'REVIEW' ||
                     card.status === 'APPROVED' ||
                     card.status === 'archived';
 
