@@ -12,7 +12,7 @@
             rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        
+
     </head>
 
     <body>
@@ -128,8 +128,7 @@
                 <div class="prop-row">
                     <div class="prop-label"><i class="fas fa-user"></i> Responsável</div>
                     <div class="prop-value flex items-center gap-2">
-                        <div class="avatar-sm" id="modal-avatar">NC</div>
-                        <span id="modal-assignee">Nicolle</span>
+                        <span id="modal-assignee"></span>
                     </div>
                 </div>
                 <div class="prop-row">
@@ -148,6 +147,7 @@
                 <div class="task-meta-block">
                     <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">Checklist</h4>
                     <div id="modal-checklist">
+
                     </div>
                 </div>
 
@@ -166,309 +166,264 @@
         </div>
 
         <script>
-            // TESTES MOKADOS COM STATUS, PRIORIDADES E ORIGEM DAS TASKS - APENAS PARA DEMONSTRACAO, DEPOIS VAI VIRAR BACKEND 
-            const CONFIG = {
-                statuses: {
-                    'draft': {
-                        label: 'Criada',
-                        color: 'gray'
-                    },
-                    'pending': {
-                        label: 'Aguardando',
-                        color: 'purple'
-                    },
-                    'in_progress': {
-                        label: 'Em execução',
-                        color: 'blue'
-                    },
-                    'under_review': {
-                        label: 'Em revisão',
-                        color: 'yellow'
-                    },
-                    'approved': {
-                        label: 'Aprovada',
-                        color: 'green'
-                    },
-                    'rejected': {
-                        label: 'Reprovada',
-                        color: 'red'
-                    },
-                    'archived': {
-                        label: 'Encerrada',
-                        color: 'gray'
-                    }
-                },
-                priorities: {
-                    'Alta': 'high',
-                    'Média': 'med',
-                    'Baixa': 'low'
-                },
-                sources: {
-                    'Facebook': 'fb',
-                    'YouTube': 'yt',
-                    'Native': 'nt'
+            document.addEventListener('DOMContentLoaded', function() {
+
+                /*
+                |--------------------------------------------------------------------------
+                | 1️⃣ DADOS DO BACKEND
+                |--------------------------------------------------------------------------
+                */
+
+                const RAW_SUBTASKS = @json($subtasks ?? []);
+
+                /*
+                |--------------------------------------------------------------------------
+                | 2️⃣ CONFIG STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                const STATUS_MAP = {
+                    CREATED: 'draft',
+                    PENDING: 'pending',
+                    REVISED: 'under_review',
+                    APPROVED: 'approved',
+                    CONCLUDED: 'archived'
+                };
+
+                const STATUS_LABELS = {
+                    draft: 'Criada',
+                    pending: 'Aguardando',
+                    under_review: 'Em revisão',
+                    approved: 'Aprovada',
+                    archived: 'Encerrada'
+                };
+
+                /*
+                |--------------------------------------------------------------------------
+                | 3️⃣ MAPEAMENTO SUBTASK → CARD
+                |--------------------------------------------------------------------------
+                */
+
+                function mapSubtasks(subtasks) {
+
+                    return subtasks.map(sub => {
+
+                        const task = sub.task ?? {};
+                        const agentes = sub.agentes ?? [];
+
+                        const isVariation = !!sub.variation;
+                        const variationNumber = sub.variation_number ?? null;
+
+                        let title = task.code ?? 'Task';
+
+                        if (isVariation && variationNumber) {
+                            title = `${task.code} V${variationNumber}`;
+                        }
+
+                        const mappedAgents = agentes.map(a => ({
+                            name: a.name,
+                            initials: a.tags ? a.tags[0].tag : '',
+                            roles: a.roles ? a.roles.map(r => r.title) : []
+                        }));
+
+                        return {
+                            id: sub.id,
+                            code: task.code ?? null,
+                            title: title,
+                            baseTitle: task.title ?? '',
+                            status: STATUS_MAP[sub.status] ?? 'draft',
+                            rawStatus: sub.status,
+                            niche: task.nicho ?? '-',
+                            due: sub.due_date ?? null,
+                            description: sub.description ?? '',
+                            variation: sub.variation,
+                            variation_number: sub.variation_number,
+                            agents: mappedAgents,
+                            platform: sub.platform ? {
+                                id: sub.platform.id,
+                                name: sub.platform.name
+                            } : null
+                        };
+                    });
                 }
-            };
 
-            // dados mokados para tasks que seram puxadas do banco
-            const db_tasks = [{
-                    id: "DBAD458-VR1",
-                    title: "Copywriter Emagrecimento - Gancho Novo Weight Loss",
-                    status: "in_progress",
-                    squad: "Copywriters",
-                    niche: "Emagrecimento",
-                    assignee: "Julia",
-                    assigneeInitials: "JL",
-                    priority: "Alta",
-                    source: "Facebook",
-                    due: "2026-02-15"
-                },
-                {
-                    id: "DBAD458-VR2",
-                    title: "Criativos - ED",
-                    status: "pending",
-                    squad: "Video",
-                    niche: "Ed",
-                    assignee: "Jorge",
-                    assigneeInitials: "JG",
-                    priority: "Média",
-                    source: "Native",
-                    due: "2026-02-18"
-                },
-                {
-                    id: "DBAD458-VR3",
-                    title: "Revisão de LP - Tintinuss",
-                    status: "under_review",
-                    squad: "Dev",
-                    niche: "Tintinuss",
-                    assignee: "Nicolle",
-                    assigneeInitials: "NC",
-                    priority: "Alta",
-                    source: "YouTube",
-                    due: "2026-02-12"
-                },
-                {
-                    id: "DBAD458-VR4",
-                    title: "Configuração RedTrack - Remocao de Bug",
-                    status: "draft",
-                    squad: "Dev",
-                    niche: "Bug",
-                    assignee: "Otávio",
-                    assigneeInitials: "OA",
-                    priority: "Baixa",
-                    source: "Facebook",
-                    due: "2026-02-25"
-                },
-                {
-                    id: "DBAD458-VR5",
-                    title: "Teste A/B 100 ADS",
-                    status: "approved",
-                    squad: "Copywriters",
-                    niche: "Ed",
-                    assignee: "Thiago",
-                    assigneeInitials: "TH",
-                    priority: "Média",
-                    source: "Native",
-                    due: "2026-02-10"
-                },
-                {
-                    id: "DBAD458-VR6",
-                    title: "Edição VSL - Gancho Novo Diabetes",
-                    status: "in_progress",
-                    squad: "Video",
-                    niche: "Diabetes",
-                    assignee: "Thamiris",
-                    assigneeInitials: "TH",
-                    priority: "Alta",
-                    source: "YouTube",
-                    due: "2026-02-16"
-                },
-            ];
+                /*
+                |--------------------------------------------------------------------------
+                | 4️⃣ ESTADO
+                |--------------------------------------------------------------------------
+                */
 
-            // TROCAR PARA KANBAN, TABLE OU CALENDAR
-            const app = {
-                currentView: 'kanban', // PADRAO, VAI INICIAR ASSIM
+                let DB = mapSubtasks(RAW_SUBTASKS);
 
-                init: () => {
-                    app.switchView('kanban');
-                },
+                /*
+                |--------------------------------------------------------------------------
+                | 5️⃣ APP
+                |--------------------------------------------------------------------------
+                */
 
-                // VIEW RENDERERS
+                const app = {
 
-                renderKanban: () => {
-                    const container = document.getElementById('main-canvas');
-                    container.innerHTML = `<div class="view-kanban-container fade-in" id="kanban-board"></div>`;
-                    const board = document.getElementById('kanban-board');
+                    init() {
+                        this.renderKanban();
+                    },
 
-                    // CONFIGURANDO AS COLUNAS
-                    for (const [key, value] of Object.entries(CONFIG.statuses)) {
-                        const colTasks = db_tasks.filter(t => t.status === key);
+                    renderKanban() {
 
-                        const colHTML = `
-                        <div class="kanban-column">
-                            <div class="kanban-header">
-                                <span style="display:flex; align-items:center; gap:6px;">
-                                    <div style="width:8px; height:8px; border-radius:50%; background-color: var(--status-${value.color === 'purple' ? 'pending' : value.color === 'blue' ? 'doing' : value.color === 'green' ? 'approved' : value.color === 'red' ? 'rejected' : value.color === 'yellow' ? 'review' : 'draft'})"></div>
-                                    ${value.label}
-                                </span>
-                                <span class="count-badge">${colTasks.length}</span>
-                            </div>
-                            <div class="kanban-cards-area">
-                                ${colTasks.map(task => app.createCardHTML(task)).join('')}
-                            </div>
+                        const container = document.getElementById('main-canvas');
+                        container.innerHTML = `<div class="view-kanban-container" id="kanban-board"></div>`;
+
+                        const board = document.getElementById('kanban-board');
+
+                        const columns = ['draft', 'pending', 'under_review', 'approved', 'archived'];
+
+                        columns.forEach(statusKey => {
+
+                            const cards = DB.filter(item => item.status === statusKey);
+
+                            const colHTML = `
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <span>${STATUS_LABELS[statusKey]}</span>
+                            <span class="count-badge">${cards.length}</span>
                         </div>
-                    `;
-                        board.innerHTML += colHTML;
+                        <div class="kanban-cards-area">
+                            ${cards.map(card => this.createCard(card)).join('')}
+                        </div>
+                    </div>
+                `;
+
+                            board.innerHTML += colHTML;
+                        });
+                    },
+
+                    createCard(card) {
+
+                        const maxVisible = 3;
+                        const visibleAgents = card.agents.slice(0, maxVisible);
+                        const extraCount = card.agents.length - maxVisible;
+
+                        const avatarsHTML = visibleAgents.map(agent => `
+        <div class="avatar-sm" title="${agent.name}">
+            ${agent.initials}
+        </div>
+    `).join('');
+
+                        const extraHTML = extraCount > 0 ?
+                            `<div class="avatar-sm more-agents">+${extraCount}</div>` :
+                            '';
+
+                        return `
+        <div class="kanban-card" onclick="app.openDrawer(${card.id})">
+            <div class="k-card-title">${card.title}</div>
+            <div class="k-card-footer">
+                <div class="k-info">
+                    <i class="fas fa-circle"></i> ${card.rawStatus}
+                </div>
+                <div class="agents-group">
+                    ${avatarsHTML}
+                    ${extraHTML}
+                </div>
+            </div>
+        </div>
+    `;
+                    },
+
+                    openDrawer(id) {
+
+                        const card = DB.find(item => item.id === id);
+                        if (!card) return;
+
+                        document.getElementById('modal-id').innerText = card.code ?? card.id;
+                        document.getElementById('modal-title').value = card.title;
+                        document.getElementById('modal-status').innerText = STATUS_LABELS[card.status];
+                        document.getElementById('modal-source').innerText = card.platform?.name ?? '-';
+                        document.getElementById('modal-assignee').innerText =
+                            card.agents.length > 0 ?
+                            card.agents.map(a => a.name).join(', ') :
+                            '—';
+                        document.getElementById('modal-date').innerText = card.due ?? '-';
+
+                        // 🔥 AQUI ESTAVA FALTANDO
+                        const checklist = resolveChecklist(card);
+
+                        document.getElementById('modal-checklist').innerHTML =
+                            checklist.map(item => `
+                                <div class="checklist-item">
+                                    <div class="check-box ${item.done ? 'checked' : ''}"></div>
+                                    ${item.label}
+                                </div>
+                            `).join('');
+
+                        document.querySelector('.modal-overlay').classList.add('open');
+                        document.getElementById('task-drawer').classList.add('open');
+                    },
+
+                    closeDrawer() {
+                        document.querySelector('.modal-overlay').classList.remove('open');
+                        document.getElementById('task-drawer').classList.remove('open');
                     }
-                },
+                };
 
-                renderTable: () => {
-                    const container = document.getElementById('main-canvas');
+                window.app = app;
 
-                    let rowsHTML = db_tasks.map(task => `
-                    <tr onclick="app.openDrawer('${task.id}')">
-                        <td style="color:var(--text-muted); font-size:11px;">${task.id}</td>
-                        <td style="font-weight:500;">${task.title}</td>
-                        <td>${task.squad}</td>
-                        <td>${task.niche}</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <div class="avatar-sm">${task.assigneeInitials}</div>
-                                ${task.assignee}
-                            </div>
-                        </td>
-                        <td><span class="badge badge-source ${CONFIG.sources[task.source]}">${task.source}</span></td>
-                        <td><span class="badge badge-prio ${CONFIG.priorities[task.priority]}">${task.priority}</span></td>
-                        <td><span class="badge badge-status">${CONFIG.statuses[task.status].label}</span></td>
-                        <td style="color:var(--text-muted)">${task.due}</td>
-                    </tr>
-                `).join('');
+                app.init();
 
-                    container.innerHTML = `
-                    <div class="view-table-container fade-in">
-                        <table class="titan-table">
-                            <thead>
-                                <tr>
-                                    <th width="80">ID</th>
-                                    <th>Título</th>
-                                    <th>Squad</th>
-                                    <th>Nicho</th>
-                                    <th>Responsável</th>
-                                    <th>Fonte</th>
-                                    <th>Prioridade</th>
-                                    <th>Status</th>
-                                    <th>Prazo</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rowsHTML}</tbody>
-                        </table>
-                    </div>
-                `;
-                },
+            });
 
-                renderCalendar: () => {
-                    const container = document.getElementById('main-canvas');
-                    // DATA
-                    let daysHTML = '';
-                    for (let i = 1; i <= 28; i++) {
-                        // TAKS COM PRAZO PARA O DIA
-                        let dayStr = `2026-02-${i.toString().padStart(2, '0')}`;
-                        let dayTasks = db_tasks.filter(t => t.due === dayStr);
+            function resolveChecklist(card) {
 
-                        let tasksHTML = dayTasks.map(t =>
-                            `<div class="cal-task-pill" onclick="event.stopPropagation(); app.openDrawer('${t.id}')">${t.title}</div>`
-                        ).join('');
+                const agents = card.agents ?? [];
 
-                        daysHTML += `
-                        <div class="cal-day">
-                            <span class="cal-date-num">${i}</span>
-                            ${tasksHTML}
-                        </div>
-                    `;
-                    }
+                const hasCopywriter = agents.some(a => a.roles.includes('COPYWRITER'));
+                const hasEditor = agents.some(a => a.roles.includes('EDITOR'));
 
-                    container.innerHTML = `
-                    <div class="view-calendar-container fade-in">
-                        <div style="margin-bottom:10px; font-weight:600;">Fevereiro 2026</div>
-                        <div class="calendar-grid">
-                            <div class="cal-header">Dom</div><div class="cal-header">Seg</div><div class="cal-header">Ter</div>
-                            <div class="cal-header">Qua</div><div class="cal-header">Qui</div><div class="cal-header">Sex</div>
-                            <div class="cal-header">Sab</div>
-                            ${daysHTML}
-                        </div>
-                    </div>
-                `;
-                },
+                const hasLinkCopy = !!card.description && card.description.includes('http');
 
-                // PRIORIDADES E ORIGEM das taks e bags com cores e numeros dos checklists
-                createCardHTML: (task) => {
-                    const prioClass = CONFIG.priorities[task.priority];
-                    const sourceClass = CONFIG.sources[task.source];
+                const isProducedCopy = card.status !== 'draft';
+                const isProducedEditor = card.status === 'pending' ||
+                    card.status === 'under_review' ||
+                    card.status === 'approved' ||
+                    card.status === 'archived';
 
-                    return `
-                    <div class="kanban-card" onclick="app.openDrawer('${task.id}')">
-                        <div class="k-card-tags">
-                            <span class="badge badge-source ${sourceClass}" style="font-size:10px;">${task.source}</span>
-                            <span class="badge badge-prio ${prioClass}" style="font-size:10px;">${task.priority}</span>
-                        </div>
-                        <div class="k-card-title">${task.title}</div>
-                        <div class="k-card-footer">
-                            <div class="k-info"><i class="far fa-check-square"></i> 0/5</div>
-                            <div class="avatar-sm" title="${task.assignee}">${task.assigneeInitials}</div>
-                        </div>
-                    </div>
-                `;
-                },
+                const isReviewed = card.status === 'under_review' ||
+                    card.status === 'approved' ||
+                    card.status === 'archived';
 
-                switchView: (viewName) => {
-                    // BUTTONS DE ACIONAMENTO
-                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                    document.getElementById(`btn-${viewName}`).classList.add('active');
+                const isPublished = card.status === 'archived';
 
-                    // RENDERIZA A VIEW SELECIONADA
-                    if (viewName === 'kanban') app.renderKanban();
-                    if (viewName === 'table') app.renderTable();
-                    if (viewName === 'calendar') app.renderCalendar();
-                },
-
-                // MODAL AQUI
-
-                // MODAL, VAI ABRIR COM OS DETALHES DA TASK - POR ENQUANTO É MOKADO, DEPOIS VAI SER PUXADO DO BACKEND PELO ID
-                openDrawer: (taskId) => {
-                    const task = db_tasks.find(t => t.id === taskId);
-                    if (!task) return;
-
-                    document.getElementById('modal-id').innerText = task.id;
-                    document.getElementById('modal-title').value = task.title;
-                    document.getElementById('modal-status').innerText = CONFIG.statuses[task.status].label;
-                    document.getElementById('modal-assignee').innerText = task.assignee;
-                    document.getElementById('modal-avatar').innerText = task.assigneeInitials;
-                    document.getElementById('modal-priority').innerText = task.priority;
-                    document.getElementById('modal-source').innerText = task.source;
-                    document.getElementById('modal-date').innerText = task.due;
-
-                    // CHECKLIST MOKADO
-                    document.getElementById('modal-checklist').innerHTML = `
-                    <div class="checklist-item"><div class="check-box checked"></div> Validar Copy</div>
-                    <div class="checklist-item"><div class="check-box"></div> Aprovar Design</div>
-                    <div class="checklist-item"><div class="check-box"></div> Subir Campanha</div>
-                    <div class="checklist-item"><div class="check-box"></div> Pedir Alteração</div>
-                    <div class="checklist-item"><div class="check-box"></div> Reprovado</div>
-                `;
-
-                    document.querySelector('.modal-overlay').classList.add('open');
-                    document.getElementById('task-drawer').classList.add('open');
-                },
-
-                closeDrawer: () => {
-                    document.querySelector('.modal-overlay').classList.remove('open');
-                    document.getElementById('task-drawer').classList.remove('open');
-                }
-            };
-
-            // START PARA TUDO
-            document.addEventListener('DOMContentLoaded', app.init);
+                return [{
+                        label: 'Atribuição copywriter',
+                        done: hasCopywriter
+                    },
+                    {
+                        label: 'Atribuição editor',
+                        done: hasEditor
+                    },
+                    {
+                        label: 'Link copy',
+                        done: hasLinkCopy
+                    },
+                    {
+                        label: 'Produção copywriter',
+                        done: isProducedCopy
+                    },
+                    {
+                        label: 'Produção editor',
+                        done: isProducedEditor
+                    },
+                    {
+                        label: 'Revisão',
+                        done: isReviewed
+                    },
+                    {
+                        label: 'Publicação',
+                        done: isPublished
+                    },
+                ];
+            }
         </script>
+
+
     </body>
 
     </html>

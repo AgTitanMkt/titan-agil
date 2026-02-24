@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TagUsers extends Model
@@ -12,8 +13,8 @@ class TagUsers extends Model
         'tag',
     ];
 
-    public function user(): HasOne
+    public function user(): BelongsTo
     {
-        return $this->hasOne(User::class,'id','user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

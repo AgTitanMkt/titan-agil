@@ -29,10 +29,19 @@ class TarefasController extends Controller
 
     public function store(StoreTaskRequest $request)
     {
+        $hasCopy = !empty($request->validated()['copywriter_id']);
+        $hasEditor = !empty($request->validated()['editor_id']);
+
+        $status = ($hasCopy && $hasEditor)
+            ? SubTask::STATUS['PENDING']
+            : SubTask::STATUS['CREATED'];
+
         $variation = $request->validated()['variacao'] === 'true';
         if (preg_match('/AD(\d+)/', $request->validated()['code'], $matches)) {
             $ad = (int) $matches[1];
         }
+
+        $task = null;
 
         if (!$variation) {
             $task = Task::create([
@@ -43,17 +52,21 @@ class TarefasController extends Controller
                 'ad' => $ad,
                 'normalized_code' => strtolower($request->validated()['code']),
             ]);
-        }else{
+        } else {
             $task = Task::where('code', $request->validated()['parentSearch'])->first();
         }
 
         $subtask = SubTask::create([
             'task_id' => $task->id,
-            'status' => SubTask::STATUS['PENDING'],
-            'description' => $variation ? $request->validated()['titulo'] : 'Subtask inicial',
+            'status' => $status,
+            'description' => $variation
+                ? $request->validated()['titulo']
+                : 'Subtask inicial',
             'variation' => $request->validated()['variacao'] == 'true',
             'platform_id' => $request->validated()['fonte_trafego'],
-            'variation_number' => $variation ? $request->validated()['variation_number'] : null,
+            'variation_number' => $variation
+                ? $request->validated()['variation_number']
+                : null,
             'hook' => 'H1',
         ]);
 
@@ -61,14 +74,14 @@ class TarefasController extends Controller
         if ($request->validated()['copywriter_id']) {
             UserTask::create([
                 'user_id' => $request->validated()['copywriter_id'],
-                'subtask_id' => $subtask->id,
+                'sub_task_id' => $subtask->id,
             ]);
         }
 
         if ($request->validated()['editor_id']) {
             UserTask::create([
                 'user_id' => $request->validated()['editor_id'],
-                'subtask_id' => $subtask->id,
+                'sub_task_id' => $subtask->id,
             ]);
         }
 
@@ -101,7 +114,18 @@ class TarefasController extends Controller
         $copies = User::withRole(2)->get();
         $editors = User::withRole(3)->get();
         $nichos = Nicho::all()->pluck('name')->unique()->toArray();
-        return view('tasks.listagem', compact('copies', 'editors', 'nichos'));
+
+        $subtasks = SubTask::with([
+            'task:id,title,nicho,code',
+            'agentes:id,name',
+            'agentes.tags:id,user_id,tag',
+            'agentes.roles:id,title',
+            'platform:id,name',
+        ])
+            ->orderBy('id', 'desc')
+            ->get();   
+
+        return view('tasks.listagem', compact('copies', 'editors', 'nichos', 'subtasks'));
     }
 
     public function nameTask($nichoID)

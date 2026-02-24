@@ -53,4 +53,9 @@ class SubTask extends Model
     {
         return $this->belongsToMany(User::class,'user_tasks','sub_task_id','user_id');
     }
+
+    public function platform(): HasOne
+    {
+        return $this->hasOne(Platform::class, 'id', 'platform_id');
+    }
 }

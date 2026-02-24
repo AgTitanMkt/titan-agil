@@ -813,6 +813,11 @@ header.top-bar,
     animation: fadeIn 0.3s ease;
 }
 
+.agents-group{
+    display: flex;
+    gap: 0.5rem;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
