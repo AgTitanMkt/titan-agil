@@ -119,7 +119,7 @@ class TarefasController extends Controller
             'task:id,title,nicho,code',
             'agentes:id,name',
             'agentes.tags:id,user_id,tag',
-            'agentes.roles:id,title',
+            'assignments.user.roles:id,title',
             'platform:id,name',
         ])
             ->orderBy('id', 'desc')

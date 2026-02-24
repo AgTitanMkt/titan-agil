@@ -242,7 +242,8 @@
                             platform: sub.platform ? {
                                 id: sub.platform.id,
                                 name: sub.platform.name
-                            } : null
+                            } : null,
+                            assignments: sub.assignments ?? []
                         };
                     });
                 }
@@ -372,23 +373,35 @@
 
             function resolveChecklist(card) {
 
-                const agents = card.agents ?? [];
+                const assignments = card.assignments ?? [];
 
-                const hasCopywriter = agents.some(a => a.roles.includes('COPYWRITER'));
-                const hasEditor = agents.some(a => a.roles.includes('EDITOR'));
+                // COPYWRITER
+                const copyAssignment = assignments.find(a =>
+                    a.user.roles.some(r => r.title === 'COPYWRITER')
+                );
 
+                const hasCopywriter = !!copyAssignment;
+                const copyInProgress = copyAssignment?.status === 'IN_PROGRESS';
+                const copyDone = copyAssignment?.status === 'DONE';
+
+                // EDITOR
+                const editorAssignment = assignments.find(a =>
+                    a.user.roles.some(r => r.title === 'EDITOR')
+                );
+
+                const hasEditor = !!editorAssignment;
+                const editorInProgress = editorAssignment?.status === 'IN_PROGRESS';
+                const editorDone = editorAssignment?.status === 'DONE';
+
+                // LINK COPY
                 const hasLinkCopy = !!card.description && card.description.includes('http');
 
-                const isProducedCopy = card.status !== 'draft';
-                const isProducedEditor = card.status === 'pending' ||
-                    card.status === 'under_review' ||
-                    card.status === 'approved' ||
+                // REVISÃO
+                const isReviewed = card.status === 'REVISED' ||
+                    card.status === 'APPROVED' ||
                     card.status === 'archived';
 
-                const isReviewed = card.status === 'under_review' ||
-                    card.status === 'approved' ||
-                    card.status === 'archived';
-
+                // PUBLICAÇÃO
                 const isPublished = card.status === 'archived';
 
                 return [{
@@ -405,11 +418,11 @@
                     },
                     {
                         label: 'Produção copywriter',
-                        done: isProducedCopy
+                        done: copyDone
                     },
                     {
                         label: 'Produção editor',
-                        done: isProducedEditor
+                        done: editorDone
                     },
                     {
                         label: 'Revisão',

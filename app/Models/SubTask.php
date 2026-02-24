@@ -26,14 +26,14 @@ class SubTask extends Model
         'variation',
         'variation_number',
         'platform_id',
-    ];  
+    ];
 
     /**
      * Sempre carregar a task associada
      */
     protected $with = ['task:id,code'];
 
-   /**
+    /**
      * Relação: SubTask pertence a uma Task
      */
     public function task(): BelongsTo
@@ -51,11 +51,16 @@ class SubTask extends Model
 
     public function agentes(): BelongsToMany
     {
-        return $this->belongsToMany(User::class,'user_tasks','sub_task_id','user_id');
+        return $this->belongsToMany(User::class, 'user_tasks', 'sub_task_id', 'user_id');
     }
 
     public function platform(): HasOne
     {
         return $this->hasOne(Platform::class, 'id', 'platform_id');
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(UserTask::class, 'sub_task_id', 'id');
     }
 }
