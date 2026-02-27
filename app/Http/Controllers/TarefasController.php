@@ -7,6 +7,7 @@ use App\Models\DeadlineSubask;
 use App\Models\Nicho;
 use App\Models\Platform;
 use App\Models\SubTask;
+use App\Models\SubtaskFile;
 use App\Models\Task;
 use App\Models\TaskFiles;
 use App\Models\User;
@@ -118,8 +119,12 @@ class TarefasController extends Controller
         $editors = User::withRole(3)->get();
         $nichos = Nicho::all()->pluck('name')->unique()->toArray();
 
+        $userId = Auth::id();
+
         $subtasks = SubTask::with([
             'task:id,title,nicho,code',
+            'files:id,subtask_id,file_type,file_url,uploaded_by,created_at',
+            'files.uploader:id,name',
             'agentes:id,name',
             'agentes.tags:id,user_id,tag',
             'assignments.user.roles:id,title',
@@ -127,7 +132,13 @@ class TarefasController extends Controller
             'revisedBy:id,name',
         ])
             ->where('status', '!=', SubTask::STATUS['CONCLUDED'])
-            ->where('created_by', Auth::id())
+            ->where(function ($query) use ($userId) {
+                $query->where('created_by', $userId)
+                    ->orWhere('revised_by', $userId)
+                    ->orWhereHas('assignments', function ($q) use ($userId) {
+                        $q->where('user_id', $userId);
+                    });
+            })
             ->orderBy('id', 'desc')
             ->get();
 
@@ -230,5 +241,42 @@ class TarefasController extends Controller
         ]);
 
         return response()->json(['message' => 'Editor adicionado com sucesso']);
+    }
+    public function confirmCopyDelivery(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|exists:user_tasks,id',
+            'delivery_link' => 'required|url'
+        ]);
+
+        $assignment = UserTask::with('subTask')->findOrFail($request->assignment_id);
+
+        // 🔒 Segurança
+        if ($assignment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // ✅ Atualiza assignment
+        $assignment->update([
+            'status' => UserTask::STATUS['DONE'],
+            'completed_at' => now(),
+        ]);
+
+        // ✅ Atualiza SubTask para REVIEW_COPY
+        $subTask = $assignment->subTask;
+
+        $subTask->update([
+            'status' => SubTask::STATUS['REVIEW_COPY']
+        ]);
+
+        // ✅ Salva link
+        SubtaskFile::create([
+            'subtask_id' => $subTask->id,
+            'file_type' => SubtaskFile::FILE_TYPE['URL'],
+            'file_url' => $request->delivery_link,
+            'uploaded_by' => auth()->id(),
+        ]);
+
+        return response()->json(['success' => true]);
     }
 }

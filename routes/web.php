@@ -23,6 +23,9 @@ Route::get('/', function () {
         if (auth()->user()->role('ADMIN')) {
             return redirect('/admin/dashboard');
         }
+        if (auth()->user()->hasAnyRole(['COPYWRITER', 'EDITOR', 'GESTOR'])) {
+            return redirect()->route('tarefas.listagem');
+        }
         return redirect('/dashboard');
     }
     return redirect('/login');
@@ -84,20 +87,34 @@ Route::middleware('auth')->group(function () {
     });
 
     // ROTAS DE TAREFAS
-    Route::prefix('tarefas')->group(function () {
-        // NOVAS ROTAS PARA PAGINA ADMIN, CADASTRO E LISTAGEM DE TAREFAS
-        Route::get('cadastro', [TarefasController::class, 'cadastro'])->name('tarefas.cadastro');
-        Route::get('listagem', [TarefasController::class, 'listagem'])->name('tarefas.listagem');
-        Route::get('code-task/{nichoID}', [TarefasController::class, 'nameTask'])->name('tarefas.code');
-        Route::get('next-variation-number/{taskId}', [TarefasController::class, 'getNexVariationNumber'])->name('tarefas.nextVariationNumber');
-        Route::post('cadastrar', [TarefasController::class, 'store'])->name('tarefas.store');
-    });
+    Route::prefix('tarefas')
+        ->middleware(['auth'])
+        ->group(function () {
 
-    Route::prefix('ajax')->group(function(){
+            Route::get('cadastro', [TarefasController::class, 'cadastro'])
+                ->name('tarefas.cadastro');
+
+            Route::get('listagem', [TarefasController::class, 'listagem'])
+                ->middleware('role:COPYWRITER,EDITOR,ADMIN,GESTOR')
+                ->name('tarefas.listagem');
+
+            Route::get('code-task/{nichoID}', [TarefasController::class, 'nameTask'])
+                ->name('tarefas.code');
+
+            Route::get('next-variation-number/{taskId}', [TarefasController::class, 'getNexVariationNumber'])
+                ->name('tarefas.nextVariationNumber');
+
+            Route::post('cadastrar', [TarefasController::class, 'store'])
+                ->name('tarefas.store');
+        });
+
+    Route::prefix('ajax')->group(function () {
         Route::get('criativos', [TarefasController::class, 'getCriativos'])->name('ajax.criativos');
         Route::get('gestores-by-trafego/{trafego_id}', [TarefasController::class, 'getGestoresByTrafego'])->name('ajax.gestores.by.trafego');
         Route::post('add-copywriter', [TarefasController::class, 'addCopywriter'])->name('ajax.add.copywriter');
         Route::post('add-editor', [TarefasController::class, 'addEditor'])->name('ajax.add.editor');
+        Route::post('confirm-copy-delivery', [TarefasController::class, 'confirmCopyDelivery'])
+            ->name('ajax.confirm.copy.delivery');
     });
 });
 

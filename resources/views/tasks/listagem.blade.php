@@ -148,15 +148,13 @@
                 </div>
 
                 <div class="task-meta-block">
-                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">Descrição & Contexto</h4>
-                    <p style="font-size:14px; line-height:1.6; color:var(--text-muted);">
-                        Esta demanda foi criada a partir da solicitação do squad FACEBOOK CHRONOS - RENATO. Necessário
-                        validar VSL e Copy para novos ganchos. Total de 100 ADS. Segue Anexo:
+                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">Revisão de entrega</h4>
+
+                    <p id="modal-description" style="font-size:14px; line-height:1.6; color:var(--text-muted);">
+                        <!-- vai ser preenchido no JS -->
                     </p>
-                    <div
-                        style="margin-top:20px; padding:15px; border:1px dashed var(--border-subtle); border-radius:6px; text-align:center; font-size:12px; color:var(--text-muted);">
-                        <i class="fas fa-paperclip"></i> Anexos do RedTrack / Script/Briefing (Alta prioridade)
-                    </div>
+
+                    <div id="modal-attachments"></div>
                 </div>
             </div>
         </div>
@@ -187,6 +185,10 @@
                 const RAW_SUBTASKS = @json($subtasks ?? []);
                 const COPIES = @json($copies);
                 const EDITORS = @json($editors);
+                const AUTH_USER = {
+                    id: {{ auth()->id() }},
+                    roles: @json(auth()->user()->roles->pluck('title'))
+                };
 
                 /*
                 |--------------------------------------------------------------------------
@@ -197,7 +199,11 @@
                 const STATUS_MAP = {
                     CREATED: 'draft',
                     PENDING: 'pending',
+
                     REVIEW: 'under_review',
+                    REVIEW_COPY: 'under_review',
+                    REVIEW_EDITOR: 'under_review',
+
                     APPROVED: 'approved',
                     CONCLUDED: 'archived'
                 };
@@ -209,6 +215,12 @@
                     approved: 'Aprovada',
                     archived: 'Encerrada'
                 };
+
+                function isCopywriter() {
+                    return AUTH_USER.roles.includes('COPYWRITER');
+                }
+
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -232,6 +244,8 @@
                         const isVariation = !!sub.variation;
                         const variationNumber = sub.variation_number ?? null;
 
+                        const taskFiles = sub.files ?? [];
+                        
                         let title = task.code ?? 'Task';
 
                         if (isVariation && variationNumber) {
@@ -265,7 +279,17 @@
                             revised_by: sub.revised_by ? {
                                 id: sub.revised_by.id,
                                 name: sub.revised_by.name
-                            } : null
+                            } : null,
+                            taskFiles: taskFiles.map(f => ({
+                                id: f.id,
+                                type: f.file_type,
+                                url: f.file_url,
+                                uploaded_by: f.uploader ? {
+                                    id: f.uploader.id,
+                                    name: f.uploader.name
+                                } : null,
+                                created_at: f.created_at
+                            }))
                         };
                     });
                 }
@@ -366,9 +390,55 @@
                         document.getElementById('modal-status').innerText = STATUS_LABELS[card.status];
                         document.getElementById('modal-source').innerText = card.platform?.name ?? '-';
 
+                        // descrição
+                        document.getElementById('modal-description').innerText =
+                            card.description || '—';
+
+                        // anexos
+                        const attachmentsEl = document.getElementById('modal-attachments');
+
+                        if (!card.taskFiles || card.taskFiles.length === 0) {
+                            attachmentsEl.innerHTML = '';
+                        } else {
+                            console.log(card.taskFiles);
+                            
+                            attachmentsEl.innerHTML = `
+                                <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+                                ${card.taskFiles.map(f => `
+                                            <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                            <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                <div style="font-size:12px; color:var(--text-muted);">
+                                                ${f.type?.toUpperCase() || 'ARQUIVO'}
+                                                </div>
+
+                                                <div style="font-size:12px; color:var(--text-muted);">
+                                                ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                </div>
+                                            </div>
+
+                                            <div style="margin-top:6px; font-size:14px;">
+                                                <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                ${f.url}
+                                                </a>
+                                            </div>
+
+                                            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                            </div>
+                                            </div>
+                                        `).join('')}
+                                </div>
+                            `;
+                        }
+
+
                         const copyAssignment = card.assignments.find(a =>
                             a.user.roles.some(r => r.title === 'COPYWRITER')
                         );
+
+                        const isMyCopyTask = copyAssignment &&
+                            copyAssignment.user.id === AUTH_USER.id &&
+                            copyAssignment.status === 'ASSIGNED';
 
                         const copyContainer = document.getElementById('modal-copywriter');
 
@@ -401,15 +471,53 @@
                         document.getElementById('modal-gestor').innerText = card.revised_by?.name ?? '—';
                         document.getElementById('modal-date').innerText = card.due ?? '-';
 
+                        const deliveryContainer = document.createElement('div');
+
+                        if (isCopywriter() && isMyCopyTask) {
+
+                            deliveryContainer.innerHTML = `
+                            <div class="task-meta-block">
+                                <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">
+                                    Sua Entrega
+                                </h4>
+
+                                <div style="display:flex; gap:10px;">
+                                    <input 
+                                        type="text" 
+                                        id="copy-delivery-link" 
+                                        placeholder="Cole o link da sua copy (ex: Google Docs)"
+                                        style="flex:1; padding:10px; border-radius:6px;"
+                                    >
+
+                                    <button 
+                                        class="btn-primary"
+                                        onclick="app.confirmDelivery(${card.id}, ${copyAssignment.id})"
+                                    >
+                                        Confirmar Entrega
+                                    </button>
+                                </div>
+
+                                <small style="display:block; margin-top:10px; color:var(--text-muted);">
+                                    Ao confirmar, o item "Produção copywriter" será marcado.
+                                </small>
+                            </div>
+                        `;
+
+                            const checklistBlock = document.getElementById('modal-checklist').closest(
+                                '.task-meta-block');
+
+                            checklistBlock.parentNode.insertBefore(deliveryContainer, checklistBlock);
+                        }
+
                         const checklist = resolveChecklist(card);
 
                         document.getElementById('modal-checklist').innerHTML =
                             checklist.map(item => `
-            <div class="checklist-item">
-                <div class="check-box ${item.done ? 'checked' : ''}"></div>
-                ${item.label}
-            </div>
-        `).join('');
+                                <div class="checklist-item">
+                                    <div class="check-box ${item.done ? 'checked' : ''}"></div>
+                                    ${item.label}
+                                </div>
+                            `).join('');
 
                         document.querySelector('.modal-overlay').classList.add('open');
                         document.getElementById('task-drawer').classList.add('open');
@@ -507,6 +615,31 @@
                         if (editorAssignment) {
                             editorContainer.innerHTML = `<span>${editorAssignment.user.name}</span>`;
                         }
+                    },
+                    confirmDelivery(taskId, assignmentId) {
+
+                        const link = document.getElementById('copy-delivery-link').value;
+
+                        if (!link) {
+                            alert('Informe o link da entrega.');
+                            return;
+                        }
+
+                        fetch("{{ route('ajax.confirm.copy.delivery') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    assignment_id: assignmentId,
+                                    delivery_link: link
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(() => {
+                                window.location.reload();
+                            });
                     }
                 };
 

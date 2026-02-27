@@ -918,6 +918,9 @@ header.top-bar,
 .role-user-item:hover {
     background: rgba(255, 255, 255, .06);
 }
+#copy-delivery-link{
+    color: black;
+}
 
 @keyframes fadeIn {
     from {

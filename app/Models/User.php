@@ -65,6 +65,11 @@ class User extends Authenticatable
         return in_array($role, $roles);
     }
 
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->roles()->whereIn('title', $roles)->exists();
+    }
+
     public function tags()
     {
         return $this->hasMany(TagUsers::class, 'user_id', 'id');

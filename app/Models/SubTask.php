@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SubTask extends Model
@@ -13,6 +14,8 @@ class SubTask extends Model
         'CREATED' => 'CREATED',
         'APPROVED' => 'APPROVED',
         'REVIEW' => 'REVIEW',
+        'REVIEW_COPY' => 'REVIEW_COPY',
+        'REVIEW_EDITOR' => 'REVIEW_EDITOR',
         'CONCLUDED' => 'CONCLUDED',
         'PENDING' => 'PENDING',
         'DONE' => 'DONE',
@@ -64,13 +67,18 @@ class SubTask extends Model
         return $this->hasOne(Platform::class, 'id', 'platform_id');
     }
 
-    public function assignments()
+    public function assignments(): HasMany
     {
         return $this->hasMany(UserTask::class, 'sub_task_id', 'id');
     }
 
-    public function revisedBy()
+    public function revisedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revised_by', 'id');
+    }
+    
+    public function files(): HasMany
+    {
+        return $this->hasMany(SubtaskFile::class, 'subtask_id', 'id');
     }
 }
