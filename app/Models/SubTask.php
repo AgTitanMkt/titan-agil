@@ -28,6 +28,7 @@ class SubTask extends Model
         'variation',
         'variation_number',
         'platform_id',
+        'revised_by',
     ];
 
 
@@ -65,5 +66,10 @@ class SubTask extends Model
     public function assignments()
     {
         return $this->hasMany(UserTask::class, 'sub_task_id', 'id');
+    }
+
+    public function revisedBy()
+    {
+        return $this->belongsTo(User::class, 'revised_by', 'id');
     }
 }

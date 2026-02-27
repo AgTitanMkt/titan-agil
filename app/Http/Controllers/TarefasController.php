@@ -10,6 +10,7 @@ use App\Models\SubTask;
 use App\Models\Task;
 use App\Models\TaskFiles;
 use App\Models\User;
+use App\Models\UserDetail;
 use App\Models\UserTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,6 +69,7 @@ class TarefasController extends Controller
                 ? $request->validated()['variation_number']
                 : null,
             'hook' => 'H1',
+            'revised_by' => $request->validated()['gestor_id'] ?? null,
         ]);
 
         //so cria a relação se copywriter ou editor forem selecionados
@@ -121,7 +123,9 @@ class TarefasController extends Controller
             'agentes.tags:id,user_id,tag',
             'assignments.user.roles:id,title',
             'platform:id,name',
+            'revisedBy:id,name',
         ])
+            ->where('status', '!=', SubTask::STATUS['CONCLUDED'])
             ->orderBy('id', 'desc')
             ->get();   
 
@@ -161,6 +165,21 @@ class TarefasController extends Controller
             ->orWhere('title', 'like', "%{$search}%")
             ->limit(10)
             ->get(['id', 'code', 'title', 'nicho']);
+    }
+
+    public function getGestoresByTrafego($trafegoId, Request $request)
+    {
+        $gestores = UserDetail::where('platform_id', $trafegoId)
+            ->with('user:id,name')
+            ->get()
+            ->map(function ($detail) {
+                return [
+                    'id' => $detail->user_id,
+                    'name' => $detail->user->name,
+                ];
+            });
+
+        return response()->json($gestores);
     }
 
     public function getNexVariationNumber($taskId)

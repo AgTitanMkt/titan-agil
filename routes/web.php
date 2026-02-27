@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('ajax')->group(function(){
         Route::get('criativos', [TarefasController::class, 'getCriativos'])->name('ajax.criativos');
+        Route::get('gestores-by-trafego/{trafego_id}', [TarefasController::class, 'getGestoresByTrafego'])->name('ajax.gestores.by.trafego');
     });
 });
 

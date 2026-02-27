@@ -131,10 +131,23 @@
                         <div class="filter-group">
                             <label>Fonte de Tráfego *</label>
                             <div class="select-wrapper">
-                                <select name="fonte_trafego" class="select-elegant" required>
+                                <select id="fonte_trafego" name="fonte_trafego" class="select-elegant" required>
                                     <option value="" disabled selected>Selecione</option>
                                     @foreach ($platforms as $platform)
                                         <option value="{{ $platform->id }}">{{ $platform->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Gestor</label>
+                            <div class="select-wrapper">
+                                <select name="gestor_id" id="gestor_id" class="select-elegant">
+                                    <option value="">Selecione</option>
+                                    @foreach ($copies as $copy)
+                                        <option value="{{ $copy->id }}">
+                                            {{ $copy->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -438,7 +451,47 @@
 
         });
     </script>
+    {{-- atualizar os gestores ao mudar a fonte de tráfego --}}
+    <script>
+        document.getElementById('fonte_trafego').addEventListener('change', async function() {
 
+            const trafegoId = this.value;
+            const gestorSelect = document.getElementById('gestor_id');
+
+            if (!trafegoId) return;
+
+            gestorSelect.innerHTML = '<option value="">Carregando...</option>';
+
+            try {
+
+                let url = "{{ route('ajax.gestores.by.trafego', ['trafego_id' => 'TRAFF_ID_PLACEHOLDER']) }}";
+                url = url.replace('TRAFF_ID_PLACEHOLDER', trafegoId);
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                gestorSelect.innerHTML = '<option value="">Selecione</option>';
+
+                if (Array.isArray(data) && data.length) {
+
+                    data.forEach(gestor => {
+                        const option = document.createElement('option');
+                        option.value = gestor.id;
+                        option.textContent = gestor.name;
+                        gestorSelect.appendChild(option);
+                    });
+
+                } else {
+                    gestorSelect.innerHTML = '<option value="">Nenhum gestor encontrado</option>';
+                }
+
+            } catch (error) {
+                console.error(error);
+                gestorSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+
+        });
+    </script>
 
 
 </x-layout>

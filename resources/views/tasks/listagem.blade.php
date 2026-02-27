@@ -132,6 +132,12 @@
                     </div>
                 </div>
                 <div class="prop-row">
+                    <div class="prop-label"><i class="fas fa-user"></i> Gestor</div>
+                    <div class="prop-value flex items-center gap-2">
+                        <span id="modal-gestor"></span>
+                    </div>
+                </div>
+                <div class="prop-row">
                     <div class="prop-label"><i class="fas fa-exclamation-circle"></i> Prioridade</div>
                     <div class="prop-value" id="modal-priority">Alta</div>
                 </div>
@@ -217,13 +223,13 @@
                         let title = task.code ?? 'Task';
 
                         if (isVariation && variationNumber) {
-                            title = `${task.code} V${variationNumber}`;
+                            title = `${task.code}V${variationNumber}`;
                         }
 
                         const mappedAgents = agentes.map(a => ({
                             name: a.name,
-                            initials: a.tags ? a.tags[0].tag : '',
-                            roles: a.roles ? a.roles.map(r => r.title) : []
+                            initials: a.tags?.[0]?.tag || '',
+                            roles: a.roles?.map(r => r.title) || []
                         }));
 
                         return {
@@ -243,7 +249,11 @@
                                 id: sub.platform.id,
                                 name: sub.platform.name
                             } : null,
-                            assignments: sub.assignments ?? []
+                            assignments: sub.assignments ?? [],
+                            revised_by: sub.revised_by ? {
+                                id: sub.revised_by.id,
+                                name: sub.revised_by.name
+                            } : null
                         };
                     });
                 }
@@ -333,7 +343,8 @@
 
                         const card = DB.find(item => item.id === id);
                         if (!card) return;
-
+                        console.log(card);
+                        
                         document.getElementById('modal-id').innerText = card.code ?? card.id;
                         document.getElementById('modal-title').value = card.title;
                         document.getElementById('modal-status').innerText = STATUS_LABELS[card.status];
@@ -342,7 +353,9 @@
                             card.agents.length > 0 ?
                             card.agents.map(a => a.name).join(', ') :
                             '—';
+                        document.getElementById('modal-gestor').innerText = card.revised_by?.name ?? '—';   
                         document.getElementById('modal-date').innerText = card.due ?? '-';
+
 
                         // 🔥 AQUI ESTAVA FALTANDO
                         const checklist = resolveChecklist(card);

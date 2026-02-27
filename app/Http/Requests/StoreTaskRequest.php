@@ -27,6 +27,7 @@ class StoreTaskRequest extends FormRequest
             'prazo_editor' => 'nullable|date',
             'code' => 'required',
             'parentSearch' => 'nullable|string',
+            'gestor_id' => 'nullable|exists:users,id',
         ];
     }
 
@@ -54,6 +55,8 @@ class StoreTaskRequest extends FormRequest
             'prazo_editor.date' => 'O prazo do editor deve ser uma data válida.',
 
             'code.required' => 'O código do criativo é obrigatório.',
+
+            'gestor_id.exists' => 'Gestor inválido.',
         ];
     }
 }
