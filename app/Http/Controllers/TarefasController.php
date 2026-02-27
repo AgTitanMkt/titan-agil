@@ -244,16 +244,50 @@ class TarefasController extends Controller
     }
     public function confirmCopyDelivery(Request $request)
     {
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'assignment_id' => 'required|exists:user_tasks,id',
             'delivery_link' => 'required|url'
+        ], [
+            'assignment_id.required' => 'Tarefa inválida.',
+            'assignment_id.exists' => 'Atribuição não encontrada.',
+            'delivery_link.required' => 'Informe o link da entrega.',
+            'delivery_link.url' => 'Informe um link válido (ex: https://...).',
         ]);
 
-        $assignment = UserTask::with('subTask')->findOrFail($request->assignment_id);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'type' => 'validation',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $assignment = UserTask::with('subTask')->find($request->assignment_id);
+
+        if (!$assignment) {
+            return response()->json([
+                'success' => false,
+                'type' => 'not_found',
+                'message' => 'Atribuição não encontrada.'
+            ], 404);
+        }
 
         // 🔒 Segurança
         if ($assignment->user_id !== auth()->id()) {
-            abort(403);
+            return response()->json([
+                'success' => false,
+                'type' => 'permission',
+                'message' => 'Você não tem permissão para confirmar essa entrega.'
+            ], 403);
+        }
+
+        // ❗ já entregue
+        if ($assignment->status === UserTask::STATUS['DONE']) {
+            return response()->json([
+                'success' => false,
+                'type' => 'business',
+                'message' => 'Essa entrega já foi confirmada.'
+            ], 409);
         }
 
         // ✅ Atualiza assignment
@@ -262,19 +296,95 @@ class TarefasController extends Controller
             'completed_at' => now(),
         ]);
 
-        // ✅ Atualiza SubTask para REVIEW_COPY
         $subTask = $assignment->subTask;
 
         $subTask->update([
             'status' => SubTask::STATUS['REVIEW_COPY']
         ]);
 
-        // ✅ Salva link
-        SubtaskFile::create([
-            'subtask_id' => $subTask->id,
-            'file_type' => SubtaskFile::FILE_TYPE['URL'],
-            'file_url' => $request->delivery_link,
-            'uploaded_by' => auth()->id(),
+        // salva ou atualiza link
+        SubtaskFile::updateOrCreate(
+            [
+                'subtask_id' => $subTask->id,
+                'file_type' => SubtaskFile::FILE_TYPE['URL'],
+            ],
+            [
+                'file_url' => $request->delivery_link,
+                'uploaded_by' => auth()->id(),
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'type' => 'success',
+            'message' => 'Entrega enviada com sucesso! Aguardando revisão do gestor.'
+        ]);
+    }
+    public function reviewCopyDelivery(Request $request)
+    {
+        $request->validate([
+            'subtask_id' => 'required|exists:sub_tasks,id',
+            'decision' => 'required|in:approve,reject',
+        ]);
+
+        $subtask = SubTask::with(['assignments.user.roles', 'files'])
+            ->findOrFail($request->subtask_id);
+
+        // 🔒 Segurança: apenas gestor responsável (revised_by) ou ADMIN
+        $user = auth()->user();
+
+        $isAdmin = $user->roles->contains('title', 'ADMIN');
+        if (!$isAdmin && $subtask->revised_by !== $user->id) {
+            abort(403);
+        }
+
+        // Só permite ação se está aguardando revisão do copy
+        if ($subtask->status !== SubTask::STATUS['REVIEW_COPY']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Essa task não está em revisão de copy.'
+            ], 422);
+        }
+
+        // Pega assignment do copywriter
+        $copyAssignment = $subtask->assignments->first(function ($a) {
+            return $a->user && $a->user->roles->contains('title', 'COPYWRITER');
+        });
+
+        if (!$copyAssignment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Copywriter não encontrado na tarefa.'
+            ], 422);
+        }
+
+        if ($request->decision === 'reject') {
+
+            // volta para ajuste
+            $copyAssignment->update([
+                'status' => UserTask::STATUS['REJECTED'],
+                'completed_at' => null,
+            ]);
+
+            $subtask->update([
+                'status' => SubTask::STATUS['PENDING_COPY'], // ou CREATED, se fizer sentido no seu fluxo
+            ]);
+
+            return response()->json(['success' => true]);
+        }
+
+        // ✅ APPROVE
+        // Verifica se editor já concluiu
+        $editorDone = $subtask->assignments->contains(function ($a) {
+            return $a->status === UserTask::STATUS['DONE']
+                && $a->user
+                && $a->user->roles->contains('title', 'EDITOR');
+        });
+
+        $subtask->update([
+            'status' => $editorDone
+                ? SubTask::STATUS['REVIEW']          // tudo pronto p/ revisão final/gestor
+                : SubTask::STATUS['PENDING_EDITOR'],  // aguardando editor (você pode usar PENDING também)
         ]);
 
         return response()->json(['success' => true]);

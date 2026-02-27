@@ -115,6 +115,8 @@ Route::middleware('auth')->group(function () {
         Route::post('add-editor', [TarefasController::class, 'addEditor'])->name('ajax.add.editor');
         Route::post('confirm-copy-delivery', [TarefasController::class, 'confirmCopyDelivery'])
             ->name('ajax.confirm.copy.delivery');
+        Route::post('/ajax/review-copy-delivery', [TarefasController::class, 'reviewCopyDelivery'])
+            ->name('ajax.review.copy.delivery');
     });
 });
 

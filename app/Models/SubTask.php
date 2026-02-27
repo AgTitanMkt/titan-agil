@@ -16,6 +16,8 @@ class SubTask extends Model
         'REVIEW' => 'REVIEW',
         'REVIEW_COPY' => 'REVIEW_COPY',
         'REVIEW_EDITOR' => 'REVIEW_EDITOR',
+        'PENDING_EDITOR' => 'PENDING_EDITOR',
+        'PENDING_COPY' => 'PENDING_COPY',
         'CONCLUDED' => 'CONCLUDED',
         'PENDING' => 'PENDING',
         'DONE' => 'DONE',

@@ -198,7 +198,10 @@
 
                 const STATUS_MAP = {
                     CREATED: 'draft',
+
                     PENDING: 'pending',
+                    PENDING_COPY: 'pending',
+                    PENDING_EDITOR: 'pending',
 
                     REVIEW: 'under_review',
                     REVIEW_COPY: 'under_review',
@@ -245,7 +248,7 @@
                         const variationNumber = sub.variation_number ?? null;
 
                         const taskFiles = sub.files ?? [];
-                        
+
                         let title = task.code ?? 'Task';
 
                         if (isVariation && variationNumber) {
@@ -312,6 +315,38 @@
 
                     init() {
                         this.renderKanban();
+                    },
+
+                    showToast(message, type = 'success') {
+
+                        const toast = document.createElement('div');
+
+                        toast.innerText = message;
+
+                        toast.style.position = 'fixed';
+                        toast.style.bottom = '30px';
+                        toast.style.right = '30px';
+                        toast.style.padding = '14px 20px';
+                        toast.style.borderRadius = '8px';
+                        toast.style.color = '#fff';
+                        toast.style.fontSize = '14px';
+                        toast.style.zIndex = '9999';
+                        toast.style.opacity = '0';
+                        toast.style.transition = 'all 0.3s ease';
+
+                        toast.style.background =
+                            type === 'success' ?
+                            'linear-gradient(90deg,#1f8f4a,#2ecc71)' :
+                            'linear-gradient(90deg,#c0392b,#e74c3c)';
+
+                        document.body.appendChild(toast);
+
+                        setTimeout(() => toast.style.opacity = '1', 10);
+
+                        setTimeout(() => {
+                            toast.style.opacity = '0';
+                            setTimeout(() => toast.remove(), 300);
+                        }, 3000);
                     },
 
                     renderKanban() {
@@ -385,14 +420,21 @@
                         const card = DB.find(item => item.id === id);
                         if (!card) return;
 
+                        // ✅ reset básico do modal
                         document.getElementById('modal-id').innerText = card.code ?? card.id;
                         document.getElementById('modal-title').value = card.title;
                         document.getElementById('modal-status').innerText = STATUS_LABELS[card.status];
                         document.getElementById('modal-source').innerText = card.platform?.name ?? '-';
 
                         // descrição
-                        document.getElementById('modal-description').innerText =
-                            card.description || '—';
+                        document.getElementById('modal-description').innerText = card.description || '—';
+
+                        // ✅ remove blocos dinâmicos antigos (evita duplicar)
+                        const oldCopyDelivery = document.getElementById('copy-delivery-block');
+                        if (oldCopyDelivery) oldCopyDelivery.remove();
+
+                        const oldManagerReview = document.getElementById('manager-review-block');
+                        if (oldManagerReview) oldManagerReview.remove();
 
                         // anexos
                         const attachmentsEl = document.getElementById('modal-attachments');
@@ -400,115 +442,191 @@
                         if (!card.taskFiles || card.taskFiles.length === 0) {
                             attachmentsEl.innerHTML = '';
                         } else {
-                            console.log(card.taskFiles);
-                            
                             attachmentsEl.innerHTML = `
-                                <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-                                ${card.taskFiles.map(f => `
-                                            <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
-                                            <div style="display:flex; justify-content:space-between; gap:10px;">
-                                                <div style="font-size:12px; color:var(--text-muted);">
-                                                ${f.type?.toUpperCase() || 'ARQUIVO'}
-                                                </div>
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+        ${card.taskFiles.map(f => `
+                                                  <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                                    <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                      <div style="font-size:12px; color:var(--text-muted);">
+                                                        ${(f.type || '').toUpperCase() || 'ARQUIVO'}
+                                                      </div>
+                                                      <div style="font-size:12px; color:var(--text-muted);">
+                                                        ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                      </div>
+                                                    </div>
 
-                                                <div style="font-size:12px; color:var(--text-muted);">
-                                                ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
-                                                </div>
-                                            </div>
+                                                    <div style="margin-top:6px; font-size:14px;">
+                                                      <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                        ${f.url}
+                                                      </a>
+                                                    </div>
 
-                                            <div style="margin-top:6px; font-size:14px;">
-                                                <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
-                                                ${f.url}
-                                                </a>
-                                            </div>
-
-                                            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                                                Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
-                                            </div>
-                                            </div>
-                                        `).join('')}
-                                </div>
-                            `;
+                                                    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                      Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                                    </div>
+                                                  </div>
+                                                `).join('')}
+      </div>
+    `;
                         }
 
-
+                        // ✅ assignments
                         const copyAssignment = card.assignments.find(a =>
-                            a.user.roles.some(r => r.title === 'COPYWRITER')
+                            a.user?.roles?.some(r => r.title === 'COPYWRITER')
                         );
 
-                        const isMyCopyTask = copyAssignment &&
-                            copyAssignment.user.id === AUTH_USER.id &&
-                            copyAssignment.status === 'ASSIGNED';
+                        const editorAssignment = card.assignments.find(a =>
+                            a.user?.roles?.some(r => r.title === 'EDITOR')
+                        );
 
+                        // Copywriter field
                         const copyContainer = document.getElementById('modal-copywriter');
-
                         if (copyAssignment) {
                             copyContainer.innerHTML = `<span>${copyAssignment.user.name}</span>`;
                         } else {
                             copyContainer.innerHTML = `
-            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'COPYWRITER')">
-                <i class="fas fa-plus"></i> Adicionar Copywriter
-            </button>
-        `;
+                            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'COPYWRITER')">
+                                <i class="fas fa-plus"></i> Adicionar Copywriter
+                            </button>
+                            `;
                         }
 
-                        const editorAssignment = card.assignments.find(a =>
-                            a.user.roles.some(r => r.title === 'EDITOR')
-                        );
-
+                        // Editor field
                         const editorContainer = document.getElementById('modal-editor');
-
                         if (editorAssignment) {
                             editorContainer.innerHTML = `<span>${editorAssignment.user.name}</span>`;
                         } else {
                             editorContainer.innerHTML = `
-            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'EDITOR')">
-                <i class="fas fa-plus"></i> Adicionar Editor
-            </button>
-        `;
+                            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'EDITOR')">
+                                <i class="fas fa-plus"></i> Adicionar Editor
+                            </button>
+                            `;
                         }
 
                         document.getElementById('modal-gestor').innerText = card.revised_by?.name ?? '—';
                         document.getElementById('modal-date').innerText = card.due ?? '-';
 
-                        const deliveryContainer = document.createElement('div');
+                        // ✅ referência do bloco do checklist para inserir blocos acima
+                        const checklistBlock = document.getElementById('modal-checklist').closest(
+                            '.task-meta-block');
+
+                        // ------------------------------------------------------------
+                        // 1) BLOCO COPY - "Sua Entrega" (quando ASSIGNED e é o dono)
+                        // ------------------------------------------------------------
+                        const isMyCopyTask = copyAssignment &&
+                            copyAssignment.user.id === AUTH_USER.id &&
+                            (
+                                copyAssignment.status === 'ASSIGNED' ||
+                                copyAssignment.status === 'REJECTED'
+                            );
 
                         if (isCopywriter() && isMyCopyTask) {
+
+                            const deliveryContainer = document.createElement('div');
+                            deliveryContainer.id = 'copy-delivery-block';
 
                             deliveryContainer.innerHTML = `
                             <div class="task-meta-block">
                                 <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">
-                                    Sua Entrega
+                                Sua Entrega
                                 </h4>
 
                                 <div style="display:flex; gap:10px;">
-                                    <input 
-                                        type="text" 
-                                        id="copy-delivery-link" 
-                                        placeholder="Cole o link da sua copy (ex: Google Docs)"
-                                        style="flex:1; padding:10px; border-radius:6px;"
-                                    >
-
-                                    <button 
-                                        class="btn-primary"
-                                        onclick="app.confirmDelivery(${card.id}, ${copyAssignment.id})"
-                                    >
-                                        Confirmar Entrega
-                                    </button>
+                                <input 
+                                    type="text" 
+                                    id="copy-delivery-link" 
+                                    placeholder="Cole o link da sua copy (ex: Google Docs)"
+                                    style="flex:1; padding:10px; border-radius:6px;"
+                                >
+                                <button 
+                                    class="btn-primary"
+                                    onclick="app.confirmDelivery(${card.id}, ${copyAssignment.id})"
+                                >
+                                    Confirmar Entrega
+                                </button>
                                 </div>
 
                                 <small style="display:block; margin-top:10px; color:var(--text-muted);">
-                                    Ao confirmar, o item "Produção copywriter" será marcado.
+                                Ao confirmar, o item "Produção copywriter" será marcado.
                                 </small>
                             </div>
-                        `;
-
-                            const checklistBlock = document.getElementById('modal-checklist').closest(
-                                '.task-meta-block');
+                            `;
 
                             checklistBlock.parentNode.insertBefore(deliveryContainer, checklistBlock);
                         }
 
+                        // ------------------------------------------------------------
+                        // 2) BLOCO GESTOR - Revisão do Copy (quando REVIEW_COPY)
+                        // ------------------------------------------------------------
+
+                        // helper: pega o último link URL entregue
+
+                        const getLatestUrlFile = (card) => {
+                            const urls = (card.taskFiles || []).filter(f => (f.type || '').toLowerCase() ===
+                                'url');
+                            if (!urls.length) return null;
+                            urls.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                            return urls[0];
+                        };
+
+
+                        const isManagerOfThis = (card.revised_by?.id && (card.revised_by?.id === AUTH_USER.id ||
+                            AUTH_USER.roles.includes('ADMIN')));
+
+
+                        const isReviewCopy = card.rawStatus === 'REVIEW_COPY';
+                        const latestCopyLink = getLatestUrlFile(card);
+
+                        if (isManagerOfThis && isReviewCopy && latestCopyLink) {
+
+                            const managerBlock = document.createElement('div');
+                            managerBlock.id = 'manager-review-block';
+
+                            managerBlock.innerHTML = `
+      <div class="task-meta-block">
+        <h4 style="font-size:20px; margin-bottom:12px; font-weight:700;">
+          Revisão de Entrega do Copywriter
+        </h4>
+
+        <div style="
+          border:1px solid var(--border-subtle);
+          border-radius:12px;
+          padding:14px;
+          background: rgba(255,255,255,0.02);
+        ">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <a href="${latestCopyLink.url}" target="_blank"
+               style="color:#5aa7ff; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+              ${latestCopyLink.url}
+            </a>
+            <i class="fas fa-link" style="opacity:.7;"></i>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:14px;">
+            <button class="btn-primary" style="flex:1; background:#2f7d4a;"
+              onclick="app.reviewCopyDelivery(${card.id}, 'approve')">
+              <i class="fas fa-check-circle"></i> Aprovar Entrega
+            </button>
+
+            <button class="btn-primary" style="flex:1; background:#b8871f;"
+              onclick="app.reviewCopyDelivery(${card.id}, 'reject')">
+              <i class="fas fa-exclamation-triangle"></i> Reprovar p/ Ajuste
+            </button>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:var(--text-muted);">
+            <div>Enviado por: <b>${latestCopyLink.uploaded_by?.name ?? '—'}</b></div>
+            <div>Horário: ${latestCopyLink.created_at ? new Date(latestCopyLink.created_at).toLocaleString() : '—'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+                            // coloca acima do checklist (e acima do bloco do copy também, se existir)
+                            checklistBlock.parentNode.insertBefore(managerBlock, checklistBlock);
+                        }
+
+                        // checklist
                         const checklist = resolveChecklist(card);
 
                         document.getElementById('modal-checklist').innerHTML =
@@ -517,7 +635,7 @@
                                     <div class="check-box ${item.done ? 'checked' : ''}"></div>
                                     ${item.label}
                                 </div>
-                            `).join('');
+                                `).join('');
 
                         document.querySelector('.modal-overlay').classList.add('open');
                         document.getElementById('task-drawer').classList.add('open');
@@ -636,11 +754,43 @@
                                     delivery_link: link
                                 })
                             })
+                            .then(async (res) => {
+                                const data = await res.json();
+
+                                if (!data.success) {
+                                    app.showToast(data.message, 'error');
+                                    return;
+                                }
+
+                                app.showToast(data.message, 'success');
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1200);
+                            });
+                    },
+                    reviewCopyDelivery(subtaskId, decision) {
+                        fetch("{{ route('ajax.review.copy.delivery') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    subtask_id: subtaskId,
+                                    decision: decision
+                                })
+                            })
                             .then(res => res.json())
-                            .then(() => {
+                            .then((data) => {
+                                if (!data.success) {
+                                    alert(data.message || 'Erro ao processar revisão.');
+                                    return;
+                                }
                                 window.location.reload();
                             });
                     }
+
                 };
 
                 window.app = app;
@@ -659,7 +809,6 @@
                 );
 
                 const hasCopywriter = !!copyAssignment;
-                const copyInProgress = copyAssignment?.status === 'IN_PROGRESS';
                 const copyDone = copyAssignment?.status === 'DONE';
 
                 // EDITOR
@@ -668,16 +817,24 @@
                 );
 
                 const hasEditor = !!editorAssignment;
-                const editorInProgress = editorAssignment?.status === 'IN_PROGRESS';
                 const editorDone = editorAssignment?.status === 'DONE';
 
-                // REVISÃO
-                const isReviewed = card.status === 'REVIEW' ||
-                    card.status === 'APPROVED' ||
-                    card.status === 'archived';
+                // 🔥 NOVO ITEM — REVISÃO COPYWRITER
+                const copyUnderReview =
+                    card.rawStatus === 'PENDING_EDITOR' ||
+                    card.rawStatus === 'REVIEW_EDITOR' ||
+                    card.rawStatus === 'APPROVED' ||
+                    card.rawStatus === 'CONCLUDED';
+
+                // REVISÃO FINAL
+                const isReviewed =
+                    card.rawStatus === 'REVIEW_EDITOR' ||
+                    card.rawStatus === 'APPROVED' ||
+                    card.rawStatus === 'CONCLUDED';
 
                 // PUBLICAÇÃO
-                const isPublished = card.status === 'archived';
+                const isPublished =
+                    card.rawStatus === 'CONCLUDED';
 
                 return [{
                         label: 'Atribuição copywriter',
@@ -692,6 +849,10 @@
                         done: copyDone
                     },
                     {
+                        label: 'Revisão copywriter',
+                        done: copyUnderReview
+                    },
+                    {
                         label: 'Produção editor',
                         done: editorDone
                     },
@@ -702,7 +863,7 @@
                     {
                         label: 'Publicação',
                         done: isPublished
-                    },
+                    }
                 ];
             }
         </script>
