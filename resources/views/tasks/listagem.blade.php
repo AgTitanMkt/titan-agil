@@ -1,21 +1,8 @@
-<x-layout>
-
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Titan Ágil - Backlog Tarefas</title>
+    <x-layout>
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
             rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-    </head>
-
-    <body>
 
         <header class="top-bar">
             <div class="page-title">
@@ -126,10 +113,13 @@
                     <div class="prop-value" id="modal-status">Em andamento</div>
                 </div>
                 <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-user"></i> Responsável</div>
-                    <div class="prop-value flex items-center gap-2">
-                        <span id="modal-assignee"></span>
-                    </div>
+                    <div class="prop-label"><i class="fas fa-user-edit"></i> Copywriter</div>
+                    <div class="prop-value flex items-center gap-2" id="modal-copywriter"></div>
+                </div>
+
+                <div class="prop-row">
+                    <div class="prop-label"><i class="fas fa-video"></i> Editor</div>
+                    <div class="prop-value flex items-center gap-2" id="modal-editor"></div>
                 </div>
                 <div class="prop-row">
                     <div class="prop-label"><i class="fas fa-user"></i> Gestor</div>
@@ -171,6 +161,20 @@
             </div>
         </div>
 
+        <div class="role-modal-overlay" id="role-overlay" onclick="event.stopPropagation(); app.closeRoleModal();">
+        </div>
+
+        <div class="role-modal" id="role-modal" onclick="event.stopPropagation()">
+            <div class="role-modal-header">
+                <h3 id="role-modal-title"></h3>
+                <button onclick="app.closeRoleModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="role-modal-body" id="role-user-list"></div>
+        </div>
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
 
@@ -181,6 +185,8 @@
                 */
 
                 const RAW_SUBTASKS = @json($subtasks ?? []);
+                const COPIES = @json($copies);
+                const EDITORS = @json($editors);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -209,6 +215,12 @@
                 | 3️⃣ MAPEAMENTO SUBTASK → CARD
                 |--------------------------------------------------------------------------
                 */
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        app.closeRoleModal();
+                    }
+                });
 
                 function mapSubtasks(subtasks) {
 
@@ -292,16 +304,16 @@
                             const cards = DB.filter(item => item.status === statusKey);
 
                             const colHTML = `
-                    <div class="kanban-column">
-                        <div class="kanban-header">
-                            <span>${STATUS_LABELS[statusKey]}</span>
-                            <span class="count-badge">${cards.length}</span>
+                        <div class="kanban-column">
+                            <div class="kanban-header">
+                                <span>${STATUS_LABELS[statusKey]}</span>
+                                <span class="count-badge">${cards.length}</span>
+                            </div>
+                            <div class="kanban-cards-area">
+                                ${cards.map(card => this.createCard(card)).join('')}
+                            </div>
                         </div>
-                        <div class="kanban-cards-area">
-                            ${cards.map(card => this.createCard(card)).join('')}
-                        </div>
-                    </div>
-                `;
+                    `;
 
                             board.innerHTML += colHTML;
                         });
@@ -314,59 +326,90 @@
                         const extraCount = card.agents.length - maxVisible;
 
                         const avatarsHTML = visibleAgents.map(agent => `
-        <div class="avatar-sm" title="${agent.name}">
-            ${agent.initials}
-        </div>
-    `).join('');
+            <div class="avatar-sm" title="${agent.name}">
+                ${agent.initials}
+            </div>
+        `).join('');
 
                         const extraHTML = extraCount > 0 ?
                             `<div class="avatar-sm more-agents">+${extraCount}</div>` :
                             '';
 
                         return `
-        <div class="kanban-card" onclick="app.openDrawer(${card.id})">
-            <div class="k-card-title">${card.title}</div>
-            <div class="k-card-footer">
-                <div class="k-info">
-                    <i class="fas fa-circle"></i> ${card.rawStatus}
-                </div>
-                <div class="agents-group">
-                    ${avatarsHTML}
-                    ${extraHTML}
+            <div class="kanban-card" onclick="app.openDrawer(${card.id})">
+                <div class="k-card-title">${card.title}</div>
+                <div class="k-card-footer">
+                    <div class="k-info">
+                        <i class="fas fa-circle"></i> ${card.rawStatus}
+                    </div>
+                    <div class="agents-group">
+                        ${avatarsHTML}
+                        ${extraHTML}
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
                     },
 
                     openDrawer(id) {
 
+                        // 🚫 Se o role modal estiver aberto, não faz nada
+                        if (document.getElementById('role-modal').classList.contains('open')) {
+                            return;
+                        }
+
                         const card = DB.find(item => item.id === id);
                         if (!card) return;
-                        console.log(card);
-                        
+
                         document.getElementById('modal-id').innerText = card.code ?? card.id;
                         document.getElementById('modal-title').value = card.title;
                         document.getElementById('modal-status').innerText = STATUS_LABELS[card.status];
                         document.getElementById('modal-source').innerText = card.platform?.name ?? '-';
-                        document.getElementById('modal-assignee').innerText =
-                            card.agents.length > 0 ?
-                            card.agents.map(a => a.name).join(', ') :
-                            '—';
-                        document.getElementById('modal-gestor').innerText = card.revised_by?.name ?? '—';   
+
+                        const copyAssignment = card.assignments.find(a =>
+                            a.user.roles.some(r => r.title === 'COPYWRITER')
+                        );
+
+                        const copyContainer = document.getElementById('modal-copywriter');
+
+                        if (copyAssignment) {
+                            copyContainer.innerHTML = `<span>${copyAssignment.user.name}</span>`;
+                        } else {
+                            copyContainer.innerHTML = `
+            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'COPYWRITER')">
+                <i class="fas fa-plus"></i> Adicionar Copywriter
+            </button>
+        `;
+                        }
+
+                        const editorAssignment = card.assignments.find(a =>
+                            a.user.roles.some(r => r.title === 'EDITOR')
+                        );
+
+                        const editorContainer = document.getElementById('modal-editor');
+
+                        if (editorAssignment) {
+                            editorContainer.innerHTML = `<span>${editorAssignment.user.name}</span>`;
+                        } else {
+                            editorContainer.innerHTML = `
+            <button class="btn-add-role" onclick="app.addRole(${card.id}, 'EDITOR')">
+                <i class="fas fa-plus"></i> Adicionar Editor
+            </button>
+        `;
+                        }
+
+                        document.getElementById('modal-gestor').innerText = card.revised_by?.name ?? '—';
                         document.getElementById('modal-date').innerText = card.due ?? '-';
 
-
-                        // 🔥 AQUI ESTAVA FALTANDO
                         const checklist = resolveChecklist(card);
 
                         document.getElementById('modal-checklist').innerHTML =
                             checklist.map(item => `
-                                <div class="checklist-item">
-                                    <div class="check-box ${item.done ? 'checked' : ''}"></div>
-                                    ${item.label}
-                                </div>
-                            `).join('');
+            <div class="checklist-item">
+                <div class="check-box ${item.done ? 'checked' : ''}"></div>
+                ${item.label}
+            </div>
+        `).join('');
 
                         document.querySelector('.modal-overlay').classList.add('open');
                         document.getElementById('task-drawer').classList.add('open');
@@ -375,6 +418,95 @@
                     closeDrawer() {
                         document.querySelector('.modal-overlay').classList.remove('open');
                         document.getElementById('task-drawer').classList.remove('open');
+                    },
+
+                    addRole(taskId, role) {
+
+                        document.body.style.pointerEvents = 'none';
+                        document.getElementById('role-modal').style.pointerEvents = 'auto';
+                        document.getElementById('role-overlay').style.pointerEvents = 'auto';
+
+                        this.currentTaskId = taskId;
+                        this.currentRole = role;
+
+                        const users = role === 'COPYWRITER' ? COPIES : EDITORS;
+
+                        document.getElementById('role-modal-title').innerText =
+                            role === 'COPYWRITER' ?
+                            'Selecionar Copywriter' :
+                            'Selecionar Editor';
+
+                        const container = document.getElementById('role-user-list');
+
+                        container.innerHTML = users.map(user => `
+            <div class="role-user-item"
+                onclick="app.selectUser(${user.id}, '${user.name.replace(/'/g, "\\'")}')">
+                ${user.name}
+            </div>
+        `).join('');
+
+                        document.getElementById('role-overlay').classList.add('open');
+                        document.getElementById('role-modal').classList.add('open');
+                    },
+
+                    selectUser(userId, userName) {
+
+                        const routeName =
+                            this.currentRole === 'COPYWRITER' ?
+                            "{{ route('ajax.add.copywriter') }}" :
+                            "{{ route('ajax.add.editor') }}";
+
+                        fetch(routeName, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    sub_task_id: this.currentTaskId,
+                                    user_id: userId
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(() => {
+                                window.location.reload();
+                            });
+                    },
+                    closeRoleModal() {
+                        document.getElementById('role-overlay').classList.remove('open');
+                        document.getElementById('role-modal').classList.remove('open');
+                        document.body.style.pointerEvents = 'auto';
+
+                        // 🔥 garante que o clique não reabra drawer
+                        setTimeout(() => {
+                            this.currentTaskId = null;
+                        }, 50);
+                    },
+                    refreshDrawer(id) {
+                        const card = DB.find(item => item.id === id);
+                        if (!card) return;
+
+                        // Atualiza apenas copywriter
+                        const copyAssignment = card.assignments.find(a =>
+                            a.user.roles.some(r => r.title === 'COPYWRITER')
+                        );
+
+                        const copyContainer = document.getElementById('modal-copywriter');
+
+                        if (copyAssignment) {
+                            copyContainer.innerHTML = `<span>${copyAssignment.user.name}</span>`;
+                        }
+
+                        // Atualiza editor
+                        const editorAssignment = card.assignments.find(a =>
+                            a.user.roles.some(r => r.title === 'EDITOR')
+                        );
+
+                        const editorContainer = document.getElementById('modal-editor');
+
+                        if (editorAssignment) {
+                            editorContainer.innerHTML = `<span>${editorAssignment.user.name}</span>`;
+                        }
                     }
                 };
 
@@ -406,9 +538,6 @@
                 const editorInProgress = editorAssignment?.status === 'IN_PROGRESS';
                 const editorDone = editorAssignment?.status === 'DONE';
 
-                // LINK COPY
-                const hasLinkCopy = !!card.description && card.description.includes('http');
-
                 // REVISÃO
                 const isReviewed = card.status === 'REVIEW' ||
                     card.status === 'APPROVED' ||
@@ -424,10 +553,6 @@
                     {
                         label: 'Atribuição editor',
                         done: hasEditor
-                    },
-                    {
-                        label: 'Link copy',
-                        done: hasLinkCopy
                     },
                     {
                         label: 'Produção copywriter',
@@ -450,8 +575,6 @@
         </script>
 
 
-    </body>
 
-    </html>
 
-</x-layout>
+    </x-layout>

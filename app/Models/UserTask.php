@@ -24,6 +24,40 @@ class UserTask extends Model
 
     protected static function booted()
     {
+
+        static::created(function ($assignment) {
+
+            // Só executa se foi criado como ASSIGNED
+            if ($assignment->status !== self::STATUS['ASSIGNED']) {
+                return;
+            }
+
+            $subtask = $assignment->subTask()->with('assignments.user.roles')->first();
+
+            if (!$subtask) {
+                return;
+            }
+
+            $assignments = $subtask->assignments;
+
+            $hasCopy = $assignments->contains(function ($a) {
+                return $a->status === self::STATUS['ASSIGNED'] &&
+                    $a->user->roles->contains('title', 'COPYWRITER');
+            });
+
+            $hasEditor = $assignments->contains(function ($a) {
+                return $a->status === self::STATUS['ASSIGNED'] &&
+                    $a->user->roles->contains('title', 'EDITOR');
+            });
+
+            if ($hasCopy && $hasEditor && $subtask->status === SubTask::STATUS['CREATED']) {
+
+                $subtask->update([
+                    'status' => SubTask::STATUS['PENDING']
+                ]);
+            }
+        });
+
         static::updated(function ($assignment) {
 
             // Só executa se status mudou

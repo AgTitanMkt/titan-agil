@@ -70,6 +70,7 @@ class TarefasController extends Controller
                 : null,
             'hook' => 'H1',
             'revised_by' => $request->validated()['gestor_id'] ?? null,
+            'created_by' => Auth::user()->id,
         ]);
 
         //so cria a relação se copywriter ou editor forem selecionados
@@ -126,8 +127,9 @@ class TarefasController extends Controller
             'revisedBy:id,name',
         ])
             ->where('status', '!=', SubTask::STATUS['CONCLUDED'])
+            ->where('created_by', Auth::id())
             ->orderBy('id', 'desc')
-            ->get();   
+            ->get();
 
         return view('tasks.listagem', compact('copies', 'editors', 'nichos', 'subtasks'));
     }
@@ -192,5 +194,41 @@ class TarefasController extends Controller
         return response()->json([
             'next_variation_number' => $lastVariation ? ($lastVariation->variation_number + 1) : 1
         ]);
+    }
+
+    public function addCopywriter(Request $request)
+    {
+        $request->validate([
+            'sub_task_id' => 'required|exists:sub_tasks,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        UserTask::firstOrCreate(
+            [
+                'user_id' => $request->user_id,
+                'sub_task_id' => $request->sub_task_id,
+            ],
+            [
+                'status' => UserTask::STATUS['ASSIGNED'],
+            ]
+        );
+
+        return response()->json(['message' => 'Copywriter adicionado com sucesso']);
+    }
+
+    public function addEditor(Request $request)
+    {
+        $request->validate([
+            'sub_task_id' => 'required|exists:sub_tasks,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        UserTask::create([
+            'user_id' => $request->user_id,
+            'sub_task_id' => $request->sub_task_id,
+            'status' => UserTask::STATUS['ASSIGNED'],
+        ]);
+
+        return response()->json(['message' => 'Editor adicionado com sucesso']);
     }
 }

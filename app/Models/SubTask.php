@@ -29,6 +29,7 @@ class SubTask extends Model
         'variation_number',
         'platform_id',
         'revised_by',
+        'created_by',
     ];
 
 
