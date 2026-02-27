@@ -10,6 +10,7 @@ class UserTask extends Model
         'user_id',
         'sub_task_id',
         'status',
+        'message',
         'started_at',
         'completed_at',
     ];

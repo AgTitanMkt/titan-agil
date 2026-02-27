@@ -128,6 +128,7 @@ class TarefasController extends Controller
             'agentes:id,name',
             'agentes.tags:id,user_id,tag',
             'assignments.user.roles:id,title',
+            'assignments:id,sub_task_id,user_id,status,message',
             'platform:id,name',
             'revisedBy:id,name',
         ])
@@ -251,7 +252,7 @@ class TarefasController extends Controller
             'assignment_id.required' => 'Tarefa inválida.',
             'assignment_id.exists' => 'Atribuição não encontrada.',
             'delivery_link.required' => 'Informe o link da entrega.',
-            'delivery_link.url' => 'Informe um link válido (ex: https://...).',
+            'delivery_link.url' => 'Informe um link válido (ex: https://...).'
         ]);
 
         if ($validator->fails()) {
@@ -325,6 +326,7 @@ class TarefasController extends Controller
         $request->validate([
             'subtask_id' => 'required|exists:sub_tasks,id',
             'decision' => 'required|in:approve,reject',
+            'message' => 'nullable|string|max:255',
         ]);
 
         $subtask = SubTask::with(['assignments.user.roles', 'files'])
@@ -363,6 +365,7 @@ class TarefasController extends Controller
             // volta para ajuste
             $copyAssignment->update([
                 'status' => UserTask::STATUS['REJECTED'],
+                'message' => $request->message ?? 'Revisão do gestor: ajustes necessários.',
                 'completed_at' => null,
             ]);
 

@@ -99,63 +99,77 @@
 
         <div class="modal-overlay" onclick="app.closeDrawer()"></div>
         <div class="modal-drawer" id="task-drawer">
+
             <div class="drawer-header">
-                <div style="font-size:12px; color:var(--text-muted)">TASK-ID: <span id="modal-id"></span></div>
+                <div class="header-info">
+                    <span class="task-id-badge">
+                        <i class="fas fa-hashtag"></i>
+                        <span id="modal-id"></span>
+                    </span>
+
+                    <span class="status-dot-label" id="modal-status"></span>
+                </div>
+
                 <div class="drawer-actions">
-                    <button onclick="app.closeDrawer()"><i class="fas fa-times"></i></button>
+                    <button class="btn-icon" onclick="app.closeDrawer()">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
+
             <div class="drawer-content">
-                <input type="text" class="drawer-title" id="modal-title" value="Título da Task">
 
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-spinner"></i> Status</div>
-                    <div class="prop-value" id="modal-status">Em andamento</div>
-                </div>
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-user-edit"></i> Copywriter</div>
-                    <div class="prop-value flex items-center gap-2" id="modal-copywriter"></div>
-                </div>
+                <input type="text" class="drawer-title-input" id="modal-title" placeholder="Título da Task">
 
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-video"></i> Editor</div>
-                    <div class="prop-value flex items-center gap-2" id="modal-editor"></div>
-                </div>
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-user"></i> Gestor</div>
-                    <div class="prop-value flex items-center gap-2">
-                        <span id="modal-gestor"></span>
+                <div class="properties-grid">
+
+                    <div class="prop-item">
+                        <div class="prop-label"><i class="far fa-user-circle"></i> Copywriter</div>
+                        <div class="prop-value" id="modal-copywriter"></div>
                     </div>
-                </div>
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-exclamation-circle"></i> Prioridade</div>
-                    <div class="prop-value" id="modal-priority">Alta</div>
-                </div>
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-bullhorn"></i> Fonte</div>
-                    <div class="prop-value" id="modal-source">Facebook</div>
-                </div>
-                <div class="prop-row">
-                    <div class="prop-label"><i class="fas fa-calendar"></i> Prazo</div>
-                    <div class="prop-value" id="modal-date">15 Fev, 2026</div>
-                </div>
 
-                <div class="task-meta-block">
-                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">Checklist</h4>
-                    <div id="modal-checklist">
-
+                    <div class="prop-item">
+                        <div class="prop-label"><i class="fas fa-magic"></i> Editor</div>
+                        <div class="prop-value" id="modal-editor"></div>
                     </div>
+
+                    <div class="prop-item">
+                        <div class="prop-label"><i class="far fa-id-badge"></i> Gestor</div>
+                        <div class="prop-value"><span id="modal-gestor"></span></div>
+                    </div>
+
+                    <div class="prop-item">
+                        <div class="prop-label"><i class="far fa-calendar-alt"></i> Prazo</div>
+                        <div class="prop-value" id="modal-date"></div>
+                    </div>
+
+                    <div class="prop-item">
+                        <div class="prop-label"><i class="fas fa-bullseye"></i> Fonte</div>
+                        <div class="prop-value" id="modal-source"></div>
+                    </div>
+
                 </div>
 
-                <div class="task-meta-block">
-                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">Revisão de entrega</h4>
+                <hr class="drawer-divider">
 
-                    <p id="modal-description" style="font-size:14px; line-height:1.6; color:var(--text-muted);">
-                        <!-- vai ser preenchido no JS -->
-                    </p>
+                <div class="section-container">
+                    <h4 class="section-title">Descrição</h4>
+                    <p id="modal-description" class="description-text"></p>
+                </div>
 
+                <!-- 🔥 BLOCO DINÂMICO AQUI -->
+                <div id="dynamic-blocks"></div>
+
+                <div class="section-container">
+                    <h4 class="section-title">Checklist de Progresso</h4>
+                    <div id="modal-checklist" class="elegant-checklist"></div>
+                </div>
+
+                <div class="section-container">
+                    <h4 class="section-title">Anexos e Entregas</h4>
                     <div id="modal-attachments"></div>
                 </div>
+
             </div>
         </div>
 
@@ -317,6 +331,10 @@
                         this.renderKanban();
                     },
 
+                    toggleRejectMessage() {
+                        const area = document.getElementById('reject-area');
+                        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+                    },
                     showToast(message, type = 'success') {
 
                         const toast = document.createElement('div');
@@ -385,29 +403,62 @@
                         const extraCount = card.agents.length - maxVisible;
 
                         const avatarsHTML = visibleAgents.map(agent => `
-            <div class="avatar-sm" title="${agent.name}">
-                ${agent.initials}
-            </div>
-        `).join('');
+        <div class="avatar-sm" title="${agent.name}">
+            ${agent.initials}
+        </div>
+    `).join('');
 
                         const extraHTML = extraCount > 0 ?
                             `<div class="avatar-sm more-agents">+${extraCount}</div>` :
                             '';
 
-                        return `
-            <div class="kanban-card" onclick="app.openDrawer(${card.id})">
-                <div class="k-card-title">${card.title}</div>
-                <div class="k-card-footer">
-                    <div class="k-info">
-                        <i class="fas fa-circle"></i> ${card.rawStatus}
-                    </div>
-                    <div class="agents-group">
-                        ${avatarsHTML}
-                        ${extraHTML}
-                    </div>
+                        // 🔥 Detecta reprovação
+                        const rejectedAssignment = (card.assignments || []).find(a => a.status === 'REJECTED');
+
+                        let rejectedBadge = '';
+
+                        if (rejectedAssignment) {
+
+                            const isCopyRejected = rejectedAssignment.user?.roles?.some(r => r.title ===
+                                'COPYWRITER');
+                            const isEditorRejected = rejectedAssignment.user?.roles?.some(r => r.title ===
+                                'EDITOR');
+
+                            if (isCopyRejected) {
+                                rejectedBadge = `
+                <div class="rejected-badge copy">
+                    COPY Reprovada
                 </div>
-            </div>
-        `;
+            `;
+                            }
+
+                            if (isEditorRejected) {
+                                rejectedBadge = `
+                <div class="rejected-badge editor">
+                    VSL Reprovada
+                </div>
+            `;
+                            }
+                        }
+
+                        return `
+                            <div class="kanban-card" onclick="app.openDrawer(${card.id})">
+                                ${rejectedBadge}
+
+                                <div class="k-card-title">${card.title}</div>
+
+                                <div class="k-card-footer">
+                                    <div class="k-info">
+                                        <i class="fas fa-circle"></i> ${card.rawStatus}
+                                    </div>
+
+                                    <div class="agents-group">
+                                        ${avatarsHTML}
+                                        ${extraHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     },
 
                     openDrawer(id) {
@@ -445,27 +496,27 @@
                             attachmentsEl.innerHTML = `
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
         ${card.taskFiles.map(f => `
-                                                  <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
-                                                    <div style="display:flex; justify-content:space-between; gap:10px;">
-                                                      <div style="font-size:12px; color:var(--text-muted);">
-                                                        ${(f.type || '').toUpperCase() || 'ARQUIVO'}
-                                                      </div>
-                                                      <div style="font-size:12px; color:var(--text-muted);">
-                                                        ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
-                                                      </div>
-                                                    </div>
+                                                                                                                  <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                                                                                                    <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                                                                                      <div style="font-size:12px; color:var(--text-muted);">
+                                                                                                                        ${(f.type || '').toUpperCase() || 'ARQUIVO'}
+                                                                                                                      </div>
+                                                                                                                      <div style="font-size:12px; color:var(--text-muted);">
+                                                                                                                        ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                                                                                      </div>
+                                                                                                                    </div>
 
-                                                    <div style="margin-top:6px; font-size:14px;">
-                                                      <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
-                                                        ${f.url}
-                                                      </a>
-                                                    </div>
+                                                                                                                    <div style="margin-top:6px; font-size:14px;">
+                                                                                                                      <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                                                                                        ${f.url}
+                                                                                                                      </a>
+                                                                                                                    </div>
 
-                                                    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                                                      Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
-                                                    </div>
-                                                  </div>
-                                                `).join('')}
+                                                                                                                    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                                                                                      Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                                                                                                    </div>
+                                                                                                                  </div>
+                                                                                                                `).join('')}
       </div>
     `;
                         }
@@ -507,8 +558,39 @@
                         document.getElementById('modal-date').innerText = card.due ?? '-';
 
                         // ✅ referência do bloco do checklist para inserir blocos acima
-                        const checklistBlock = document.getElementById('modal-checklist').closest(
-                            '.task-meta-block');
+                        const dynamicContainer = document.getElementById('dynamic-blocks');
+                        dynamicContainer.innerHTML = '';
+
+                        // ------------------------------------------------------------
+                        // BLOCO DE FEEDBACK (quando REJECTED)
+                        // ------------------------------------------------------------
+
+                        const rejectedAssignment = (card.assignments || [])
+                            .filter(a => a.status === 'REJECTED')
+                            .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))[0];
+
+                        if (rejectedAssignment && rejectedAssignment.message) {
+                            
+                            const feedbackBlock = document.createElement('div');
+                            feedbackBlock.className = 'review-feedback-card';
+
+                            feedbackBlock.innerHTML = `
+                                <div class="feedback-header">
+                                    <span>FEEDBACK DE REVISÃO</span>
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+
+                                <div class="feedback-body">
+                                    <strong>REPROVADA</strong> - ${rejectedAssignment.message}
+                                </div>
+
+                                <div class="feedback-meta">
+                                    Enviado por: <b>${card.revised_by?.name ?? '—'}</b>
+                                </div>
+                            `;
+
+                            dynamicContainer.appendChild(feedbackBlock);
+                        }
 
                         // ------------------------------------------------------------
                         // 1) BLOCO COPY - "Sua Entrega" (quando ASSIGNED e é o dono)
@@ -552,7 +634,7 @@
                             </div>
                             `;
 
-                            checklistBlock.parentNode.insertBefore(deliveryContainer, checklistBlock);
+                            dynamicContainer.appendChild(deliveryContainer);
                         }
 
                         // ------------------------------------------------------------
@@ -583,47 +665,61 @@
                             managerBlock.id = 'manager-review-block';
 
                             managerBlock.innerHTML = `
-      <div class="task-meta-block">
-        <h4 style="font-size:20px; margin-bottom:12px; font-weight:700;">
-          Revisão de Entrega do Copywriter
-        </h4>
+                                <div class="task-meta-block review-block">
 
-        <div style="
-          border:1px solid var(--border-subtle);
-          border-radius:12px;
-          padding:14px;
-          background: rgba(255,255,255,0.02);
-        ">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <a href="${latestCopyLink.url}" target="_blank"
-               style="color:#5aa7ff; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
-              ${latestCopyLink.url}
-            </a>
-            <i class="fas fa-link" style="opacity:.7;"></i>
-          </div>
+                                <div class="review-header">
+                                    <div>
+                                        <h4>Revisão da Entrega</h4>
+                                        <span class="review-sub">Avalie a copy enviada</span>
+                                    </div>
+                                    <div class="review-status-badge">
+                                        Em análise
+                                    </div>
+                                </div>
 
-          <div style="display:flex; gap:12px; margin-top:14px;">
-            <button class="btn-primary" style="flex:1; background:#2f7d4a;"
-              onclick="app.reviewCopyDelivery(${card.id}, 'approve')">
-              <i class="fas fa-check-circle"></i> Aprovar Entrega
-            </button>
+                                <div class="review-link-box">
+                                    <a href="${latestCopyLink.url}" target="_blank">
+                                        <i class="fas fa-link"></i>
+                                        <span>${latestCopyLink.url}</span>
+                                    </a>
+                                </div>
 
-            <button class="btn-primary" style="flex:1; background:#b8871f;"
-              onclick="app.reviewCopyDelivery(${card.id}, 'reject')">
-              <i class="fas fa-exclamation-triangle"></i> Reprovar p/ Ajuste
-            </button>
-          </div>
+                                <div class="review-meta">
+                                    <span>Enviado por <b>${latestCopyLink.uploaded_by?.name ?? '—'}</b></span>
+                                    <span>${latestCopyLink.created_at ? new Date(latestCopyLink.created_at).toLocaleString() : '—'}</span>
+                                </div>
 
-          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:var(--text-muted);">
-            <div>Enviado por: <b>${latestCopyLink.uploaded_by?.name ?? '—'}</b></div>
-            <div>Horário: ${latestCopyLink.created_at ? new Date(latestCopyLink.created_at).toLocaleString() : '—'}</div>
-          </div>
-        </div>
-      </div>
-    `;
+                                <div class="review-actions">
+                                    <button class="btn-approve"
+                                        onclick="app.reviewCopyDelivery(${card.id}, 'approve')">
+                                        <i class="fas fa-check-circle"></i>
+                                        Aprovar
+                                    </button>
+
+                                    <button class="btn-reject"
+                                        onclick="app.toggleRejectMessage()">
+                                        <i class="fas fa-times-circle"></i>
+                                        Reprovar
+                                    </button>
+                                </div>
+
+                                <div class="review-message-area" id="reject-area" style="display:none;">
+                                    <textarea 
+                                        id="copy-delivery-message"
+                                        placeholder="Explique o que precisa ser ajustado..."
+                                    ></textarea>
+
+                                    <button class="btn-send-reject"
+                                        onclick="app.reviewCopyDelivery(${card.id}, 'reject')">
+                                        Enviar Reprovação
+                                    </button>
+                                </div>
+
+                                </div>
+                                `;
 
                             // coloca acima do checklist (e acima do bloco do copy também, se existir)
-                            checklistBlock.parentNode.insertBefore(managerBlock, checklistBlock);
+                            dynamicContainer.appendChild(managerBlock);
                         }
 
                         // checklist
@@ -751,7 +847,7 @@
                                 },
                                 body: JSON.stringify({
                                     assignment_id: assignmentId,
-                                    delivery_link: link
+                                    delivery_link: link,
                                 })
                             })
                             .then(async (res) => {
@@ -770,6 +866,14 @@
                             });
                     },
                     reviewCopyDelivery(subtaskId, decision) {
+
+                        const message = document.getElementById('copy-delivery-message')?.value || null;
+
+                        if (decision === 'reject' && !message) {
+                            app.showToast('Explique o motivo da reprovação.', 'error');
+                            return;
+                        }
+
                         fetch("{{ route('ajax.review.copy.delivery') }}", {
                                 method: 'POST',
                                 headers: {
@@ -778,16 +882,23 @@
                                 },
                                 body: JSON.stringify({
                                     subtask_id: subtaskId,
-                                    decision: decision
+                                    decision: decision,
+                                    message: message
                                 })
                             })
                             .then(res => res.json())
                             .then((data) => {
+
                                 if (!data.success) {
-                                    alert(data.message || 'Erro ao processar revisão.');
+                                    app.showToast(data.message || 'Erro ao processar.', 'error');
                                     return;
                                 }
-                                window.location.reload();
+
+                                app.showToast(data.message, 'success');
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1200);
                             });
                     }
 

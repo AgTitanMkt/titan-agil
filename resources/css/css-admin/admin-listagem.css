@@ -36,6 +36,13 @@
     --prio-high: #EF4444;
     --prio-med: #EAB308;
     --prio-low: #22C55E;
+
+    --bg-drawer: #121214;
+    --bg-card-alt: #1c1c1f;
+    --accent-blue: #5aa7ff;
+    --text-main: #e1e1e6;
+    --text-muted: #a8a8b3;
+    --border-elegant: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -918,8 +925,303 @@ header.top-bar,
 .role-user-item:hover {
     background: rgba(255, 255, 255, .06);
 }
-#copy-delivery-link{
+
+#copy-delivery-link {
     color: black;
+}
+
+#copy-delivery-message {
+    color: white;
+    margin-top: 0.7rem;
+    width: 100%;
+}
+
+.rejected-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: inline-block;
+    letter-spacing: .5px;
+}
+
+.rejected-badge.copy {
+    background: rgba(255, 77, 77, 0.15);
+    color: #ff4d4d;
+    border: 1px solid rgba(255, 77, 77, 0.4);
+}
+
+.rejected-badge.editor {
+    background: rgba(255, 170, 0, 0.15);
+    color: #ffb020;
+    border: 1px solid rgba(255, 170, 0, 0.4);
+}
+
+.review-block {
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.review-header h4 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.review-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.review-status-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255, 170, 0, 0.15);
+    color: #ffb020;
+    border: 1px solid rgba(255, 170, 0, 0.4);
+}
+
+.review-link-box {
+    background: rgba(90, 167, 255, 0.08);
+    border: 1px solid rgba(90, 167, 255, 0.25);
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.review-link-box a {
+    color: #5aa7ff;
+    text-decoration: none;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.review-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.review-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-approve {
+    flex: 1;
+    background: #2f7d4a;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-reject {
+    flex: 1;
+    background: #8b1f1f;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.review-message-area {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.review-message-area textarea {
+    resize: none;
+    min-height: 80px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+}
+
+.btn-send-reject {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Drawer base */
+.modal-drawer {
+    background: var(--bg-drawer);
+    border-left: 1px solid var(--border-elegant);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.4, 0, .2, 1);
+}
+
+.modal-drawer.open {
+    transform: translateX(0);
+}
+
+/* Header */
+.drawer-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-elegant);
+}
+
+.task-id-badge {
+    background: var(--bg-card-alt);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--accent-blue);
+    border: 1px solid var(--border-elegant);
+}
+
+.status-dot-label {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-elegant);
+}
+
+/* Título */
+.drawer-title-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-main);
+    padding: 24px;
+    outline: none;
+}
+
+/* Propriedades */
+.properties-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0 24px 24px;
+}
+
+.prop-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.prop-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.prop-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.prop-value {
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.section-container {
+    padding: 20px 24px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.drawer-divider {
+    border: 0;
+    border-top: 1px solid var(--border-elegant);
+    margin: 0;
+}
+
+/* ========================================= */
+/* FEEDBACK DE REVISÃO */
+/* ========================================= */
+
+.review-feedback-card {
+    margin: 20px 24px;
+    padding: 18px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #2a2116, #1c160e);
+    border: 1px solid rgba(255, 180, 80, 0.3);
+    box-shadow: 0 0 20px rgba(255, 170, 0, 0.15);
+    animation: fadeIn 0.3s ease;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #f4c27a;
+    margin-bottom: 12px;
+}
+
+.feedback-header i {
+    color: #e74c3c;
+}
+
+.feedback-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #f1e7d5;
+}
+
+.feedback-body strong {
+    color: #ffb347;
+}
+
+.feedback-meta {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #c9b89b;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeIn {
