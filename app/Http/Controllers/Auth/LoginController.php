@@ -27,11 +27,18 @@ class LoginController extends Controller
     }
 
     protected function redirectTo()
-    {
-        if (auth()->user()->role === 'ADMIN') {
-            return '/admin/dashboard';
-        }
+{
+    dd(auth()->user());
+    $user = auth()->user();
 
-        return '/dashboard';
+    if ($user->hasRole('ADMIN')) {
+        return '/admin/dashboard';
     }
+
+    if ($user->hasAnyRole(['COPYWRITER', 'EDITOR', 'GESTOR'])) {
+        return route('tarefas.listagem');
+    }
+
+    return '/dashboard';
+}
 }

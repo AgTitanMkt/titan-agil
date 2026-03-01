@@ -4,6 +4,13 @@
             rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+        <style>
+            html,
+            body {
+                overflow-y: auto;
+            }
+        </style>
+
         <header class="top-bar">
             <div class="page-title">
                 <i class="fas fa-layer-group"></i> Backlog de Tarefas
@@ -500,27 +507,27 @@
                             attachmentsEl.innerHTML = `
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
         ${card.taskFiles.map(f => `
-                                                        <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
-                                                        <div style="display:flex; justify-content:space-between; gap:10px;">
-                                                            <div style="font-size:12px; color:var(--text-muted);">
-                                                            ${(f.type || '').toUpperCase() || 'ARQUIVO'}
-                                                            </div>
-                                                            <div style="font-size:12px; color:var(--text-muted);">
-                                                            ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
-                                                            </div>
-                                                        </div>
+                                                                <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                                                <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                                    <div style="font-size:12px; color:var(--text-muted);">
+                                                                    ${(f.type || '').toUpperCase() || 'ARQUIVO'}
+                                                                    </div>
+                                                                    <div style="font-size:12px; color:var(--text-muted);">
+                                                                    ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                                    </div>
+                                                                </div>
 
-                                                        <div style="margin-top:6px; font-size:14px;">
-                                                            <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
-                                                            ${f.url}
-                                                            </a>
-                                                        </div>
+                                                                <div style="margin-top:6px; font-size:14px;">
+                                                                    <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                                    ${f.url}
+                                                                    </a>
+                                                                </div>
 
-                                                        <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                                                            Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
-                                                        </div>
-                                                        </div>
-                                                    `).join('')}
+                                                                <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                                    Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                                                </div>
+                                                                </div>
+                                                            `).join('')}
       </div>
     `;
                         }
@@ -708,8 +715,8 @@
 
                         const isReviewCopy = card.rawStatus === 'REVIEW_COPY';
                         const latestCopyLink = getLatestUrlFile(card);
-                        console.log(isManagerOfThis,isReviewCopy,latestCopyLink);
-                        
+                        console.log(isManagerOfThis, isReviewCopy, latestCopyLink);
+
                         if (isManagerOfThis && isReviewCopy && latestCopyLink) {
 
                             const managerBlock = document.createElement('div');
