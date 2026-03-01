@@ -1111,7 +1111,7 @@ header.top-bar,
 
 /* Título */
 .drawer-title-input {
-    width: 100%;
+    width: fit-content;
     background: transparent;
     border: none;
     font-size: 26px;

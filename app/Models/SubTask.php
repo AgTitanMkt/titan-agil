@@ -22,6 +22,7 @@ class SubTask extends Model
         'PENDING' => 'PENDING',
         'DONE' => 'DONE',
         'PUBLISHED' => 'PUBLISHED',
+        'ASSIGNED' => 'ASSIGNED',
     ];
 
     protected $fillable = [
@@ -78,9 +79,26 @@ class SubTask extends Model
     {
         return $this->belongsTo(User::class, 'revised_by', 'id');
     }
-    
+
     public function files(): HasMany
     {
         return $this->hasMany(SubtaskFile::class, 'subtask_id', 'id');
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(SubtaskHistories::class)->latest();
+    }
+
+    public function addHistory($event, $description = null, $old = null, $new = null)
+    {
+        SubtaskHistories::create([
+            'sub_task_id' => $this->id,
+            'user_id' => auth()->id(),
+            'event' => $event,
+            'description' => $description,
+            'old_value' => $old,
+            'new_value' => $new,
+        ]);
     }
 }

@@ -106,6 +106,14 @@ class TarefasController extends Controller
             ]);
         }
 
+        $subtask->addHistory(
+            'task_created',
+            'Tarefa criada',
+            'Tarefa criada por ' . Auth::user()->name,
+            null,
+            SubTask::STATUS['CREATED']
+        );
+
 
         return redirect()
             ->route('tarefas.listagem')
@@ -131,6 +139,7 @@ class TarefasController extends Controller
             'assignments:id,sub_task_id,user_id,status,message',
             'platform:id,name',
             'revisedBy:id,name',
+            'histories.user:id,name',
         ])
             ->where('status', '!=', SubTask::STATUS['CONCLUDED'])
             ->where(function ($query) use ($userId) {
@@ -225,6 +234,15 @@ class TarefasController extends Controller
             ]
         );
 
+        $subTask = SubTask::find($request->sub_task_id);
+        $subTask->addHistory(
+            'copy_assigned',
+            'Copywriter '. User::find($request->user_id)->name .' atribuído a tarefa',
+            'Copywriter adicionado à tarefa por ' . Auth::user()->name,
+            null,
+            SubTask::STATUS['ASSIGNED']
+        );
+
         return response()->json(['message' => 'Copywriter adicionado com sucesso']);
     }
 
@@ -240,6 +258,15 @@ class TarefasController extends Controller
             'sub_task_id' => $request->sub_task_id,
             'status' => UserTask::STATUS['ASSIGNED'],
         ]);
+
+        $subTask = SubTask::find($request->sub_task_id);
+        $subTask->addHistory(
+            'editor_assigned',
+            'Editor '. User::find($request->user_id)->name .' atribuído a tarefa',
+            'Editor adicionado à tarefa por ' . Auth::user()->name,
+            null,
+            SubTask::STATUS['ASSIGNED']
+        );
 
         return response()->json(['message' => 'Editor adicionado com sucesso']);
     }
@@ -299,6 +326,14 @@ class TarefasController extends Controller
         $subTask->update([
             'status' => SubTask::STATUS['REVIEW_EDITOR']
         ]);
+
+        $subTask->addHistory(
+            'editor_delivery',
+            'Entrega do editor',
+            'Entrega confirmada pelo editor',
+            null,
+            SubTask::STATUS['REVIEW_EDITOR']
+        );
 
         SubtaskFile::updateOrCreate(
             [
@@ -376,6 +411,14 @@ class TarefasController extends Controller
         $subTask->update([
             'status' => SubTask::STATUS['REVIEW_COPY']
         ]);
+
+        $subTask->addHistory(
+            'copy_delivery',
+            'Entrega do copywriter',
+            'Entrega confirmada pelo copywriter',
+            null,
+            SubTask::STATUS['REVIEW_COPY']
+        );
 
         // salva ou atualiza link
         SubtaskFile::updateOrCreate(
@@ -469,6 +512,14 @@ class TarefasController extends Controller
                 'status' => SubTask::STATUS['PENDING_EDITOR']
             ]);
 
+            $subtask->addHistory(
+                'editor_rejected',
+                'Revisão do editor rejeitada',
+                'Revisão do editor rejeitada por ' . Auth::user()->name . '. Feedback: ' . ($request->message ?? 'Ajustes necessários na VSL.'),
+                null,
+                SubTask::STATUS['PENDING_EDITOR']
+            );
+
             return response()->json([
                 'success' => true,
                 'type' => 'success',
@@ -481,6 +532,14 @@ class TarefasController extends Controller
         $subtask->update([
             'status' => SubTask::STATUS['APPROVED']
         ]);
+
+        $subtask->addHistory(
+            'editor_approved',
+            'Revisão do editor aprovada',
+            'Revisão do editor aprovada por ' . Auth::user()->name,
+            null,
+            SubTask::STATUS['APPROVED']
+        );
 
         return response()->json([
             'success' => true,
@@ -540,6 +599,14 @@ class TarefasController extends Controller
                 'status' => SubTask::STATUS['PENDING_COPY'], // ou CREATED, se fizer sentido no seu fluxo
             ]);
 
+            $subtask->addHistory(
+                'copy_rejected',
+                'Revisão do copywriter rejeitada',
+                'Revisão do copywriter rejeitada por ' . Auth::user()->name . '. Feedback: ' . ($request->message ?? 'Revisão do gestor: ajustes necessários.'),
+                null,
+                SubTask::STATUS['PENDING_COPY']
+            );
+
             return response()->json(['success' => true]);
         }
 
@@ -556,6 +623,14 @@ class TarefasController extends Controller
                 ? SubTask::STATUS['REVIEW']          // tudo pronto p/ revisão final/gestor
                 : SubTask::STATUS['PENDING_EDITOR'],  // aguardando editor (você pode usar PENDING também)
         ]);
+
+        $subtask->addHistory(
+            'copy_approved',
+            'Revisão do copywriter aprovada',
+            'Revisão do copywriter aprovada por ' . Auth::user()->name,
+            null,
+            $editorDone ? SubTask::STATUS['REVIEW'] : SubTask::STATUS['PENDING_EDITOR']
+        );
 
         return response()->json(['success' => true]);
     }

@@ -9,6 +9,114 @@
             body {
                 overflow-y: auto;
             }
+
+            .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-close:hover {
+    color: #e74c3c;
+}
+
+.copy-code-btn {
+    background: none;
+    border: none;
+    margin-left: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: 0.2s;
+}
+
+.copy-code-btn:hover {
+    color: #5aa7ff;
+}
+
+            #id-creative {
+                display: flex;
+                gap: 12px;
+            }
+            .copymodal-title-code-btn {
+                background: none;
+                border: none;
+                margin-left: 8px;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 12px;
+                transition: 0.2s;
+            }
+
+            .copy-code-btn:hover {
+                color: #5aa7ff;
+            }
+
+            .history-icon {
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.05);
+                font-size: 13px;
+            }
+
+            .history-timeline {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .history-item {
+                display: flex;
+                gap: 12px;
+            }
+
+            .history-dot {
+                width: 8px;
+                height: 8px;
+                background: #5aa7ff;
+                border-radius: 50%;
+                margin-top: 6px;
+            }
+
+            .history-content {
+                flex: 1;
+                font-size: 13px;
+            }
+
+            .history-header {
+                display: flex;
+                justify-content: space-between;
+                color: var(--text-muted);
+                font-size: 12px;
+            }
+
+            .history-body {
+                margin-top: 4px;
+            }
         </style>
 
         <header class="top-bar">
@@ -108,25 +216,41 @@
         <div class="modal-drawer" id="task-drawer">
 
             <div class="drawer-header">
-                <div class="header-info">
+                <div class="header-left">
                     <span class="task-id-badge">
                         <i class="fas fa-hashtag"></i>
                         <span id="modal-id"></span>
+
+                        <button class="copy-code-btn"
+                            onclick="app.copyCreativeCode()"
+                            title="Copiar código">
+                            <i class="fas fa-copy"></i>
+                        </button>
                     </span>
 
                     <span class="status-dot-label" id="modal-status"></span>
                 </div>
 
-                <div class="drawer-actions">
-                    <button class="btn-icon" onclick="app.closeDrawer()">
-                        <i class="fas fa-times"></i>
+                <div class="header-actions">
+                    <button class="btn-close"
+                        onclick="app.closeDrawer()"
+                        title="Fechar">
+                        <i class="fas fa-xmark"></i>
                     </button>
                 </div>
             </div>
 
             <div class="drawer-content">
 
-                <input type="text" class="drawer-title-input" id="modal-title" placeholder="Título da Task">
+                <div id="id-creative">
+                    <span id="modal-id"></span>
+    
+                            <button class="copy-code-btn" onclick="app.copyCreativeCode()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </span>
+                    <input type="text" class="drawer-title-input" id="modal-title" placeholder="Título da Task">
+                </div>
 
                 <div class="properties-grid">
 
@@ -172,9 +296,15 @@
                     <div id="modal-checklist" class="elegant-checklist"></div>
                 </div>
 
+
                 <div class="section-container">
                     <h4 class="section-title">Anexos e Entregas</h4>
                     <div id="modal-attachments"></div>
+                </div>
+
+                <div class="section-container">
+                    <h4 class="section-title">Histórico</h4>
+                    <div id="modal-history"></div>
                 </div>
 
             </div>
@@ -195,6 +325,13 @@
         </div>
 
         <script>
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    app.closeDrawer();
+                }
+            });
+
             document.addEventListener('DOMContentLoaded', function() {
 
                 /*
@@ -238,6 +375,45 @@
                     under_review: 'Em revisão',
                     approved: 'Aprovada',
                     archived: 'Encerrada'
+                };
+
+                const HISTORY_ICON_MAP = {
+                    task_created: {
+                        icon: 'fa-rocket',
+                        color: '#5aa7ff'
+                    },
+                    copy_assigned: {
+                        icon: 'fa-user-pen',
+                        color: '#8e44ad'
+                    },
+                    editor_assigned: {
+                        icon: 'fa-user-gear',
+                        color: '#16a085'
+                    },
+                    copy_delivery: {
+                        icon: 'fa-file-lines',
+                        color: '#2980b9'
+                    },
+                    editor_delivery: {
+                        icon: 'fa-video',
+                        color: '#2980b9'
+                    },
+                    copy_rejected: {
+                        icon: 'fa-circle-xmark',
+                        color: '#e74c3c'
+                    },
+                    editor_rejected: {
+                        icon: 'fa-circle-xmark',
+                        color: '#e74c3c'
+                    },
+                    copy_approved: {
+                        icon: 'fa-circle-check',
+                        color: '#2ecc71'
+                    },
+                    editor_approved: {
+                        icon: 'fa-circle-check',
+                        color: '#2ecc71'
+                    },
                 };
 
                 function isCopywriter() {
@@ -287,6 +463,7 @@
                         }));
 
                         return {
+                            histories: sub.histories ?? [],
                             id: sub.id,
                             code: task.code ?? null,
                             title: title,
@@ -337,6 +514,51 @@
                 */
 
                 const app = {
+
+                    copyCreativeCode() {
+
+                        const code = document.getElementById('modal-id')?.innerText;
+
+                        if (!code) {
+                            this.showToast('Código inválido.', 'error');
+                            return;
+                        }
+
+                        // 🚀 Se clipboard API estiver disponível
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+
+                            navigator.clipboard.writeText(code)
+                                .then(() => {
+                                    this.showToast('Código copiado com sucesso!');
+                                })
+                                .catch(() => {
+                                    this.fallbackCopy(code);
+                                });
+
+                        } else {
+                            this.fallbackCopy(code);
+                        }
+                    },
+
+                    fallbackCopy(text) {
+
+                        const textarea = document.createElement("textarea");
+                        textarea.value = text;
+                        textarea.style.position = "fixed";
+                        textarea.style.left = "-9999px";
+
+                        document.body.appendChild(textarea);
+                        textarea.select();
+
+                        try {
+                            document.execCommand("copy");
+                            this.showToast('Código copiado com sucesso!');
+                        } catch (err) {
+                            this.showToast('Erro ao copiar código.', 'error');
+                        }
+
+                        document.body.removeChild(textarea);
+                    },
 
                     init() {
                         this.renderKanban();
@@ -507,27 +729,27 @@
                             attachmentsEl.innerHTML = `
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
         ${card.taskFiles.map(f => `
-                                                                <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
-                                                                <div style="display:flex; justify-content:space-between; gap:10px;">
-                                                                    <div style="font-size:12px; color:var(--text-muted);">
-                                                                    ${(f.type || '').toUpperCase() || 'ARQUIVO'}
-                                                                    </div>
-                                                                    <div style="font-size:12px; color:var(--text-muted);">
-                                                                    ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
-                                                                    </div>
-                                                                </div>
+                                                                                                        <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                                                                                        <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                                                                            <div style="font-size:12px; color:var(--text-muted);">
+                                                                                                            ${(f.type || '').toUpperCase() || 'ARQUIVO'}
+                                                                                                            </div>
+                                                                                                            <div style="font-size:12px; color:var(--text-muted);">
+                                                                                                            ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                                                                            </div>
+                                                                                                        </div>
 
-                                                                <div style="margin-top:6px; font-size:14px;">
-                                                                    <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
-                                                                    ${f.url}
-                                                                    </a>
-                                                                </div>
+                                                                                                        <div style="margin-top:6px; font-size:14px;">
+                                                                                                            <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                                                                            ${f.url}
+                                                                                                            </a>
+                                                                                                        </div>
 
-                                                                <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                                                                    Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
-                                                                </div>
-                                                                </div>
-                                                            `).join('')}
+                                                                                                        <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                                                                            Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                                                                                        </div>
+                                                                                                        </div>
+                                                                                                    `).join('')}
       </div>
     `;
                         }
@@ -860,6 +1082,44 @@
                                     ${item.label}
                                 </div>
                                 `).join('');
+
+                        //historico
+                        const historyEl = document.getElementById('modal-history');
+
+if (!card.histories || card.histories.length === 0) {
+    historyEl.innerHTML = '<small>Sem histórico ainda.</small>';
+} else {
+    historyEl.innerHTML = `
+        <div class="history-timeline">
+            ${card.histories.map(h => {
+
+                const config = HISTORY_ICON_MAP[h.event] || {
+                    icon: 'fa-clock',
+                    color: '#95a5a6'
+                };
+
+                return `
+                    <div class="history-item">
+                        <div class="history-icon" style="color:${config.color}">
+                            <i class="fas ${config.icon}"></i>
+                        </div>
+
+                        <div class="history-content">
+                            <div class="history-header">
+                                <strong>${h.user?.name ?? 'Sistema'}</strong>
+                                <span>${new Date(h.created_at).toLocaleString()}</span>
+                            </div>
+
+                            <div class="history-body">
+                                ${h.description ?? h.event}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
 
                         document.querySelector('.modal-overlay').classList.add('open');
                         document.getElementById('task-drawer').classList.add('open');
