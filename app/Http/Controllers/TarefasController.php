@@ -243,6 +243,80 @@ class TarefasController extends Controller
 
         return response()->json(['message' => 'Editor adicionado com sucesso']);
     }
+    public function confirmEditorDelivery(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'assignment_id' => 'required|exists:user_tasks,id',
+            'delivery_link' => 'required|url'
+        ], [
+            'assignment_id.required' => 'Tarefa inválida.',
+            'assignment_id.exists' => 'Atribuição não encontrada.',
+            'delivery_link.required' => 'Informe o link da entrega.',
+            'delivery_link.url' => 'Informe um link válido (ex: https://...).'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'type' => 'validation',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $assignment = UserTask::with('subTask')->find($request->assignment_id);
+
+        if (!$assignment) {
+            return response()->json([
+                'success' => false,
+                'type' => 'not_found',
+                'message' => 'Atribuição não encontrada.'
+            ], 404);
+        }
+
+        if ($assignment->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'type' => 'permission',
+                'message' => 'Você não tem permissão para confirmar essa entrega.'
+            ], 403);
+        }
+
+        if ($assignment->status === UserTask::STATUS['DONE']) {
+            return response()->json([
+                'success' => false,
+                'type' => 'business',
+                'message' => 'Essa entrega já foi confirmada.'
+            ], 409);
+        }
+
+        $assignment->update([
+            'status' => UserTask::STATUS['DONE'],
+            'completed_at' => now(),
+        ]);
+
+        $subTask = $assignment->subTask;
+
+        $subTask->update([
+            'status' => SubTask::STATUS['REVIEW_EDITOR']
+        ]);
+
+        SubtaskFile::updateOrCreate(
+            [
+                'subtask_id' => $subTask->id,
+                'file_type' => SubtaskFile::FILE_TYPE['URL'],
+                'uploaded_by' => auth()->id(),
+            ],
+            [
+                'file_url' => $request->delivery_link,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'type' => 'success',
+            'message' => 'VSL enviada com sucesso! Aguardando revisão do gestor.'
+        ]);
+    }
     public function confirmCopyDelivery(Request $request)
     {
         $validator = \Validator::make($request->all(), [
@@ -308,10 +382,10 @@ class TarefasController extends Controller
             [
                 'subtask_id' => $subTask->id,
                 'file_type' => SubtaskFile::FILE_TYPE['URL'],
+                'uploaded_by' => auth()->id(),
             ],
             [
                 'file_url' => $request->delivery_link,
-                'uploaded_by' => auth()->id(),
             ]
         );
 
@@ -319,6 +393,99 @@ class TarefasController extends Controller
             'success' => true,
             'type' => 'success',
             'message' => 'Entrega enviada com sucesso! Aguardando revisão do gestor.'
+        ]);
+    }
+    public function reviewEditorDelivery(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'subtask_id' => 'required|exists:sub_tasks,id',
+            'decision' => 'required|in:approve,reject',
+            'message' => 'nullable|string|max:255',
+        ], [
+            'subtask_id.required' => 'Task inválida.',
+            'decision.required' => 'Decisão inválida.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'type' => 'validation',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $subtask = SubTask::with(['assignments.user.roles'])
+            ->find($request->subtask_id);
+
+        if (!$subtask) {
+            return response()->json([
+                'success' => false,
+                'type' => 'not_found',
+                'message' => 'Task não encontrada.'
+            ], 404);
+        }
+
+        $user = auth()->user();
+        $isAdmin = $user->roles->contains('title', 'ADMIN');
+
+        if (!$isAdmin && $subtask->revised_by !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'type' => 'permission',
+                'message' => 'Você não tem permissão para revisar essa entrega.'
+            ], 403);
+        }
+
+        if ($subtask->status !== SubTask::STATUS['REVIEW_EDITOR']) {
+            return response()->json([
+                'success' => false,
+                'type' => 'business',
+                'message' => 'Essa task não está em revisão de VSL.'
+            ], 422);
+        }
+
+        $editorAssignment = $subtask->assignments->first(function ($a) {
+            return $a->user &&
+                $a->user->roles->contains('title', 'EDITOR');
+        });
+
+        if (!$editorAssignment) {
+            return response()->json([
+                'success' => false,
+                'type' => 'business',
+                'message' => 'Editor não encontrado na tarefa.'
+            ], 422);
+        }
+
+        if ($request->decision === 'reject') {
+
+            $editorAssignment->update([
+                'status' => UserTask::STATUS['REJECTED'],
+                'message' => $request->message ?? 'Ajustes necessários na VSL.',
+                'completed_at' => null,
+            ]);
+
+            $subtask->update([
+                'status' => SubTask::STATUS['PENDING_EDITOR']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'type' => 'success',
+                'message' => 'VSL reprovada e enviada para ajustes.'
+            ]);
+        }
+
+        // APPROVE
+
+        $subtask->update([
+            'status' => SubTask::STATUS['APPROVED']
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'type' => 'success',
+            'message' => 'VSL aprovada e tarefa concluída.'
         ]);
     }
     public function reviewCopyDelivery(Request $request)

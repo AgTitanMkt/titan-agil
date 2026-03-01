@@ -237,6 +237,10 @@
                     return AUTH_USER.roles.includes('COPYWRITER');
                 }
 
+                function isEditor() {
+                    return AUTH_USER.roles.includes('EDITOR');
+                }
+
 
 
                 /*
@@ -496,27 +500,27 @@
                             attachmentsEl.innerHTML = `
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
         ${card.taskFiles.map(f => `
-                                                                                                                  <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
-                                                                                                                    <div style="display:flex; justify-content:space-between; gap:10px;">
-                                                                                                                      <div style="font-size:12px; color:var(--text-muted);">
-                                                                                                                        ${(f.type || '').toUpperCase() || 'ARQUIVO'}
-                                                                                                                      </div>
-                                                                                                                      <div style="font-size:12px; color:var(--text-muted);">
-                                                                                                                        ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
-                                                                                                                      </div>
-                                                                                                                    </div>
+                                                        <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:8px;">
+                                                        <div style="display:flex; justify-content:space-between; gap:10px;">
+                                                            <div style="font-size:12px; color:var(--text-muted);">
+                                                            ${(f.type || '').toUpperCase() || 'ARQUIVO'}
+                                                            </div>
+                                                            <div style="font-size:12px; color:var(--text-muted);">
+                                                            ${f.created_at ? new Date(f.created_at).toLocaleString() : ''}
+                                                            </div>
+                                                        </div>
 
-                                                                                                                    <div style="margin-top:6px; font-size:14px;">
-                                                                                                                      <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
-                                                                                                                        ${f.url}
-                                                                                                                      </a>
-                                                                                                                    </div>
+                                                        <div style="margin-top:6px; font-size:14px;">
+                                                            <a href="${f.url}" target="_blank" style="color:#5aa7ff; text-decoration:none;">
+                                                            ${f.url}
+                                                            </a>
+                                                        </div>
 
-                                                                                                                    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                                                                                                                      Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
-                                                                                                                    </div>
-                                                                                                                  </div>
-                                                                                                                `).join('')}
+                                                        <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                                                            Enviado por: <b>${f.uploaded_by?.name ?? '—'}</b>
+                                                        </div>
+                                                        </div>
+                                                    `).join('')}
       </div>
     `;
                         }
@@ -570,7 +574,7 @@
                             .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))[0];
 
                         if (rejectedAssignment && rejectedAssignment.message) {
-                            
+
                             const feedbackBlock = document.createElement('div');
                             feedbackBlock.className = 'review-feedback-card';
 
@@ -590,6 +594,52 @@
                             `;
 
                             dynamicContainer.appendChild(feedbackBlock);
+                        }
+
+                        // ------------------------------------------------------------
+                        // BLOCO EDITOR - "Sua Entrega"
+                        // ------------------------------------------------------------
+
+                        const isMyEditorTask = editorAssignment &&
+                            editorAssignment.user.id === AUTH_USER.id &&
+                            (
+                                editorAssignment.status === 'ASSIGNED' ||
+                                editorAssignment.status === 'REJECTED'
+                            );
+
+                        if (isEditor() && isMyEditorTask && card.rawStatus === 'PENDING_EDITOR') {
+
+                            const editorDeliveryBlock = document.createElement('div');
+                            editorDeliveryBlock.id = 'editor-delivery-block';
+
+                            editorDeliveryBlock.innerHTML = `
+                                <div class="task-meta-block">
+                                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-muted)">
+                                        Sua Entrega (VSL)
+                                    </h4>
+
+                                    <div style="display:flex; gap:10px;">
+                                        <input 
+                                            type="text" 
+                                            id="editor-delivery-link" 
+                                            placeholder="Cole o link do vídeo (Drive, Vimeo, etc)"
+                                            style="flex:1; padding:10px; border-radius:6px;"
+                                        >
+                                        <button 
+                                            class="btn-primary"
+                                            onclick="app.confirmEditorDelivery(${card.id}, ${editorAssignment.id})"
+                                        >
+                                            Confirmar Entrega
+                                        </button>
+                                    </div>
+
+                                    <small style="display:block; margin-top:10px; color:var(--text-muted);">
+                                        Ao confirmar, irá para revisão do gestor.
+                                    </small>
+                                </div>
+                            `;
+
+                            dynamicContainer.appendChild(editorDeliveryBlock);
                         }
 
                         // ------------------------------------------------------------
@@ -722,6 +772,76 @@
                             dynamicContainer.appendChild(managerBlock);
                         }
 
+
+                        // ------------------------------------------------------------
+                        // BLOCO GESTOR - Revisão da VSL
+                        // ------------------------------------------------------------
+
+                        const isReviewEditor = card.rawStatus === 'REVIEW_EDITOR';
+                        const latestEditorLink = getLatestUrlFile(card);
+
+                        if (isManagerOfThis && isReviewEditor && latestEditorLink) {
+
+                            const reviewEditorBlock = document.createElement('div');
+                            reviewEditorBlock.id = 'manager-review-editor-block';
+
+                            reviewEditorBlock.innerHTML = `
+                                <div class="task-meta-block review-block">
+
+                                    <div class="review-header">
+                                        <div>
+                                            <h4>Revisão da VSL</h4>
+                                            <span class="review-sub">Avalie o vídeo enviado</span>
+                                        </div>
+                                        <div class="review-status-badge">
+                                            Em análise
+                                        </div>
+                                    </div>
+
+                                    <div class="review-link-box">
+                                        <a href="${latestEditorLink.url}" target="_blank">
+                                            <i class="fas fa-video"></i>
+                                            <span>${latestEditorLink.url}</span>
+                                        </a>
+                                    </div>
+
+                                    <div class="review-meta">
+                                        <span>Enviado por <b>${latestEditorLink.uploaded_by?.name ?? '—'}</b></span>
+                                        <span>${latestEditorLink.created_at ? new Date(latestEditorLink.created_at).toLocaleString() : '—'}</span>
+                                    </div>
+
+                                    <div class="review-actions">
+                                        <button class="btn-approve"
+                                            onclick="app.reviewEditorDelivery(${card.id}, 'approve')">
+                                            <i class="fas fa-check-circle"></i>
+                                            Aprovar
+                                        </button>
+
+                                        <button class="btn-reject"
+                                            onclick="app.toggleRejectMessage()">
+                                            <i class="fas fa-times-circle"></i>
+                                            Reprovar
+                                        </button>
+                                    </div>
+
+                                    <div class="review-message-area" id="reject-area" style="display:none;">
+                                        <textarea 
+                                            id="editor-delivery-message"
+                                            placeholder="Explique o que precisa ser ajustado..."
+                                        ></textarea>
+                                        <br>
+                                        <button class="btn-send-reject"
+                                            onclick="app.reviewEditorDelivery(${card.id}, 'reject')">
+                                            Enviar Reprovação
+                                        </button>
+                                    </div>
+
+                                </div>
+                            `;
+
+                            dynamicContainer.appendChild(reviewEditorBlock);
+                        }
+
                         // checklist
                         const checklist = resolveChecklist(card);
 
@@ -830,6 +950,41 @@
                             editorContainer.innerHTML = `<span>${editorAssignment.user.name}</span>`;
                         }
                     },
+                    confirmEditorDelivery(taskId, assignmentId) {
+
+                        const link = document.getElementById('editor-delivery-link').value;
+
+                        if (!link) {
+                            app.showToast('Informe o link da entrega.', 'error');
+                            return;
+                        }
+
+                        fetch("{{ route('ajax.confirm.editor.delivery') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    assignment_id: assignmentId,
+                                    delivery_link: link,
+                                })
+                            })
+                            .then(res => res.json())
+                            .then((data) => {
+
+                                if (!data.success) {
+                                    app.showToast(data.message, 'error');
+                                    return;
+                                }
+
+                                app.showToast(data.message, 'success');
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1200);
+                            });
+                    },
                     confirmDelivery(taskId, assignmentId) {
 
                         const link = document.getElementById('copy-delivery-link').value;
@@ -855,6 +1010,42 @@
 
                                 if (!data.success) {
                                     app.showToast(data.message, 'error');
+                                    return;
+                                }
+
+                                app.showToast(data.message, 'success');
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1200);
+                            });
+                    },
+                    reviewEditorDelivery(subtaskId, decision) {
+
+                        const message = document.getElementById('editor-delivery-message')?.value || null;
+
+                        if (decision === 'reject' && !message) {
+                            app.showToast('Explique o motivo da reprovação.', 'error');
+                            return;
+                        }
+
+                        fetch("{{ route('ajax.review.editor.delivery') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    subtask_id: subtaskId,
+                                    decision: decision,
+                                    message: message
+                                })
+                            })
+                            .then(res => res.json())
+                            .then((data) => {
+
+                                if (!data.success) {
+                                    app.showToast(data.message || 'Erro ao processar.', 'error');
                                     return;
                                 }
 
@@ -938,8 +1129,7 @@
                     card.rawStatus === 'CONCLUDED';
 
                 // REVISÃO FINAL
-                const isReviewed =
-                    card.rawStatus === 'REVIEW_EDITOR' ||
+                const editorUnderReview =
                     card.rawStatus === 'APPROVED' ||
                     card.rawStatus === 'CONCLUDED';
 
@@ -968,8 +1158,8 @@
                         done: editorDone
                     },
                     {
-                        label: 'Revisão',
-                        done: isReviewed
+                        label: 'Revisão Editor',
+                        done: editorUnderReview
                     },
                     {
                         label: 'Publicação',
