@@ -2,34 +2,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
-        .suggestions {
-            margin-top: 8px;
-            list-style: none;
-            padding: 0;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            background: #fff;
-            max-height: 240px;
+        html,
+        body {
             overflow-y: auto;
         }
 
-        .suggestion-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .suggestion-item:hover {
-            background: rgba(0, 0, 0, 0.04);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #parentSuggestions {
-            background-color: #0f264b;
-        }
     </style>
 
     <div class="cadastro-container">
@@ -63,7 +40,7 @@
         <div class="production-filters-section glass-card filters-shadow">
             <h3 class="section-title">Informações da Demanda</h3>
 
-            <form action="{{ route('tarefas.store') }}" method="POST" id="formDemanda" novalidate>
+            <form action="{{ route('tarefas.store') }}" method="POST" id="formDemanda">
                 @csrf
                 <input type="hidden" id="criativo-code" name="code">
                 <input type="hidden" name="variation_number" id="variation_number">
@@ -142,7 +119,7 @@
                         <div class="filter-group">
                             <label>Gestor</label>
                             <div class="select-wrapper">
-                                <select name="gestor_id" id="gestor_id" class="select-elegant">
+                                <select required name="gestor_id" id="gestor_id" class="select-elegant">
                                     <option value="">Selecione</option>
                                     @foreach ($copies as $copy)
                                         <option value="{{ $copy->id }}">

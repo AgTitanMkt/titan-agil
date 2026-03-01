@@ -708,7 +708,8 @@
 
                         const isReviewCopy = card.rawStatus === 'REVIEW_COPY';
                         const latestCopyLink = getLatestUrlFile(card);
-
+                        console.log(isManagerOfThis,isReviewCopy,latestCopyLink);
+                        
                         if (isManagerOfThis && isReviewCopy && latestCopyLink) {
 
                             const managerBlock = document.createElement('div');

@@ -392,6 +392,9 @@ html {
     opacity: 1;
 }
 
+#logout-button-container{
+    margin-left: 3rem;
+}
 
 
 /* Em telas menores — não empurra o conteúdo */

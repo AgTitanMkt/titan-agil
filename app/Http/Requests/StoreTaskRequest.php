@@ -23,6 +23,7 @@ class StoreTaskRequest extends FormRequest
             'fonte_trafego' => 'required|exists:platforms,id',
             'copywriter_id' => 'nullable|exists:users,id',
             'editor_id' => 'nullable|exists:users,id',
+            'gestor_id' => 'required|exists:users,id',
             'prazo_copy' => 'nullable|date',
             'prazo_editor' => 'nullable|date',
             'code' => 'required',
@@ -57,6 +58,7 @@ class StoreTaskRequest extends FormRequest
             'code.required' => 'O código do criativo é obrigatório.',
 
             'gestor_id.exists' => 'Gestor inválido.',
+            'gestor_id.required' => 'O gestor é obrigatório.',
         ];
     }
 }
