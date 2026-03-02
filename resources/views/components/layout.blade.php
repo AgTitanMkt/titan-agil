@@ -222,6 +222,12 @@
             </div>
         </header>
 
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const menuToggle = document.getElementById('menuToggle');

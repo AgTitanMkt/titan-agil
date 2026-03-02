@@ -36,37 +36,39 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::prefix('admin')->group(function () {
-        Route::get('dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::prefix('admin')
+        ->middleware('role:ADMIN')
+        ->group(function () {
+            Route::get('dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-        Route::get('agents/{type}', [AdminController::class, 'agents'])
-            ->whereIn('type', ['editors', 'copywriters'])
-            ->name('admin.agents');
-
-
-
-        Route::get('editors/synergy', function (Request $request) {
-            return app(AdminController::class)->synergyData($request, 'editors');
-        })->name('admin.editors.synergy');
-
-        Route::get('copywriters/synergy', function (Request $request) {
-            return app(AdminController::class)->synergyData($request, 'copywriters');
-        })->name('admin.copies.synergy');
+            Route::get('agents/{type}', [AdminController::class, 'agents'])
+                ->whereIn('type', ['editors', 'copywriters'])
+                ->name('admin.agents');
 
 
-        // ROTA PARA GESTORES
-        Route::get('gestores', [AdminController::class, 'gestores'])->name('admin.gestores');
 
-        Route::get('time', [AdminController::class, 'time'])->name('admin.time');
-        Route::get('faturamento', [AdminController::class, 'faturamento'])->name('admin.faturamento');
-        Route::get('creative-history', [AdminController::class, 'creativeHistory'])->name('admin.creative.history');
+            Route::get('editors/synergy', function (Request $request) {
+                return app(AdminController::class)->synergyData($request, 'editors');
+            })->name('admin.editors.synergy');
 
-        Route::prefix('import')->group(function () {
-            Route::get('index', [ImportCSVController::class, 'index'])->name('admin.import.index');
-            Route::post('preview', [ImportCSVController::class, 'preview'])->name('admin.import.preview');
-            Route::post('store', [ImportCSVController::class, 'store'])->name('admin.import.store');
+            Route::get('copywriters/synergy', function (Request $request) {
+                return app(AdminController::class)->synergyData($request, 'copywriters');
+            })->name('admin.copies.synergy');
+
+
+            // ROTA PARA GESTORES
+            Route::get('gestores', [AdminController::class, 'gestores'])->name('admin.gestores');
+
+            Route::get('time', [AdminController::class, 'time'])->name('admin.time');
+            Route::get('faturamento', [AdminController::class, 'faturamento'])->name('admin.faturamento');
+            Route::get('creative-history', [AdminController::class, 'creativeHistory'])->name('admin.creative.history');
+
+            Route::prefix('import')->group(function () {
+                Route::get('index', [ImportCSVController::class, 'index'])->name('admin.import.index');
+                Route::post('preview', [ImportCSVController::class, 'preview'])->name('admin.import.preview');
+                Route::post('store', [ImportCSVController::class, 'store'])->name('admin.import.store');
+            });
         });
-    });
     Route::prefix('rh')->group(function () {
         Route::get('colaboradores', [RhController::class, 'colaboradores'])->name('rh.colaboradores');
         Route::get('status', [RhController::class, 'status'])->name('rh.status');
@@ -92,6 +94,7 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
 
             Route::get('cadastro', [TarefasController::class, 'cadastro'])
+                ->middleware('role:GESTOR,ADMIN')
                 ->name('tarefas.cadastro');
 
             Route::get('listagem', [TarefasController::class, 'listagem'])

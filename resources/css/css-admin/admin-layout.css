@@ -18,8 +18,11 @@ html {
     padding: 0;
     font-family: 'Inter', sans-serif;
     color: var(--text-light);
+}
 
-    overflow-x: hidden;
+html,
+body {
+    overflow-y: auto !important;
 }
 
 .admin-page-wrapper {
@@ -392,7 +395,7 @@ html {
     opacity: 1;
 }
 
-#logout-button-container{
+#logout-button-container {
     margin-left: 3rem;
 }
 

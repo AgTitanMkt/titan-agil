@@ -1054,7 +1054,7 @@ class AdminController extends Controller
             ->get()
             ->groupBy('alias');
 
-        $copaService = new CopaProfitService(null, null, 4, 2025);
+        $copaService = new CopaProfitService(null, null);
         $copaData = $copaService->make();
         $podium = $copaData['podium'];
         $copiesPodium = $copaData['copiesPodium'];
