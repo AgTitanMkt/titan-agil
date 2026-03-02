@@ -123,8 +123,12 @@ class TarefasController extends Controller
 
     public function listagem()
     {
-        $copies = User::withRole(2)->get();
-        $editors = User::withRole(3)->get();
+        $copies = User::withRole(2)
+            ->where('active', true)
+            ->get();
+        $editors = User::withRole(3)
+            ->where('active', true)
+            ->get();
         $nichos = Nicho::all()->pluck('name')->unique()->toArray();
 
         $userId = Auth::id();
