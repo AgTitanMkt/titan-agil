@@ -1064,7 +1064,7 @@ class AdminController extends Controller
         $copaPrize = $copaData['copaPrize'];
         $editorPrize = $copaData['editorPrize'];
         $copiePrize = $copaData['copiePrize'];
-        $aliasRanking = new SquadService()->rankByAlias(4);
+        $aliasRanking = (new SquadService())->rankByAlias(4);
         $aliasRanking = $aliasRanking->filter(function ($item) {
             return $item['profit'] > 0;
         });

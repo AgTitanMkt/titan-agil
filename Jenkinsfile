@@ -18,6 +18,7 @@ pipeline {
                 sh '''
                 composer install --no-interaction --prefer-dist
                 npm install
+                npm run build
                 '''
 
             }
@@ -29,7 +30,13 @@ pipeline {
                     string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
                     string(credentialsId: 'DB_DATABASE', variable: 'DB_DATABASE'),
                     string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
-                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+
+                    string(credentialsId: 'CLICKUP_BASE_URL', variable: 'CLICKUP_BASE_URL'),
+                    string(credentialsId: 'CLICKUP_API_KEY', variable: 'CLICKUP_API_KEY'),
+
+                    string(credentialsId: 'REDTRACK_BASE_URL', variable: 'REDTRACK_BASE_URL'),
+                    string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
                 ]) {
                     sh '''
                     if [ ! -f .env ]; then
@@ -40,6 +47,12 @@ pipeline {
                     sed -i "s/DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" .env
                     sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" .env
                     sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
+
+                    sed -i "s/CLICKUP_BASE_URL=.*/CLICKUP_BASE_URL=$CLICKUP_BASE_URL/" .env
+                    sed -i "s/CLICKUP_API_KEY=.*/CLICKUP_API_KEY=$CLICKUP_API_KEY/" .env
+
+                    sed -i "s/REDTRACK_BASE_URL=.*/REDTRACK_BASE_URL=$REDTRACK_BASE_URL/" .env
+                    sed -i "s/REDTRACK_API_KEY=.*/REDTRACK_API_KEY=$REDTRACK_API_KEY/" .env
                     '''
                 }
             }
@@ -60,7 +73,6 @@ pipeline {
 
                 php artisan config:cache
                 php artisan view:cache
-                npm run build
                 '''
             }
         }
