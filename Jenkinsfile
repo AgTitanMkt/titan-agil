@@ -15,7 +15,12 @@ pipeline {
 
         stage('Instalar Dependências') {
             steps {
-                sh 'composer install --no-interaction --prefer-dist'
+                sh '''
+                composer install --no-interaction --prefer-dist
+                npm install
+                npm run build
+                '''
+
             }
         }
 
