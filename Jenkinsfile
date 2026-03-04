@@ -65,7 +65,7 @@ pipeline {
             steps {
                 echo 'Iniciando deploy...'
                 sh '''
-                rsync -avz --delete ./ ubuntu@18.117.96.96:/var/www/laravel-dev
+                rsync -av --delete ./ /var/www/laravel-dev
                 '''
             }
         }
