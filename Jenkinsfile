@@ -50,7 +50,6 @@ pipeline {
         stage('Cache Config') {
             steps {
                 sh 'php artisan config:cache'
-                sh 'php artisan route:cache'
                 sh 'php artisan view:cache'
             }
         }
