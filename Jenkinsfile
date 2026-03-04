@@ -18,7 +18,6 @@ pipeline {
                 sh '''
                 composer install --no-interaction --prefer-dist
                 npm install
-                npm run build
                 '''
 
             }
@@ -28,6 +27,7 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
+                    string(credentialsId: 'DB_DATABASE', variable: 'DB_DATABASE'),
                     string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
@@ -56,13 +56,11 @@ pipeline {
             steps {
                 sh '''
                 rsync -rvz --delete --exclude=.env ./ /var/www/laravel-dev
-
-                chown -R www-data:www-data /var/www/laravel-dev
-
                 cd /var/www/laravel-dev
 
                 php artisan config:cache
                 php artisan view:cache
+                npm run build
                 '''
             }
         }
