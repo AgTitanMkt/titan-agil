@@ -47,13 +47,15 @@ pipeline {
             }
         }
 
-
         stage('Deploy') {
             steps {
-                echo 'Iniciando deploy...'
                 sh '''
-                rsync -av --delete ./ /var/www/laravel-dev
-                php artisan key:generate --force
+                rsync -rvz --delete --exclude=.env ./ /var/www/laravel-dev
+
+                chown -R www-data:www-data /var/www/laravel-dev
+
+                cd /var/www/laravel-dev
+
                 php artisan config:cache
                 php artisan view:cache
                 '''
