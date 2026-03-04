@@ -24,35 +24,31 @@ pipeline {
             }
         }
 
-        stage('Gerar .env se não existir') {
+        stage('Gerar .env') {
             steps {
                 withCredentials([
                     string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
                     string(credentialsId: 'DB_DATABASE', variable: 'DB_DATABASE'),
                     string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
-
                     string(credentialsId: 'CLICKUP_BASE_URL', variable: 'CLICKUP_BASE_URL'),
                     string(credentialsId: 'CLICKUP_API_KEY', variable: 'CLICKUP_API_KEY'),
-
                     string(credentialsId: 'REDTRACK_BASE_URL', variable: 'REDTRACK_BASE_URL'),
-                    string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
+                    string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY')
                 ]) {
                     sh '''
-                    if [ ! -f .env ]; then
-                        cp .env.example .env
-                    fi
+                    cp .env.example .env
 
-                    sed -i "s/DB_HOST=.*/DB_HOST=$DB_HOST/" .env
-                    sed -i "s/DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" .env
-                    sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" .env
-                    sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
+                    printf "\nDB_HOST=%s\n" "$DB_HOST" >> .env
+                    printf "DB_DATABASE=%s\n" "$DB_DATABASE" >> .env
+                    printf "DB_USERNAME=%s\n" "$DB_USERNAME" >> .env
+                    printf "DB_PASSWORD=%s\n" "$DB_PASSWORD" >> .env
 
-                    sed -i "s/CLICKUP_BASE_URL=.*/CLICKUP_BASE_URL=$CLICKUP_BASE_URL/" .env
-                    sed -i "s/CLICKUP_API_KEY=.*/CLICKUP_API_KEY=$CLICKUP_API_KEY/" .env
+                    printf "CLICKUP_BASE_URL=%s\n" "$CLICKUP_BASE_URL" >> .env
+                    printf "CLICKUP_API_KEY=%s\n" "$CLICKUP_API_KEY" >> .env
 
-                    sed -i "s/REDTRACK_BASE_URL=.*/REDTRACK_BASE_URL=$REDTRACK_BASE_URL/" .env
-                    sed -i "s/REDTRACK_API_KEY=.*/REDTRACK_API_KEY=$REDTRACK_API_KEY/" .env
+                    printf "REDTRACK_BASE_URL=%s\n" "$REDTRACK_BASE_URL" >> .env
+                    printf "REDTRACK_API_KEY=%s\n" "$REDTRACK_API_KEY" >> .env
                     '''
                 }
             }
