@@ -22,10 +22,9 @@ pipeline {
         stage('Gerar .env se não existir') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'db-host', variable: 'DB_HOST'),
-                    string(credentialsId: 'db-name', variable: 'DB_DATABASE'),
-                    string(credentialsId: 'db-user', variable: 'DB_USERNAME'),
-                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+                    string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
+                    string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
                     sh '''
                     if [ ! -f .env ]; then
@@ -56,14 +55,13 @@ pipeline {
             }
         }
 
-
-
         stage('Rodar Build (validação)') {
             steps {
                 sh 'php artisan config:clear'
                 sh 'php artisan config:cache'
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Iniciando deploy...'
