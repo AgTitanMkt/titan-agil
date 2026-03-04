@@ -7,13 +7,19 @@ pipeline {
 
     stages {
 
-        stage('Instalar Dependências') {
+        stage('Clonar Repositório') {
             steps {
-                sh 'composer install --no-interaction --prefer-dist --no-dev'
+                echo 'Clonando projeto...'
             }
         }
 
-        stage('Gerar .env') {
+        stage('Instalar Dependências') {
+            steps {
+                sh 'composer install --no-interaction --prefer-dist'
+            }
+        }
+
+        stage('Gerar .env se não existir') {
             steps {
                 withCredentials([
                     string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
@@ -21,9 +27,12 @@ pipeline {
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
                     sh '''
-                    cp .env.example .env
+                    if [ ! -f .env ]; then
+                        cp .env.example .env
+                    fi
 
                     sed -i "s/DB_HOST=.*/DB_HOST=$DB_HOST/" .env
+                    sed -i "s/DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" .env
                     sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" .env
                     sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
                     '''
@@ -31,25 +40,25 @@ pipeline {
             }
         }
 
-        stage('Build Test') {
+
+        stage('Gerar APP_KEY') {
             steps {
-                sh 'php artisan config:clear'
+                sh 'php artisan key:generate'
             }
         }
 
+
         stage('Deploy') {
             steps {
+                echo 'Iniciando deploy...'
                 sh '''
-                rsync -av --delete --exclude=.env ./ /var/www/laravel-dev
-
-                cd /var/www/laravel-dev
-
+                rsync -av --delete ./ /var/www/laravel-dev
                 php artisan key:generate --force
-                php artisan migrate --force
                 php artisan config:cache
                 php artisan view:cache
                 '''
             }
         }
+
     }
 }
