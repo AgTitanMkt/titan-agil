@@ -64,7 +64,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                rsync -rvz --delete --exclude=.env ./ /var/www/laravel-dev
+                rsync -avz --delete \
+                --exclude=.env \
+                --exclude=storage \
+                --exclude=vendor \
+                --exclude=node_modules \
+                ./ /var/www/laravel-dev
                 cd /var/www/laravel-dev
 
                 php artisan config:cache
