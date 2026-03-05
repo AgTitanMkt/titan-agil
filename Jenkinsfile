@@ -13,12 +13,10 @@ pipeline {
             }
         }
 
-        stage('Instalar Dependências') {
+        stage('Instalar Dependências PHP') {
             steps {
                 sh '''
                 composer install --no-interaction --prefer-dist
-                npm install
-                npm run build
                 '''
 
             }
@@ -61,6 +59,15 @@ pipeline {
             }
         }
 
+        stage('Gerar Build Frontend') {
+            steps {
+                sh '''
+                npm install
+                npm run build
+                '''
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sh '''
@@ -70,8 +77,8 @@ pipeline {
                 --exclude=vendor \
                 --exclude=node_modules \
                 ./ /var/www/laravel-dev
-                cd /var/www/laravel-dev
 
+                cd /var/www/laravel-dev
                 php artisan config:cache
                 php artisan view:cache
                 '''
