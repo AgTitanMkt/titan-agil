@@ -71,7 +71,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                rsync -avz --delete \
+                rsync -rz --delete \
+                 --omit-dir-times \
+                 --no-perms \
+                 --no-group \
+                 --no-owner \
                 --exclude=.env \
                 --exclude=storage \
                 --exclude=vendor \
