@@ -1,7 +1,5 @@
 FROM php:8.3-fpm
 
-RUN chmod -R 777 storage bootstrap/cache
-
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -23,10 +21,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# copia apenas composer
+# copia composer primeiro (cache do docker)
 COPY composer.json composer.lock ./
 
-# instala deps sem scripts
 RUN composer install \
     --no-interaction \
     --prefer-dist \
@@ -34,10 +31,13 @@ RUN composer install \
     --no-dev \
     --no-scripts
 
-# copia resto do projeto
+# copia projeto
 COPY . .
 
-# roda scripts do laravel depois
-RUN php artisan package:discover
+# permissões laravel
+RUN chmod -R 777 storage bootstrap/cache
+
+# scripts laravel
+RUN php artisan package:discover --ansi || true
 
 CMD ["php-fpm"]
