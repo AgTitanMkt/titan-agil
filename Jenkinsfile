@@ -1,24 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        APP_ENV = 'dev'
-    }
-
     stages {
 
         stage('Clonar Repositório') {
             steps {
-                echo 'Clonando projeto...'
-            }
-        }
-
-        stage('Instalar Dependências PHP') {
-            steps {
-                sh '''
-                composer install --no-interaction --prefer-dist
-                '''
-
+                checkout scm
             }
         }
 
@@ -29,62 +16,53 @@ pipeline {
                     string(credentialsId: 'DB_DATABASE', variable: 'DB_DATABASE'),
                     string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+
                     string(credentialsId: 'CLICKUP_BASE_URL', variable: 'CLICKUP_BASE_URL'),
                     string(credentialsId: 'CLICKUP_API_KEY', variable: 'CLICKUP_API_KEY'),
+
                     string(credentialsId: 'REDTRACK_BASE_URL', variable: 'REDTRACK_BASE_URL'),
-                    string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY')
+                    string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
                 ]) {
                     sh '''
                     cp .env.example .env
 
-                    printf "\nDB_HOST=%s\n" "$DB_HOST" >> .env
-                    printf "DB_DATABASE=%s\n" "$DB_DATABASE" >> .env
-                    printf "DB_USERNAME=%s\n" "$DB_USERNAME" >> .env
-                    printf "DB_PASSWORD=%s\n" "$DB_PASSWORD" >> .env
+                    echo DB_HOST=$DB_HOST >> .env
+                    echo DB_DATABASE=$DB_DATABASE >> .env
+                    echo DB_USERNAME=$DB_USERNAME >> .env
+                    echo DB_PASSWORD=$DB_PASSWORD >> .env
 
-                    printf "CLICKUP_BASE_URL=%s\n" "$CLICKUP_BASE_URL" >> .env
-                    printf "CLICKUP_API_KEY=%s\n" "$CLICKUP_API_KEY" >> .env
+                    echo CLICKUP_BASE_URL=$CLICKUP_BASE_URL >> .env
+                    echo CLICKUP_API_KEY=$CLICKUP_API_KEY >> .env
 
-                    printf "REDTRACK_BASE_URL=%s\n" "$REDTRACK_BASE_URL" >> .env
-                    printf "REDTRACK_API_KEY=%s\n" "$REDTRACK_API_KEY" >> .env
+                    echo REDTRACK_BASE_URL=$REDTRACK_BASE_URL >> .env
+                    echo REDTRACK_API_KEY=$REDTRACK_API_KEY >> .env
                     '''
                 }
             }
         }
 
-
-        stage('Gerar APP_KEY') {
-            steps {
-                sh 'php artisan key:generate'
-            }
-        }
-
-        stage('Gerar Build Frontend') {
+        stage('Build Containers') {
             steps {
                 sh '''
-                npm install
-                npm run build
+                docker-compose -f docker/docker-compose.yml build
                 '''
             }
         }
 
-        stage('Deploy') {
+        stage('Subir Containers') {
             steps {
                 sh '''
-                rsync -rz --delete \
-                 --omit-dir-times \
-                 --no-perms \
-                 --no-group \
-                 --no-owner \
-                --exclude=.env \
-                --exclude=storage \
-                --exclude=vendor \
-                --exclude=node_modules \
-                ./ /var/www/laravel-dev
+                docker-compose -f docker/docker-compose.yml up -d
+                '''
+            }
+        }
 
-                cd /var/www/laravel-dev
-                php artisan config:cache
-                php artisan view:cache
+        stage('Laravel Cache') {
+            steps {
+                sh '''
+                docker exec laravel_app php artisan config:cache
+                docker exec laravel_app php artisan route:cache
+                docker exec laravel_app php artisan view:cache
                 '''
             }
         }
