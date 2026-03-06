@@ -1,5 +1,7 @@
 FROM php:8.3-fpm
 
+RUN chmod -R 777 storage bootstrap/cache
+
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -21,12 +23,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# copia apenas composer primeiro (melhor cache)
+# copia apenas composer
 COPY composer.json composer.lock ./
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+# instala deps sem scripts
+RUN composer install \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-dev \
+    --no-scripts
 
-# depois copia o resto
+# copia resto do projeto
 COPY . .
+
+# roda scripts do laravel depois
+RUN php artisan package:discover
 
 CMD ["php-fpm"]
