@@ -3,7 +3,7 @@ pipeline {
 
     stages {
 
-        stage('Clonar Repositório') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -22,7 +22,7 @@ pipeline {
 
                     string(credentialsId: 'REDTRACK_BASE_URL', variable: 'REDTRACK_BASE_URL'),
                     string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
-                ]) {
+                ])  {
                     sh '''
                     cp .env.example .env
 
@@ -43,25 +43,19 @@ pipeline {
 
         stage('Build Containers') {
             steps {
-                sh '''
-                docker compose -f docker/docker-compose.yml build
-                '''
+                sh 'docker compose -f docker/docker-compose.yml build'
             }
         }
 
-        stage('Subir Containers') {
+        stage('Stop Containers') {
             steps {
-                sh '''
-                docker compose -f docker/docker-compose.yml up -d
-                '''
+                sh 'docker compose -f docker/docker-compose.yml down'
             }
         }
 
-        stage('Laravel Dependencies') {
+        stage('Start Containers') {
             steps {
-                sh '''
-                docker exec laravel_app composer install --no-dev --optimize-autoloader
-                '''
+                sh 'docker compose -f docker/docker-compose.yml up -d'
             }
         }
 
@@ -74,13 +68,15 @@ pipeline {
             }
         }
 
-        stage('Laravel Cache') {
+        //stage('Laravel Migrate') {
+        //    steps {
+        //        sh 'docker exec laravel_app php artisan migrate --force'
+        //    }
+        //}
+
+        stage('Laravel Optimize') {
             steps {
-                sh '''
-                docker exec laravel_app php artisan config:cache
-                docker exec laravel_app php artisan route:cache
-                docker exec laravel_app php artisan view:cache
-                '''
+                sh 'docker exec laravel_app php artisan optimize'
             }
         }
 

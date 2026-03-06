@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev
 
+# Node
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# extensões php
 RUN docker-php-ext-install \
     pdo_mysql \
     mbstring \
@@ -17,27 +22,25 @@ RUN docker-php-ext-install \
     bcmath \
     gd
 
+# composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# copia composer primeiro (cache do docker)
-COPY composer.json composer.lock ./
+# copia projeto
+COPY . .
 
+# instala dependências php
 RUN composer install \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
-    --no-dev \
-    --no-scripts
+    --no-dev
 
-# copia projeto
-COPY . .
+# build frontend
+RUN npm install && npm run build
 
 # permissões laravel
 RUN chmod -R 777 storage bootstrap/cache
-
-# scripts laravel
-RUN php artisan package:discover --ansi || true
 
 CMD ["php-fpm"]
