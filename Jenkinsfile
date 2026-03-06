@@ -41,6 +41,12 @@ pipeline {
             }
         }
 
+        stage('Gerar APP_KEY') {
+            steps {
+                sh 'php artisan key:generate'
+            }
+        }
+
         stage('Build Containers') {
             steps {
                 sh 'docker compose -f docker/docker-compose.yml build'
@@ -74,11 +80,11 @@ pipeline {
         //    }
         //}
 
-        stage('Laravel Optimize') {
-            steps {
-                sh 'docker exec laravel_app php artisan optimize'
-            }
-        }
+        //stage('Laravel Optimize') {
+        //    steps {
+        //        sh 'docker exec laravel_app php artisan optimize'
+        //    }
+        //}
 
     }
 }
