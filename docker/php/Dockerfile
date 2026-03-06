@@ -41,6 +41,6 @@ RUN composer install \
 RUN npm install && npm run build
 
 # permissões laravel
-RUN chmod -R 777 storage bootstrap/cache
-
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 775 storage bootstrap/cache
 CMD ["php-fpm"]
