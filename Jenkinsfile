@@ -80,11 +80,14 @@ pipeline {
         //    }
         //}
 
-        //stage('Laravel Optimize') {
-        //    steps {
-        //        sh 'docker exec laravel_app php artisan optimize'
-        //    }
-        //}
+        stage('Laravel Optimize') {
+            steps {
+                sh '''
+                docker exec laravel_app php artisan optimize:clear
+                docker exec laravel_app php artisan optimize
+                '''
+            }
+        }
 
     }
 }

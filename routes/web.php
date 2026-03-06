@@ -10,13 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/logout', function () {
-    Auth::logout();
-    session()->invalidate();
-    session()->regenerateToken();
-
-    return redirect('/login')->with('success', 'Você saiu da sua conta.');
-})->name('logout');
 
 Route::get('/', function () {
     if (auth()->check()) {
