@@ -57,6 +57,23 @@ pipeline {
             }
         }
 
+        stage('Laravel Dependencies') {
+            steps {
+                sh '''
+                docker exec laravel_app composer install --no-dev --optimize-autoloader
+                '''
+            }
+        }
+
+        stage('Frontend Build') {
+            steps {
+                sh '''
+                docker exec laravel_app npm install
+                docker exec laravel_app npm run build
+                '''
+            }
+        }
+
         stage('Laravel Cache') {
             steps {
                 sh '''
