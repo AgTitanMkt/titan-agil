@@ -44,7 +44,7 @@ pipeline {
         stage('Build Containers') {
             steps {
                 sh '''
-                docker-compose -f docker/docker-compose.yml build
+                docker compose -f docker/docker-compose.yml build
                 '''
             }
         }
@@ -52,7 +52,7 @@ pipeline {
         stage('Subir Containers') {
             steps {
                 sh '''
-                docker-compose -f docker/docker-compose.yml up -d
+                docker compose -f docker/docker-compose.yml up -d
                 '''
             }
         }
