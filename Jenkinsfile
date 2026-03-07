@@ -65,9 +65,9 @@ pipeline {
                 sh 'docker compose -f docker/docker-compose.yml up -d'
             }
         }
-        stage('Gerar APP_KEY') {
+        stage('Laravel Install') {
             steps {
-                sh 'docker exec laravel_app php artisan key:generate'
+                sh 'docker exec laravel_app composer install --no-dev --optimize-autoloader'
             }
         }
 
@@ -77,6 +77,12 @@ pipeline {
                 docker exec laravel_app npm install
                 docker exec laravel_app npm run build
                 '''
+            }
+        }
+
+        stage('Gerar APP_KEY') {
+            steps {
+                sh 'docker exec laravel_app php artisan key:generate'
             }
         }
 
