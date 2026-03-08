@@ -4,19 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserDetail extends Model
+class SubtaskHistories extends Model
 {
-    protected $table = 'user_details';
-
     protected $fillable = [
+        'sub_task_id',
         'user_id',
-        'platform_id',
-        'tags',
+        'event',
+        'description',
+        'old_value',
+        'new_value',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
 }

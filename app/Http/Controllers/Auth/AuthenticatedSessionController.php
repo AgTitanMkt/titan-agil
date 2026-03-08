@@ -14,11 +14,15 @@ class AuthenticatedSessionController extends Controller
 
     protected function authenticated($request, $user)
     {
-        if ($user->role('ADMIN')) {
-            return redirect('/admin/dashboard');
+        if ($user->hasRole('ADMIN')) {
+            return '/admin/dashboard';
         }
 
-        return redirect('/dashboard');
+        if ($user->hasAnyRole(['COPYWRITER', 'EDITOR', 'GESTOR'])) {
+            return route('tarefas.listagem');
+        }
+
+        return '/dashboard';
     }
 
 
@@ -41,6 +45,10 @@ class AuthenticatedSessionController extends Controller
 
         if ($request->user()->role('ADMIN')) {
             return redirect('/admin/dashboard');
+        }
+
+        if ($request->user()->hasAnyRole(['COPYWRITER', 'EDITOR', 'GESTOR'])) {
+            return redirect()->route('tarefas.listagem');
         }
 
         return redirect('/dashboard');

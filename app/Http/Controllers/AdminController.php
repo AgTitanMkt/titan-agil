@@ -1054,7 +1054,7 @@ class AdminController extends Controller
             ->get()
             ->groupBy('alias');
 
-        $copaService = new CopaProfitService(null, null, 4, 2025);
+        $copaService = new CopaProfitService(null, null);
         $copaData = $copaService->make();
         $podium = $copaData['podium'];
         $copiesPodium = $copaData['copiesPodium'];
@@ -1064,7 +1064,7 @@ class AdminController extends Controller
         $copaPrize = $copaData['copaPrize'];
         $editorPrize = $copaData['editorPrize'];
         $copiePrize = $copaData['copiePrize'];
-        $aliasRanking = new SquadService()->rankByAlias(4);
+        $aliasRanking = (new SquadService())->rankByAlias(4);
         $aliasRanking = $aliasRanking->filter(function ($item) {
             return $item['profit'] > 0;
         });
@@ -1223,4 +1223,5 @@ class AdminController extends Controller
             ])->values()
         );
     }
+
 }

@@ -12,6 +12,7 @@ class Task extends Model
         'title',
         'nicho',
         'code',
+        'ad',
         'normalized_code'
     ];
 

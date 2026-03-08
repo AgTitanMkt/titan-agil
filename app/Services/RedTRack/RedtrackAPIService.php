@@ -98,19 +98,30 @@ class RedtrackAPIService
                 }
                 foreach ($items as $item) {
                     try {
+                        $adParts = explode('-', $item['rt_ad']);
+                        $rawCode = trim($adParts[0]); // Ex: MMAD123V2 ou MMAD123
 
-                        $ad = explode('-', $item['rt_ad']);
+                        // --- LÓGICA DE SEPARAÇÃO ---
+                        $taskCode = $rawCode;
+                        $variationNumber = null;
+
+                        // Se houver V + número no final, extraímos e limpamos o $taskCode
+                        if (preg_match('/^(.*)V(\d+)$/i', $rawCode, $matches)) {
+                            $taskCode = $matches[1];        // Aqui fica apenas 'MMAD123'
+                            $variationNumber = (int)$matches[2]; // Aqui fica '2'
+                        }
+                        // ---------------------------
 
                         RedtrackReport::updateOrCreate(
                             [
                                 'name'   => $item['rt_ad'],
                                 'source' => $item['source'],
-                                'alias' => $item['source_alias'],
-                                'date' => $dateFrom
+                                'alias'  => $item['source_alias'],
+                                'date'   => $dateFrom
                             ],
                             [
                                 'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
-                                'ad_code' => $ad[0],
+                                'ad_code' => $taskCode, // Salva o código limpo no report também
                                 'clicks'       => $item['clicks'] ?? 0,
                                 'conversions'  => $item['conversions'] ?? 0,
                                 'cost'         => $item['cost'] ?? 0,
@@ -120,55 +131,64 @@ class RedtrackAPIService
                             ]
                         );
 
-
                         if (preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $item['rt_ad'])) {
 
-                            // limpa: remove espaços e valores vazios
-                            $ad = array_map('trim', $ad);
-                            $ad = array_filter($ad);
-                            $ad = array_values($ad); // reorganiza índices
+                            $cleanParts = array_values(array_filter(array_map('trim', $adParts)));
+                            $lastParts = array_slice($cleanParts, -2);
 
-                            // pega as 2 últimas posições (ajuste o número se quiser)
-                            $lastParts = array_slice($ad, -2);
-
-                            // busca os usuários
                             $agents = TagUsers::whereIn('tag', $lastParts)->get()
-                                ->map(function ($agent) {
-                                    return $agent->user;
-                                });
+                                ->map(fn($agent) => $agent->user);
 
                             try {
-                                // Criando a task e subtask
+                                $codeAdNumeric = null;
+                                if (preg_match('/AD(\d+)/i', $taskCode, $matches)) {
+                                    $codeAdNumeric = (int) $matches[1];
+                                }
+
+                                // A TASK sempre será criada/buscada com o nome limpo (MMAD123)
                                 $task = Task::updateOrCreate(
-                                    ['code' => $ad[0]],
+                                    ['code' => $taskCode],
                                     [
                                         'created_by' => 81,
                                         'title' => 'nova tarefa',
-                                        'nicho' => Nicho::where('sigla', strtoupper(substr($ad[0], 0, 2)))->first()->id,
-                                        'normalized_code' => strtolower(str_replace(' ', '', $ad[0]))
+                                        'nicho' => Nicho::where('sigla', strtoupper(substr($taskCode, 0, 2)))->first()?->id,
+                                        'normalized_code' => strtolower(str_replace(' ', '', $taskCode)),
+                                        'ad' => $codeAdNumeric,
                                     ]
                                 );
-                                $SubTask = SubTask::updateOrCreate(
-                                    ['task_id' => $task->id],
-                                    [
-                                        'description' => 'Subtask Inicial',
-                                        'status' => 'Pendente',
+
+                                // A SUBTASK gerencia se é a V2, V3 ou a principal (null/0)
+                                $subTask = SubTask::where('task_id', $task->id)
+                                    ->where('variation_number', $variationNumber)
+                                    ->first();
+
+                                if ($subTask) {
+                                    $subTask->update([
+                                        'status' => SubTask::STATUS['CONCLUDED'],
+                                    ]);
+                                } else {
+                                    $subTask = SubTask::create([
+                                        'task_id' => $task->id,
+                                        'description' => $variationNumber ? "Variação {$variationNumber}" : 'Subtask Inicial',
+                                        'status' => SubTask::STATUS['CONCLUDED'],
+                                        'variation' => $variationNumber ? 1 : 0,
+                                        'variation_number' => $variationNumber,
                                         'hook' => 'H1',
-                                        'due_date' => Carbon::now()
-                                    ]
-                                );
+                                    ]);
+                                }
 
                                 foreach ($agents as $agent) {
-                                    UserTask::updateOrCreate(
-                                        [
-                                            'user_id' => $agent->id,
-                                            'sub_task_id' => $SubTask->id
-                                        ],
-
-                                    );
+                                    if ($agent) {
+                                        UserTask::updateOrCreate(
+                                            [
+                                                'user_id' => $agent->id,
+                                                'sub_task_id' => $subTask->id
+                                            ]
+                                        );
+                                    }
                                 }
                             } catch (Exception $e) {
-                                Log::error("Erro ao salvar task Criativo. " . $e->getMessage(), $ad);
+                                Log::error("Erro ao salvar task Criativo. " . $e->getMessage(), ['ad' => $taskCode]);
                             }
                         }
 
