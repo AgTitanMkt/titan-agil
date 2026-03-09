@@ -1,0 +1,308 @@
+.creative-positive {
+    border: 2px solid #00ff88;
+    background: rgba(0, 255, 136, 0.08);
+}
+
+.creative-negative {
+    border: 2px solid #ff3b3b;
+    background: rgba(255, 59, 59, 0.08);
+}
+
+.profit-positive,
+.roi-positive {
+    color: #00ff88;
+    font-weight: 700;
+}
+
+.profit-negative,
+.roi-negative {
+    color: #ff3b3b;
+    font-weight: 700;
+}
+
+
+.titan-select {
+    background: linear-gradient(145deg, #1c3f7a, #16325f);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(6px);
+}
+
+.titan-select:hover {
+    border-color: rgba(49, 97, 255, 0.18);
+}
+
+
+.titan-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+
+.titan-select option {
+    background-color: #0f1f3d;
+    color: #ffffff;
+    padding: 10px;
+}
+
+.titan-select option:hover {
+    background-color: #1e40af;
+    color: #ffffff;
+    border-color: rgba(49, 97, 255, 0.18);
+}
+
+
+.titan-select option:checked {
+    background-color: #1e40af;
+    color: #ffffff;
+}
+
+
+/* METRICAS TOTAIS NO TOPO */
+
+/* organizar em colunas */
+.metrics-top-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 20px;
+    width: 100%;
+}
+
+/* card glass */
+.metric-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #3b82f6;
+}
+
+
+.metric-card .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.metric-card .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+
+/* PROFIT */
+.highlight-profit .value {
+    color: #10b981;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+/* ROI */
+.metric-card:last-child .value {
+    color: #3b82f6;
+}
+
+/* TOP PODIUM CREATIVES DAS METRICAS PRINCIPAIS */
+.top-creatives-podium {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+    perspective: 1000px;
+}
+
+.podium-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.podium-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* DESTAQUE PARA RANK 1 */
+.rank-1 {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.rank-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 35px;
+    height: 35px;
+    background: #111;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rank-1 .rank-badge {
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+.creative-id {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    display: block;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.agents-line {
+    display: flex;
+    gap: 10px;
+    color: #aaa;
+    margin-bottom: 15px;
+}
+
+.podium-stats {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #888;
+    display: block;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.stat-value.profit {
+    color: #00ff88;
+}
+
+.stat-value.roi {
+    color: #00d4ff;
+}
+
+.source-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 12px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    border-bottom-left-radius: 12px;
+    text-transform: uppercase;
+}
+
+.facebook {
+    background: #1877f2;
+    color: white;
+}
+
+.youtube {
+    background: #ff0000;
+    color: white;
+}
+
+.native {
+    background: rgb(12, 100, 9)0;
+    color: white;
+}
+
+.tiktok {
+    background: rgb(0, 0, 0)0;
+    color: white;
+}
+
+
+
+/* BADGE DE TESTADO/POTENCIAL*/
+
+/*  COMPONENTE BADGE */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.70rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+/* POSITIVE */
+.badge.positive {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border-color: rgba(0, 255, 136, 0.2);
+}
+
+/* NEUTRO */
+.badge.neutral {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border-color: rgba(255, 193, 7, 0.2);
+}
+
+/* NEGATIVE */
+.badge.negative {
+    background: rgba(255, 69, 58, 0.1);
+    color: #ff453a;
+    border-color: rgba(255, 69, 58, 0.2);
+}
+
+/* HOVER */
+.badge:hover {
+    filter: brightness(1.2);
+    cursor: default;
+}

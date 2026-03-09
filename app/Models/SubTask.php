@@ -29,7 +29,7 @@ class SubTask extends Model
         'task_id',
         'description',
         'status',
-        'due_date',
+        'due_date', // ADICIONADO NO MIGRATION COLUNA EM sub_tasks
         'hook',
         'variation',
         'variation_number',

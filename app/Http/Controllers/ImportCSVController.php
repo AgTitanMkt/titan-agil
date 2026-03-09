@@ -27,48 +27,71 @@ class ImportCSVController extends Controller
         ]);
 
         $copywriters = User::whereHas('roles', function ($q) {
-            $q->where('roles.id', 2);  // COPYWRITER
+            $q->where('roles.id', 2);
         })->orderBy('users.name')->get();
 
         $editors = User::whereHas('roles', function ($q) {
-            $q->where('roles.id', 3);  // EDITOR
+            $q->where('roles.id', 3);
         })->orderBy('users.name')->get();
 
-
         $file = $request->file('file');
-
-        // Pega o caminho temporário nativo do PHP
         $path = $file->getPathname();
 
         if (!file_exists($path)) {
             dd("Erro: arquivo não existe no caminho temporário", $path);
         }
 
-        $rows = array_map('str_getcsv', file($path, FILE_SKIP_EMPTY_LINES));
+        /* MUDANCA AQUI, VAI CARREGAR TODAS AS TAGS DE UMA VEZ */
+        $tags = TagUsers::with('user')->get()->keyBy('tag');
 
-        // Extrai cabeçalho
-        $headers = array_map('trim', $rows[0]);
-        unset($rows[0]);
+        /* LE O CSV EM STREMING  NAO CARREGA TUDO NA MEMORIA */
+        $handle = fopen($path, 'r');
+
+        $headers = fgetcsv($handle);
+        $headers = array_map('trim', $headers);
 
         $preview = [];
 
-        foreach ($rows as $r) {
+        while (($row = fgetcsv($handle)) !== false) {
 
+            if (count($headers) !== count($row)) {
+                continue;
+            }
 
-            $line = array_combine($headers, $r);
-            $copy = TagUsers::where('tag', explode(" ", $line['COPY RESPONSÁVEL'])[0])->first();
-            $editor = TagUsers::where('tag', explode(" ", $line['EDITOR'])[0])->first();
-            $copy   = $copy ? $copy->user : null;
-            $editor   = $editor ? $editor->user : null;
-            if (trim($line['ID CRIATIVO']) && ($line['COPY RESPONSÁVEL'] || $line['EDITOR']))
+            $line = array_combine($headers, $row);
+
+            $copyTag = isset($line['COPY RESPONSÁVEL'])
+                ? explode(" ", $line['COPY RESPONSÁVEL'])[0]
+                : null;
+
+            $editorTag = isset($line['EDITOR'])
+                ? explode(" ", $line['EDITOR'])[0]
+                : null;
+
+            $copy = $copyTag && isset($tags[$copyTag])
+                ? $tags[$copyTag]->user
+                : null;
+
+            $editor = $editorTag && isset($tags[$editorTag])
+                ? $tags[$editorTag]->user
+                : null;
+
+            if (
+                !empty($line['ID CRIATIVO']) &&
+                (!empty($line['COPY RESPONSÁVEL']) || !empty($line['EDITOR']))
+            ) {
+
                 $preview[] = [
                     'code'        => trim($line['ID CRIATIVO']),
-                    'copy_name'   => $line['COPY RESPONSÁVEL'],
-                    'editor_name' => $line['EDITOR'],
+                    'copy_name'   => $line['COPY RESPONSÁVEL'] ?? null,
+                    'editor_name' => $line['EDITOR'] ?? null,
                     'copy_id'     => $copy->id ?? null,
                     'editor_id'   => $editor->id ?? null,
                 ];
+            }
         }
+
+        fclose($handle);
 
         return view('admin.import.preview', [
             'preview'     => $preview,
@@ -80,77 +103,114 @@ class ImportCSVController extends Controller
 
     public function store(Request $request)
     {
-        $items = json_decode($request->payload, true);
+        $items = json_decode($request->payload, true) ?? [];
+
+        $tasks = [];
+        $subtasks = [];
+        $userTasks = [];
+
+        $now = now();
+        $due = Carbon::now()->addDays(3);
+
+        /* carregar nichos uma vez */
+        $nichos = Nicho::pluck('id', 'sigla');
 
         foreach ($items as $item) {
 
-            // Ignorar registros inválidos
             if (empty($item['code']) || (empty($item['copy_id']) && empty($item['editor_id']))) {
                 continue;
             }
 
-            /**
-             * 🔥 1. Extrair sigla (nichos)
-             */
-            $sigla = strtoupper(substr($item['code'], 0, 2));
+            $code = trim($item['code']);
+            $sigla = strtoupper(substr($code, 0, 2));
 
-            $nicho = \App\Models\Nicho::where('sigla', $sigla)->first();
+            $nicho_id = $nichos[$sigla] ?? 18;
 
-            $nicho_id = $nicho->id ?? null;
+            $tasks[] = [
+                'code' => $code,
+                'title' => 'criativo',
+                'normalized_code' => strtolower(str_replace(' ', '', $code)),
+                'created_by' => FacadesAuth::id(),
+                'nicho' => $nicho_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+        }
 
-            if(!$nicho){
-                $nicho = Nicho::find(18);
-            }
+        /* UPSERT TASKS */
+        Task::upsert(
+            $tasks,
+            ['code'],
+            ['title', 'normalized_code', 'nicho', 'updated_at']
+        );
 
-            /**
-             * 🔥 2. Criar/atualizar TASK com nicho preenchido
-             */
-            $task = Task::updateOrCreate(
-                ['code' => $item['code']],
-                [
-                    'title' => 'criativo',
-                    'normalized_code' => strtolower(str_replace(' ', '', $item['code'])),
-                    'created_by' => FacadesAuth::id(),
-                    'nicho' => $nicho_id,
-                ]
-            );
+        /* pegar tasks criadas */
+        $codes = collect($tasks)->pluck('code');
 
-            /**
-             * 🔥 3. Criar/atualizar SubTask com HOOK H1
-             */
-            $sub = SubTask::updateOrCreate(
-                [
-                    'task_id' => $task->id,
-                    'hook' => 'H1',
-                ],
-                [
-                    'description' => 'Subtask inicial',
-                    'status' => 'pendente',
-                    'due_date' => Carbon::now()->addDays(3)
-                ]
-            );
+        $taskMap = Task::whereIn('code', $codes)->pluck('id', 'code');
 
-            /**
-             * 🔥 4. Copywriter
-             */
+        foreach ($items as $item) {
+
+            $code = trim($item['code']);
+            $taskId = $taskMap[$code] ?? null;
+
+            if (!$taskId) continue;
+
+            $subtasks[] = [
+                'task_id' => $taskId,
+                'hook' => 'H1',
+                'description' => 'Subtask inicial',
+                'status' => 'pendente',
+                'due_date' => $due,
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+        }
+
+        SubTask::upsert(
+            $subtasks,
+            ['task_id', 'hook'],
+            ['description', 'status', 'due_date', 'updated_at']
+        );
+
+        /* pegar subtasks */
+        $subMap = SubTask::whereIn('task_id', $taskMap->values())
+            ->where('hook', 'H1')
+            ->pluck('id', 'task_id');
+
+        foreach ($items as $item) {
+
+            $code = trim($item['code']);
+            $taskId = $taskMap[$code] ?? null;
+            $subId = $subMap[$taskId] ?? null;
+
+            if (!$subId) continue;
+
             if (!empty($item['copy_id'])) {
-                UserTask::updateOrCreate([
-                    'user_id'     => $item['copy_id'],
-                    'sub_task_id' => $sub->id
-                ]);
+                $userTasks[] = [
+                    'user_id' => $item['copy_id'],
+                    'sub_task_id' => $subId,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
             }
 
-            /**
-             * 🔥 5. Editor
-             */
             if (!empty($item['editor_id'])) {
-                UserTask::updateOrCreate([
-                    'user_id'     => $item['editor_id'],
-                    'sub_task_id' => $sub->id
-                ]);
+                $userTasks[] = [
+                    'user_id' => $item['editor_id'],
+                    'sub_task_id' => $subId,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
             }
         }
 
-        return redirect()->route('admin.import.index')->with('success', 'Importação concluída com sucesso!');
+        UserTask::upsert(
+            $userTasks,
+            ['user_id', 'sub_task_id']
+        );
+
+        return redirect()->route('admin.import.index')
+            ->with('success', 'Importação concluída com sucesso!');
     }
 }
