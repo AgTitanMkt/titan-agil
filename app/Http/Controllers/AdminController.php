@@ -1141,9 +1141,99 @@ class AdminController extends Controller
         return view("admin.gestores");
     }
 
-    public function creatives(){
-        
-        return view("admin.creatives");
+    // Estrutura da Rota Creatives: Ler filtros da request; Normalizar Datas; Carregar Nichos; Carregar agentes; Enviar tudo para a view.
+    public function creatives(Request $request)
+    {
+        // FILTROS TYPE, COPYWRITERS, EDITORS, DATA, NICHOS, SOURCES
+        $type = $request->get('type', 'copywriters');
+        $isCopy = $type === 'copywriters';
+
+        $startDate = $request->input('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $endDate = $request->input('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        $nicho = $request->input('nicho', 'TOTAL');
+        $source = $request->input('source', 'TOTAL');
+        $agentsFilter = $request->input($isCopy ? 'copywriters' : 'editors');
+
+        // CODIGO DO CRIATIVO
+        $query = DB::table('vw_creatives_performance')
+            ->select(
+                'creative_code',
+                DB::raw('MAX(source) as source'),
+                DB::raw("MAX(CASE WHEN role_id = 2 THEN agent_name END) AS copywriter"),
+                DB::raw("MAX(CASE WHEN role_id = 3 THEN agent_name END) AS editor"),
+                DB::raw('SUM(clicks) as total_clicks'),
+                DB::raw('SUM(conversions) as total_conversions'),
+                DB::raw('SUM(cost) as total_cost'),
+                DB::raw('SUM(profit) as total_profit'),
+                DB::raw('SUM(revenue) as total_revenue'),
+                // calculo de ROI por criativo
+                DB::raw('ROUND(SUM(profit)/NULLIF(SUM(cost),0),4) as roi_decimal')
+            )
+            // redtrack para puxar data 
+            ->whereBetween('redtrack_date', [$startDate, $endDate]);
+
+        // filtros dinamicos
+        if ($source !== 'TOTAL') $query->where('source', strtolower($source));
+        if ($agentsFilter) $query->where('agent_name', $agentsFilter);
+
+        $creatives = $query->groupBy('creative_code')
+            ->orderByDesc('total_profit')
+            ->get();
+
+        // PEGA OS 3 MELHORES CRIATIVOS
+        $topCreatives = $creatives->take(3);
+
+        // METRICAS NO TOPO, CALCULO
+        $totalTestado = $creatives->count();
+        $totalPotencial = $creatives->where('total_profit', '>', 0)->count();
+        // validado é lucro positivo + ROI acima de 30%
+        $totalValidados = $creatives->where('total_profit', '>', 0)->where('roi_decimal', '>', 0.3)->count();
+
+        $winRate = $totalTestado > 0 ? ($totalValidados / $totalTestado) * 100 : 0;
+
+        $totalClicks = $creatives->sum('total_clicks');
+        $totalConversions = $creatives->sum('total_conversions');
+        $totalCost = $creatives->sum('total_cost');
+        $totalProfit = $creatives->sum('total_profit');
+        $totalROI = $totalCost > 0 ? ($totalProfit / $totalCost) * 100 : 0;
+
+        // O MELHOR CRIATIVO
+        $bestCreative = $creatives->first();
+
+        // lista para os filtros
+        $allNiches = Nicho::query()->groupBy('name')->pluck('name');
+        $allCopywriters = $this->allCopywritersArray();
+        $allEditors = $this->allEditorsArray();
+
+        // return de todas as variaveis 
+        return view("admin.creatives", compact(
+            'type',
+            'isCopy',
+            'startDate',
+            'endDate',
+            'nicho',
+            'source',
+            'creatives',
+            'allNiches',
+            'allCopywriters',
+            'allEditors',
+            'totalTestado',
+            'totalPotencial',
+            'totalValidados',
+            'winRate',
+            'totalClicks',
+            'totalConversions',
+            'totalCost',
+            'totalProfit',
+            'totalROI',
+            'bestCreative',
+            'topCreatives'
+        ));
     }
 
 
@@ -1223,5 +1313,4 @@ class AdminController extends Controller
             ])->values()
         );
     }
-
 }

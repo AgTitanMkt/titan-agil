@@ -10,7 +10,7 @@
                 </div>
 
                 <div class="view-selector-wrapper">
-                    <span class="selector-label">Fevereiro 2k26</span>
+                    <span class="selector-label">2k26</span>
                     <div class="toggle-group">
                         {{-- <button id="btn-dashboard" class="btn-nav inactive">Dashboard</button>
                         <button id="btn-creatives" class="btn-nav active">Criativos</button> --}}
@@ -19,55 +19,74 @@
             </div>
 
             <nav class="filter-toolbar-container">
-                <form class="filter-main-form">
+                <form action="{{ route('admin.creatives') }}" method="GET" class="filter-main-form">
+
+                    <input type="hidden" name="type" value="{{ $type }}">
+
 
                     <div class="filter-item item-date">
-                        <label>Período</label>
-                        <input type="date">
+                        <label>Escolha o Filtro Desejado:</label>
+                        <x-date-range name="date" :from="$startDate" :to="$endDate" />
                     </div>
 
                     <div class="filter-item">
                         <label>Nicho</label>
-                        <select class="titan-select">
-                            <option>TOTAL</option>
-                            <option>Memoria</option>
-                            <option>Diabetes</option>
-                            <option>Prostata</option>
+                        <select name="nicho" class="titan-select">
+                            <option value="TOTAL" {{ request('nicho', 'TOTAL') === 'TOTAL' ? 'selected' : '' }}>
+                                TOTAL
+                            </option>
+
+                            @foreach ($allNiches as $niche)
+                                <option value="{{ $niche }}" {{ request('nicho') === $niche ? 'selected' : '' }}>
+                                    {{ $niche }}
+                                </option>
+                            @endforeach
                         </select>
+
                     </div>
 
                     <div class="filter-item">
                         <label>Fonte</label>
-                        <select class="titan-select">
-                            <option>TOTAL</option>
-                            <option>FACEBOOK</option>
-                            <option>YOUTUBE</option>
-                            <option>TIKTOK</option>
-                            <option>NATIVE</option>
+                        <select name="source" class="titan-select">
+                            @php $source = request('source', 'TOTAL'); @endphp
+
+                            <option value="TOTAL" {{ $source === 'TOTAL' ? 'selected' : '' }}>TOTAL</option>
+                            <option value="FACEBOOK" {{ $source === 'FACEBOOK' ? 'selected' : '' }}>FACEBOOK</option>
+                            <option value="YOUTUBE" {{ $source === 'YOUTUBE' ? 'selected' : '' }}>YOUTUBE</option>
+                            <option value="NATIVE" {{ $source === 'NATIVE' ? 'selected' : '' }}>NATIVE</option>
+                            <option value="TIKTOK" {{ $source === 'TIKTOK' ? 'selected' : '' }}>TIKTOK</option>
                         </select>
+
                     </div>
 
                     <div class="filter-item">
                         <label>Tipo</label>
-                        <select class="titan-select">
-                            <option>TOTAL</option>
-                            <option>Original</option>
-                            <option>Variação</option>
+                        <select name="creation_type" class="titan-select">
+                            @php $typeFilter = request('creation_type', 'TOTAL'); @endphp
+
+                            <option value="TOTAL" {{ $typeFilter === 'TOTAL' ? 'selected' : '' }}>TOTAL</option>
+                            <option value="original" {{ $typeFilter === 'original' ? 'selected' : '' }}>Original
+                            </option>
+                            <option value="variation" {{ $typeFilter === 'variation' ? 'selected' : '' }}>Variação
+                            </option>
                         </select>
+
                     </div>
+
 
                     <div class="filter-item item-agent">
                         <label>Copywriter</label>
-                        <input type="text" placeholder="Buscar profissional..." class="titan-select">
+                        <x-multiselect name="copywriters" :options="$allCopywriters" placeholder="Buscar copywriter..." />
                     </div>
+
 
                     <div class="filter-item item-agent">
                         <label>Editor</label>
-                        <input type="text" placeholder="Buscar profissional..." class="titan-select">
+                        <x-multiselect name="editors" :options="$allEditors" placeholder="Buscar editor..." />
                     </div>
 
                     <div class="filter-actions">
-                        <button type="button" class="btn-execute-filter">
+                        <button type="submit" class="btn-execute-filter">
                             <i class="fas fa-filter"></i>
                             <span>FILTRAR</span>
                         </button>
@@ -79,11 +98,86 @@
 
         <section id="section-creatives" class="content-section">
 
+
+            <div class="top-creatives-podium">
+                @foreach ($topCreatives as $index => $top)
+                    <div class="podium-card rank-{{ $index + 1 }}">
+                        <div class="rank-badge">
+                            @if ($index == 0)
+                                <i class="fas fa-crown"></i>
+                            @else
+                                {{ $index + 1 }}º
+                            @endif
+                        </div>
+
+                        <div class="podium-info">
+                            <span class="creative-id">{{ $top->creative_code }}</span>
+                            <div class="agents-line">
+                                <small><i class="fas fa-pen-nib"></i>
+                                    {{ explode(' ', $top->copywriter)[0] ?? '---' }}</small>
+                                <small><i class="fas fa-video"></i>
+                                    {{ explode(' ', $top->editor)[0] ?? '---' }}</small>
+                            </div>
+                        </div>
+
+                        <div class="podium-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">LUCRO</span>
+                                <span class="stat-value profit">@dollar($top->total_profit)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">ROI</span>
+                                <span class="stat-value roi">{{ number_format($top->roi_decimal * 100, 1) }}%</span>
+                            </div>
+                        </div>
+
+                        <div class="source-tag {{ strtolower($top->source) }}">
+                            {{ $top->source }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="metrics-top-cards">
+                <div class="metric-card">
+                    <span class="label">TESTADO</span>
+                    <span class="value">{{ $totalTestado }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">POTENCIAL</span>
+                    <span class="value">{{ $totalPotencial }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">VALIDADOS</span>
+                    <span class="value">{{ $totalValidados }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">WIN/RATE</span>
+                    <span class="value">{{ number_format($winRate, 1) }}%</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">CLIQUES</span>
+                    <span class="value">{{ number_format($totalClicks) }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">CUSTO</span>
+                    <span class="value">@dollar($totalCost)</span>
+                </div>
+                <div class="metric-card highlight-profit">
+                    <span class="label">LUCRO</span>
+                    <span class="value">@dollar($totalProfit)</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">ROI TOTAL</span>
+                    <span class="value">{{ number_format($totalROI, 1) }}%</span>
+                </div>
+            </div>
+
+
             <div class="production-filters-section glass-card filters-shadow">
                 <h3 class="section-title">
                     Produção Criativos
                 </h3>
-
 
 
                 <link rel="stylesheet"
@@ -100,146 +194,64 @@
                                     </th>
                                     <th class="sortable-main" data-sort="copy">Copywriter <i class="fas fa-sort"></i>
                                     </th>
-                                    <th class="sortable-main" data-sort="editor">Editor <i class="fas fa-sort"></i></th>
+                                    <th class="sortable-main" data-sort="editor">Editor <i class="fas fa-sort"></i>
+                                    </th>
                                     <th class="sortable-main" data-sort="tested">Testado <i class="fas fa-sort"></i>
                                     </th>
                                     <th class="sortable-main" data-sort="potential">Potencial <i
                                             class="fas fa-sort"></i></th>
                                     <th class="sortable-main" data-sort="validated">Validados <i
                                             class="fas fa-sort"></i></th>
-                                    <th class="sortable-main" data-sort="winrate">Win/Rate <i class="fas fa-sort"></i>
+                                    <th class="sortable-main" data-sort="winrate">Win/Rate <i
+                                            class="fas fa-sort"></i>
                                     </th>
                                     <th class="sortable-main" data-sort="clicks">Cliques <i class="fas fa-sort"></i>
                                     </th>
                                     <th class="sortable-main" data-sort="conversions">Conversões <i
                                             class="fas fa-sort"></i></th>
                                     <th class="sortable-main" data-sort="cost">Custo <i class="fas fa-sort"></i></th>
-                                    <th class="sortable-main" data-sort="profit">Lucro <i class="fas fa-sort"></i></th>
-                                    <th class="sortable-main" data-sort="roi">ROI (%) <i class="fas fa-sort"></i></th>
+                                    <th class="sortable-main" data-sort="profit">Lucro <i class="fas fa-sort"></i>
+                                    </th>
+                                    <th class="sortable-main" data-sort="roi">ROI (%) <i class="fas fa-sort"></i>
+                                    </th>
                                 </tr>
                             </thead>
 
                             <tbody id="creativesTable">
-                                {{-- testes mockados --}}
-                                <tr class="creative-row">
-                                    <td>001</td>
-                                    <td>Eduardo Bezerra</td>
-                                    <td>Julia Tavares</td>
-                                    <td><span class="badge positive">SIM</span></td>
-                                    <td><span class="badge neutral">ALTO</span></td>
-                                    <td>5</td>
-                                    <td>60%</td>
-                                    <td>1200</td>
-                                    <td>150</td>
-                                    <td>R$ 2.000</td>
-                                    <td class="profit-value">R$ 3.500</td>
-                                    <td class="roi-value">75%</td>
-                                </tr>
+                                @foreach ($creatives as $creative)
+                                    <tr class="creative-row">
+                                        <td>{{ $creative->creative_code }}</td>
+                                        <td>{{ $creative->copywriter ?? '---' }}</td>
+                                        <td>{{ $creative->editor ?? '---' }}</td>
 
-                                <tr class="creative-row">
-                                    <td>002</td>
-                                    <td>Rogerio Barenco</td>
-                                    <td>Thiago Gomes</td>
-                                    <td><span class="badge negative">NÃO</span></td>
-                                    <td><span class="badge neutral">BAIXO</span></td>
-                                    <td>1</td>
-                                    <td>20%</td>
-                                    <td>800</td>
-                                    <td>40</td>
-                                    <td>R$ 1.500</td>
-                                    <td class="profit-value">-R$ 900</td>
-                                    <td class="roi-value">-35%</td>
-                                </tr>
+                                        {{-- testado/potencial --}}
+                                        <td><span
+                                                class="badge {{ $creative->total_clicks > 0 ? 'positive' : 'negative' }}">
+                                                {{ $creative->total_clicks > 0 ? 'SIM' : 'NÃO' }}
+                                            </span></td>
 
-                                <tr class="creative-row">
-                                    <td>001</td>
-                                    <td>Eduardo Bezerra</td>
-                                    <td>Julia Tavares</td>
-                                    <td><span class="badge positive">SIM</span></td>
-                                    <td><span class="badge neutral">ALTO</span></td>
-                                    <td>5</td>
-                                    <td>60%</td>
-                                    <td>1200</td>
-                                    <td>150</td>
-                                    <td>R$ 2.000</td>
-                                    <td class="profit-value">R$ 3.500</td>
-                                    <td class="roi-value">75%</td>
-                                </tr>
+                                        <td><span
+                                                class="badge {{ $creative->total_profit > 0 ? 'neutral' : 'negative' }}">
+                                                {{ $creative->total_profit > 200 ? 'ALTO' : ($creative->total_profit > 0 ? 'MÉDIO' : 'BAIXO') }}
+                                            </span></td>
 
-                                <tr class="creative-row">
-                                    <td>002</td>
-                                    <td>Rogerio Barenco</td>
-                                    <td>Thiago Gomes</td>
-                                    <td><span class="badge negative">NÃO</span></td>
-                                    <td><span class="badge neutral">BAIXO</span></td>
-                                    <td>1</td>
-                                    <td>20%</td>
-                                    <td>800</td>
-                                    <td>40</td>
-                                    <td>R$ 1.500</td>
-                                    <td class="profit-value">-R$ 900</td>
-                                    <td class="roi-value">-35%</td>
-                                </tr>
-                                <tr class="creative-row">
-                                    <td>001</td>
-                                    <td>Eduardo Bezerra</td>
-                                    <td>Julia Tavares</td>
-                                    <td><span class="badge positive">SIM</span></td>
-                                    <td><span class="badge neutral">ALTO</span></td>
-                                    <td>5</td>
-                                    <td>60%</td>
-                                    <td>1200</td>
-                                    <td>150</td>
-                                    <td>R$ 2.000</td>
-                                    <td class="profit-value">R$ 3.500</td>
-                                    <td class="roi-value">75%</td>
-                                </tr>
+                                        <td>{{ $creative->total_conversions }}</td>
+                                        <td>{{ number_format($creative->roi_decimal * 100, 1) }}%</td>
+                                        <td>{{ number_format($creative->total_clicks) }}</td>
+                                        <td>{{ $creative->total_conversions }}</td>
+                                        <td>@dollar($creative->total_cost)</td>
 
-                                <tr class="creative-row">
-                                    <td>002</td>
-                                    <td>Rogerio Barenco</td>
-                                    <td>Thiago Gomes</td>
-                                    <td><span class="badge negative">NÃO</span></td>
-                                    <td><span class="badge neutral">BAIXO</span></td>
-                                    <td>1</td>
-                                    <td>20%</td>
-                                    <td>800</td>
-                                    <td>40</td>
-                                    <td>R$ 1.500</td>
-                                    <td class="profit-value">-R$ 900</td>
-                                    <td class="roi-value">-35%</td>
-                                </tr>
-                                <tr class="creative-row">
-                                    <td>001</td>
-                                    <td>Eduardo Bezerra</td>
-                                    <td>Julia Tavares</td>
-                                    <td><span class="badge positive">SIM</span></td>
-                                    <td><span class="badge neutral">ALTO</span></td>
-                                    <td>5</td>
-                                    <td>60%</td>
-                                    <td>1200</td>
-                                    <td>150</td>
-                                    <td>R$ 2.000</td>
-                                    <td class="profit-value">R$ 3.500</td>
-                                    <td class="roi-value">75%</td>
-                                </tr>
+                                        <td
+                                            class="{{ $creative->total_profit >= 0 ? 'profit-positive' : 'profit-negative' }}">
+                                            @dollar($creative->total_profit)
+                                        </td>
 
-                                <tr class="creative-row">
-                                    <td>002</td>
-                                    <td>Rogerio Barenco</td>
-                                    <td>Thiago Gomes</td>
-                                    <td><span class="badge negative">NÃO</span></td>
-                                    <td><span class="badge neutral">BAIXO</span></td>
-                                    <td>1</td>
-                                    <td>20%</td>
-                                    <td>800</td>
-                                    <td>40</td>
-                                    <td>R$ 1.500</td>
-                                    <td class="profit-value">-R$ 900</td>
-                                    <td class="roi-value">-35%</td>
-                                </tr>
-
-
+                                        <td
+                                            class="{{ $creative->roi_decimal >= 0 ? 'roi-positive' : 'roi-negative' }}">
+                                            {{ number_format($creative->roi_decimal * 100, 1) }}%
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
 
