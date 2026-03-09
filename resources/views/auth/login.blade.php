@@ -23,7 +23,7 @@
            <div class="proverb-text">
                 <p>
                     "SE TE MOSTRARES FRACO NO DIA DA ANGÚSTIA,
-                    <span class="proverb-highlight">A TUA FORÇA É PEQUENA.</span>"
+                    <span class="proverb-highlight">A TUA FORÇA É PEQUENA.PEQUENA.</span>"
                 </p>
             </div>
         </div>
