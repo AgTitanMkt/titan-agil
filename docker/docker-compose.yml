@@ -21,8 +21,11 @@ services:
     container_name: laravel_nginx
     ports:
       - "80:80"
+      - "433:433"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
     networks:
       - laravel
 
