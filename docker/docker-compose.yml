@@ -5,6 +5,8 @@ services:
       context: ..
       dockerfile: docker/php/Dockerfile
     container_name: laravel_blue
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
     networks:
       - laravel
 
@@ -13,6 +15,8 @@ services:
       context: ..
       dockerfile: docker/php/Dockerfile
     container_name: laravel_green
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
     networks:
       - laravel
 
