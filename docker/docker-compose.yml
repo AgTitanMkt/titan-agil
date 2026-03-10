@@ -1,34 +1,30 @@
 services:
 
-  app:
+  app_blue:
     build:
       context: ..
       dockerfile: docker/php/Dockerfile
-    container_name: laravel_app
-    restart: always
-    volumes:
-      - ..:/var/www
+    container_name: laravel_blue
     networks:
       - laravel
 
+  app_green:
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
+    container_name: laravel_green
+    networks:
+      - laravel
 
   nginx:
     image: nginx:latest
     container_name: laravel_nginx
-    restart: always
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ..:/var/www
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot
-    depends_on:
-      - app
+      - ./nginx:/etc/nginx/conf.d
     networks:
       - laravel
-
 
 networks:
   laravel:
