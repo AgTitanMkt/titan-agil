@@ -15,6 +15,28 @@ pipeline {
             }
         }
 
+        stage('Install Backend Dependencies') {
+            steps {
+                sh '''
+                echo "Instalando dependências PHP..."
+                composer install \
+                    --no-interaction \
+                    --prefer-dist \
+                    --optimize-autoloader
+                '''
+            }
+        }
+
+        stage('Install Frontend Dependencies') {
+            steps {
+                sh '''
+                echo "Instalando dependências Node..."
+                npm install
+                npm run build
+                '''
+            }
+        }
+
         stage('Detect Active Environment') {
             steps {
                 script {
@@ -46,7 +68,7 @@ pipeline {
             }
         }
 
-        stage('Optimize Laravel') {
+        stage('Laravel Optimize') {
             steps {
                 sh '''
                 docker exec laravel_${NEW_ENV} php artisan optimize
