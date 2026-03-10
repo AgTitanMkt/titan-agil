@@ -104,14 +104,6 @@ pipeline {
                 '''
             }
         }
-        stage('Laravel Optimize') {
-            steps {
-                sh '''
-                docker exec laravel_${NEW_ENV} php artisan optimize:clear
-                docker exec laravel_${NEW_ENV} php artisan optimize
-                '''
-            }
-        }
         stage('Switch Nginx') {
             steps {
                 sh '''
