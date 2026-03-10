@@ -108,7 +108,6 @@ pipeline {
             steps {
                 sh '''
                 sed -i "s/server laravel_.*/server laravel_${NEW_ENV}:9000;/" docker/nginx/default.conf
-                docker cp docker/nginx/default.conf laravel_nginx:/etc/nginx/conf.d/default.conf
                 docker exec laravel_nginx nginx -s reload
                 '''
             }
