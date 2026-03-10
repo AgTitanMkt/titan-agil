@@ -30,11 +30,12 @@ WORKDIR /var/www
 # copia projeto
 COPY . .
 
-# instala dependências
+# instala dependências php
 RUN composer install \
-    --no-dev \
+    --no-interaction \
+    --prefer-dist \
     --optimize-autoloader \
-    --no-interaction
+    --no-dev
 
 # build frontend
 RUN npm install && npm run build
@@ -42,5 +43,4 @@ RUN npm install && npm run build
 # permissões laravel
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache
-
 CMD ["php-fpm"]
