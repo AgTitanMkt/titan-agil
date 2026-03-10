@@ -15,28 +15,6 @@ pipeline {
             }
         }
 
-        stage('Install Backend Dependencies') {
-            steps {
-                sh '''
-                echo "Instalando dependências PHP..."
-                composer install \
-                    --no-interaction \
-                    --prefer-dist \
-                    --optimize-autoloader
-                '''
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
-            steps {
-                sh '''
-                echo "Instalando dependências Node..."
-                npm install
-                npm run build
-                '''
-            }
-        }
-
         stage('Detect Active Environment') {
             steps {
                 script {
@@ -65,6 +43,28 @@ pipeline {
         stage('Start Container') {
             steps {
                 sh 'docker compose -f docker/docker-compose.yml up -d app_${NEW_ENV}'
+            }
+        }
+
+        stage('Install Backend Dependencies (Composer)') {
+            steps {
+                sh '''
+                echo "Instalando dependências do Laravel..."
+                docker exec laravel_${NEW_ENV} composer install \
+                    --no-interaction \
+                    --prefer-dist \
+                    --optimize-autoloader
+                '''
+            }
+        }
+
+        stage('Install Frontend Dependencies (Node)') {
+            steps {
+                sh '''
+                echo "Instalando dependências do Front..."
+                docker exec laravel_${NEW_ENV} npm install
+                docker exec laravel_${NEW_ENV} npm run build
+                '''
             }
         }
 
