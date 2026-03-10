@@ -46,15 +46,6 @@ pipeline {
             }
         }
 
-        stage('Run Migrations') {
-            steps {
-                sh '''
-                sleep 10
-                docker exec laravel_${NEW_ENV} php artisan migrate --force
-                '''
-            }
-        }
-
         stage('Optimize Laravel') {
             steps {
                 sh '''
