@@ -50,32 +50,21 @@ pipeline {
 
         stage('Build Containers') {
             steps {
-                sh 'docker compose -f docker/docker-compose.yml build'
+                sh 'docker compose -f docker/docker-compose.yml up -d --build'
             }
         }
 
-        stage('Stop Containers') {
+        stage('Laravel Migrate') {
             steps {
-                sh 'docker compose -f docker/docker-compose.yml down'
+                sh 'docker exec laravel_app php artisan migrate --force'
             }
         }
 
-        stage('Start Containers') {
-            steps {
-                sh 'docker compose -f docker/docker-compose.yml up -d'
-            }
-        }
-        stage('Laravel Install') {
-            steps {
-                sh 'docker exec laravel_app composer install --no-dev --optimize-autoloader'
-            }
-        }
-
-        stage('Frontend Build') {
+        stage('Setando Permissões') {
             steps {
                 sh '''
-                docker exec laravel_app npm install
-                docker exec laravel_app npm run build
+                docker exec laravel_app chown -R www-data:www-data storage bootstrap/cache
+                docker exec laravel_app chmod -R 775 storage bootstrap/cache
                 '''
             }
         }
