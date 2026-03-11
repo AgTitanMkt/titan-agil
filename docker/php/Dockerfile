@@ -27,15 +27,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# copia projeto
-COPY . .
+COPY composer.json composer.lock ./
 
-# instala dependências php
 RUN composer install \
-    --no-interaction \
-    --prefer-dist \
+    --no-dev \
     --optimize-autoloader \
-    --no-dev
+    --no-interaction
+
+COPY . .
 
 # build frontend
 RUN npm install && npm run build
