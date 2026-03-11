@@ -80,14 +80,23 @@ pipeline {
             }
         }
 
-        stage('Laravel Optimize') {
+        stage('Frontend Build') {
             steps {
                 sh '''
-                docker exec laravel_app php artisan optimize:clear
-                docker exec laravel_app php artisan optimize
-                '''
+                    docker exec laravel_app npm install
+                    docker exec laravel_app npm run build
+                    '''
             }
         }
 
-    }
+            stage('Laravel Optimize') {
+                steps {
+                    sh '''
+                    docker exec laravel_app php artisan optimize:clear
+                    docker exec laravel_app php artisan optimize
+                    '''
+                }
+            }
+
+        }
 }

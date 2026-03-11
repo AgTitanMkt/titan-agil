@@ -39,9 +39,6 @@ RUN composer install \
 # agora copia o resto do projeto
 COPY . .
 
-# roda scripts do laravel
-RUN php artisan package:discover
-
 # build frontend
 RUN npm install && npm run build
 
