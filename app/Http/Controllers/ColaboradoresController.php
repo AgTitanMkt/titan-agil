@@ -22,8 +22,8 @@ class ColaboradoresController extends Controller
         ];
 
         $metaQuinzenal = 1050000;
-        $metricasDiaria = new CopaProfitService(Carbon::now()->startOfDay(), Carbon::now()->endOfDay())->getPlatformsMetricsGroup();
-        $metricasSemana = new CopaProfitService(Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek())->getPlatformsMetricsGroup();
+        $metricasDiaria = (new CopaProfitService(Carbon::now()->startOfDay(), Carbon::now()->endOfDay()))->getPlatformsMetricsGroup();
+        $metricasSemana = (new CopaProfitService(Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()))->getPlatformsMetricsGroup();
 
 
         $agora = Carbon::now();
@@ -58,8 +58,8 @@ class ColaboradoresController extends Controller
         $metricasQuinzSources = collect($metricasQuinzSources)->sum('total_profit');
         // dd($metricasQuinzenal);
 
-        $metrics = new CopaProfitService(Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth())->getPlatformsMetricsGroup();
-                
+        $metrics = (new CopaProfitService(Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()))->getPlatformsMetricsGroup();
+
         return view('colaboradores.metas', compact([
             'metasSemanal',
             'metasDiaria',
