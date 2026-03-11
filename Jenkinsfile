@@ -54,15 +54,13 @@ pipeline {
             }
         }
 
-        stage('Laravel Migrate') {
-            steps {
-                sh 'docker exec laravel_app php artisan migrate --force'
-            }
-        }
-
-        stage('Setando Permissões') {
+        stage('Fix Permissions') {
             steps {
                 sh '''
+                docker exec laravel_app mkdir -p storage/framework/cache
+                docker exec laravel_app mkdir -p storage/framework/views
+                docker exec laravel_app mkdir -p storage/framework/sessions
+
                 docker exec laravel_app chown -R www-data:www-data storage bootstrap/cache
                 docker exec laravel_app chmod -R 775 storage bootstrap/cache
                 '''
@@ -72,6 +70,13 @@ pipeline {
         stage('Gerar APP_KEY') {
             steps {
                 sh 'docker exec laravel_app php artisan key:generate'
+            }
+        }
+
+
+        stage('Laravel Migrate') {
+            steps {
+                sh 'docker exec laravel_app php artisan migrate --force'
             }
         }
 
