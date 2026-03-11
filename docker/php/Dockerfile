@@ -27,19 +27,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
+# otimização de cache
 COPY composer.json composer.lock ./
 
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
-    --no-interaction
+    --no-interaction \
+    --no-scripts
 
+# agora copia o resto do projeto
 COPY . .
+
+# roda scripts do laravel
+RUN php artisan package:discover
 
 # build frontend
 RUN npm install && npm run build
 
-# permissões laravel
+# permissões
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache
+
 CMD ["php-fpm"]

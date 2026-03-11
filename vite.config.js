@@ -18,6 +18,7 @@ export default defineConfig({
                 'resources/css/css-admin/admin-multiselect.css',
                 'resources/css/css-admin/admin-gestores.css',
                 'resources/css/css-admin/admin-editors.css',
+                'resources/css/register-custom.css',
                 'resources/css/css-colaboradores/colaboradores-metas.css',
                 'resources/css/css-admin/admin-copy-dashboard.css', // CSS DO COPY PARA ABA DE DASHBOARD
                 'resources/css/css-admin/admin-creatives.css', // CSS DO CRIATIVOS //
