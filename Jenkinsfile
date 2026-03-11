@@ -70,6 +70,12 @@ pipeline {
             }
         }
 
+        stage('Install Composer') {
+            steps {
+                sh 'docker exec laravel_app composer install --no-dev --optimize-autoloader'
+            }
+        }
+
         stage('Gerar APP_KEY') {
             steps {
                 sh 'docker exec laravel_app php artisan key:generate'
