@@ -484,9 +484,19 @@ class AdminController extends Controller
         ));
     }
 
-    public function agents(Request $request, string $type = 'editors')
-    {
+    public function agents(
+        Request $request,
+        string $type = 'editors',
+        string $collaborator = 'IN'
+    ) {
+        $collaborator = $request->input('collaborator', $collaborator);
+
+        $collaborator = in_array($collaborator, ['IN', 'EX'])
+            ? $collaborator
+            : 'IN';
+
         $isCopy = $type === 'copywriters';
+
 
         $roleId        = $isCopy ? 2 : 3;
         $idParam       = $isCopy ? 'copy_id' : 'editor_id';
@@ -521,11 +531,24 @@ class AdminController extends Controller
             : null;
 
         // -------------------------------------------------
-        // 2️⃣ Lista completa
+        // 2️⃣ Lista completa - FILTRO MULTISELECT
         // -------------------------------------------------
-        $allAgents = $isCopy
-            ? $this->allCopywritersArray()
-            : $this->allEditorsArray();
+        // $allAgents = $isCopy
+        //     ? $this->allCopywritersArray()
+        //     : $this->allEditorsArray();
+
+        $allAgents = User::withRole($roleId)
+            ->where('tipo_colaborador', $collaborator)
+            ->where('active', 1)
+            ->whereNotNull('name')
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+        // puxando apenas os actives do banco
+
+        // filtro multiselct recebe apenas intenros na rota /copywriters/IN, externos na rota /copywriters/EX e normal para editores 
+        // /admin/agents/copywriters/IN
+        // /admin/agents/copywriters/EX
 
         $allNiches = Nicho::groupBy('name')->pluck('name');
 
@@ -538,7 +561,12 @@ class AdminController extends Controller
 
 
 
-        $agents = User::withRole($roleId)->get();
+        // $agents = User::withRole($roleId)->get();
+        $agents = User::withRole($roleId)
+            ->where('tipo_colaborador', $collaborator)
+            ->where('active', 1)
+            ->get();
+        // puxando apenas os actives do banco
 
         foreach ($agents as $agent) {
             $agent->applyFilter(
@@ -766,7 +794,9 @@ class AdminController extends Controller
             'chartSynergyData',
             'selectedAgentId',
             'type',
-            'allNiches'
+            'allNiches',
+            'collaborator'
+            // nova para copy INTERNO E EXTERNO
         ));
     }
 
@@ -1141,16 +1171,20 @@ class AdminController extends Controller
         return view("admin.gestores");
     }
 
-    // Estrutura da Rota Creatives: Ler filtros da request; Normalizar Datas; Carregar Nichos; Carregar agentes; Enviar tudo para a view.
-    public function creatives(Request $request)
+    // Estrutura da Rota Creatives: Ler filtros da request; Normalizar Datas; Carregar Nichos; Carregar agentes; Enviar tudo para a view e Copy/editor MANUALMENTE pelo sistema
+    public function creatives(Request $request, string $collaborator = 'IN')
     {
-        // FILTROS TYPE, COPYWRITERS, EDITORS, DATA, NICHOS, SOURCES
+
+        $collaborator = $request->input('collaborator', $collaborator);
+        $collaborator = in_array($collaborator, ['IN', 'EX']) ? $collaborator : 'IN';
+
         $type = $request->get('type', 'copywriters');
         $isCopy = $type === 'copywriters';
 
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
             : Carbon::now()->startOfMonth();
+
         $endDate = $request->input('date_to')
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfMonth();
@@ -1159,58 +1193,173 @@ class AdminController extends Controller
         $source = $request->input('source', 'TOTAL');
         $agentsFilter = $request->input($isCopy ? 'copywriters' : 'editors');
 
-        // CODIGO DO CRIATIVO
-        $query = DB::table('vw_creatives_performance')
+
+
+        /* QUERY REAL DOS CRIATIVOS - PARA PUXAR TODOS OS CRIATIVOS DO SISTEMA */
+
+        $query = DB::table('tasks as t')
+
+
+            ->leftJoin('sub_tasks as st', 'st.task_id', '=', 't.id')
+            // ->leftJoin('users as editor', 'editor.id', '=', 't.editor_id')
+            ->leftJoin('user_tasks as ut', 'ut.sub_task_id', '=', 'st.id')
+            ->leftJoin('users as u', 'u.id', '=', 'ut.user_id')
+            ->leftJoin('user_roles as ur', 'ur.user_id', '=', 'u.id')
+
+            // JOIN PARA COLOCAR COPY/EDITOR MANUALEMNTE PELO SISTEMA.
+            ->leftJoin('creative_assignments as ca', 'ca.creative_code', '=', 't.code')
+            ->leftJoin('users as manual_copy', 'manual_copy.id', '=', 'ca.copywriter_id')
+            ->leftJoin('users as manual_editor', 'manual_editor.id', '=', 'ca.editor_id')
+
+
+
+
+            ->leftJoin('redtrack_reports as r', 'r.ad_code', '=', 't.code')
+
+            ->leftJoin('validated_creatives as v', 'v.ad', '=', 't.code')
+
             ->select(
-                'creative_code',
-                DB::raw('MAX(source) as source'),
-                DB::raw("MAX(CASE WHEN role_id = 2 THEN agent_name END) AS copywriter"),
-                DB::raw("MAX(CASE WHEN role_id = 3 THEN agent_name END) AS editor"),
-                DB::raw('SUM(clicks) as total_clicks'),
-                DB::raw('SUM(conversions) as total_conversions'),
-                DB::raw('SUM(cost) as total_cost'),
-                DB::raw('SUM(profit) as total_profit'),
-                DB::raw('SUM(revenue) as total_revenue'),
-                // calculo de ROI por criativo
-                DB::raw('ROUND(SUM(profit)/NULLIF(SUM(cost),0),4) as roi_decimal')
+
+                't.code as creative_code',
+
+                // alterado para 
+                // se existir override manual → usa manual
+                // se nao → usa o que vier do redtrack
+
+                DB::raw("
+                COALESCE(
+                    MAX(manual_copy.name),
+                    GROUP_CONCAT(DISTINCT CASE 
+                        WHEN ur.role_id = 2 THEN u.name 
+                    END SEPARATOR ', ')
+                ) as copywriter
+                "),
+
+
+                DB::raw("
+                COALESCE(
+                    MAX(manual_editor.name),
+                    GROUP_CONCAT(DISTINCT CASE 
+                        WHEN ur.role_id = 3 THEN u.name 
+                    END SEPARATOR ', ')
+                ) as editor
+                "),
+
+                DB::raw('MAX(r.source) as source'),
+
+                DB::raw('SUM(r.clicks) as total_clicks'),
+                DB::raw('SUM(r.conversions) as total_conversions'),
+                DB::raw('SUM(r.cost) as total_cost'),
+                DB::raw('SUM(r.profit) as total_profit'),
+
+                DB::raw('ROUND(SUM(r.profit)/NULLIF(SUM(r.cost),0),4) as roi_decimal'),
+
+                DB::raw('MAX(v.is_Potential) as potential'),
+                DB::raw('MAX(v.is_Validated) as validated')
+
             )
-            // redtrack para puxar data 
-            ->whereBetween('redtrack_date', [$startDate, $endDate]);
 
-        // filtros dinamicos
-        if ($source !== 'TOTAL') $query->where('source', strtolower($source));
-        if ($agentsFilter) $query->where('agent_name', $agentsFilter);
+            ->whereBetween('r.date', [$startDate, $endDate]);
 
-        $creatives = $query->groupBy('creative_code')
-            ->orderByDesc('total_profit')
+
+
+        if ($source !== 'TOTAL') {
+            $query->where('r.source', strtolower($source));
+        }
+
+        if ($agentsFilter) {
+            $query->where('u.name', $agentsFilter);
+        }
+
+
+
+        $creatives = $query
+            ->groupBy('t.code')
+            ->orderByDesc(DB::raw('SUM(r.profit)'))
             ->get();
 
-        // PEGA OS 3 MELHORES CRIATIVOS
+
+
+        /* TOP CRIATIVOS  */
+
         $topCreatives = $creatives->take(3);
 
-        // METRICAS NO TOPO, CALCULO
-        $totalTestado = $creatives->count();
-        $totalPotencial = $creatives->where('total_profit', '>', 0)->count();
-        // validado é lucro positivo + ROI acima de 30%
-        $totalValidados = $creatives->where('total_profit', '>', 0)->where('roi_decimal', '>', 0.3)->count();
 
-        $winRate = $totalTestado > 0 ? ($totalValidados / $totalTestado) * 100 : 0;
+        /* METRICAS GERAIS  */
+
+        $totalTestado = $creatives->count();
+
+        $totalPotencial = $creatives->where('potential', 1)->count();
+
+        $totalValidados = $creatives->where('validated', 1)->count();
+
+        $winRate = $totalTestado > 0
+            ? ($totalValidados / $totalTestado) * 100
+            : 0;
+
+
 
         $totalClicks = $creatives->sum('total_clicks');
         $totalConversions = $creatives->sum('total_conversions');
         $totalCost = $creatives->sum('total_cost');
         $totalProfit = $creatives->sum('total_profit');
-        $totalROI = $totalCost > 0 ? ($totalProfit / $totalCost) * 100 : 0;
 
-        // O MELHOR CRIATIVO
+        $totalROI = $totalCost > 0
+            ? ($totalProfit / $totalCost) * 100
+            : 0;
+
+
+
         $bestCreative = $creatives->first();
 
-        // lista para os filtros
-        $allNiches = Nicho::query()->groupBy('name')->pluck('name');
-        $allCopywriters = $this->allCopywritersArray();
-        $allEditors = $this->allEditorsArray();
 
-        // return de todas as variaveis 
+
+        /* LISTAS DE FILTROS - COPY/EDITOR */
+
+        $allNiches = Nicho::groupBy('name')->pluck('name');
+
+        // $allCopywriters = User::withRole(2)
+        //     ->where('tipo_colaborador', $collaborator)
+        //     ->where('active', 1)
+        //     ->orderBy('name')
+        //     ->pluck('name')
+        //     ->toArray();
+
+        $allCopywriters = User::withRole(2)
+            ->where('tipo_colaborador', $collaborator)
+            ->where('active', 1)
+            ->orderBy('name')
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($u) {
+                return [
+                    'value' => $u->id,
+                    'label' => $u->name
+                ];
+            })
+            ->toArray();
+
+        // $allEditors = User::withRole(3)
+        //     ->where('active', 1)
+        //     ->orderBy('name')
+        //     ->pluck('name')
+        //     ->toArray();
+
+        $allEditors = User::withRole(3)
+            ->where('active', 1)
+            ->orderBy('name')
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($u) {
+                return [
+                    'value' => $u->id,
+                    'label' => $u->name
+                ];
+            })
+            ->toArray();
+
+
+
         return view("admin.creatives", compact(
             'type',
             'isCopy',
@@ -1232,9 +1381,33 @@ class AdminController extends Controller
             'totalProfit',
             'totalROI',
             'bestCreative',
-            'topCreatives'
+            'topCreatives',
+            'collaborator'
         ));
     }
+
+
+    // Funcao para copy/editor MANUALEMENTE pelo sistema
+    public function assignCreative(Request $request)
+    {
+
+        $creative = $request->creative_code;
+
+        DB::table('creative_assignments')
+            ->updateOrInsert(
+                ['creative_code' => $creative],
+                [
+                    'copywriter_id' => $request->copywriter_id,
+                    'editor_id' => $request->editor_id,
+                    'updated_at' => now(),
+                    'created_at' => now()
+                ]
+            );
+
+        return response()->json(['success' => true]);
+    }
+
+    
 
 
     public function synergyData(Request $request, $type = 'editors')

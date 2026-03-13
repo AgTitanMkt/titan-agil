@@ -72,21 +72,52 @@
                                     <i class="fas fa-bullseye nav-icon"></i> Metas
                                 </a>
                             </li>
+
+                            {{-- NOVO CAMPO - ABA DE COPY EXTERNO --}}
+
                             <li>
-                                <a href="{{ route('admin.agents', 'copywriters') }}" class="nav-link submenu-link">
-                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters
+                                <a href="{{ route('admin.agents', ['copywriters', 'IN']) }}"
+                                    class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters Internos
                                 </a>
                             </li>
+
+                            {{-- NOVO CAMPO - ABA DE COPY INTERNO --}}
+                            
                             <li>
-                                <a href="{{ route('admin.agents', 'editors') }}" class="nav-link submenu-link">
-                                    <i class="fas fa-pen-fancy nav-icon"></i> Editores
+                                <a href="{{ route('admin.agents', ['copywriters', 'EX']) }}"
+                                    class="nav-link submenu-link">
+                                    <i class="fas fa-edit nav-icon"></i> Copywriters Externos
                                 </a>
                             </li>
+
                             <li>
-                                <a href="{{ route('admin.creatives') }}" class="nav-link submenu-link">
-                                    <i class="fas fa-layer-group nav-icon"></i> Criativos
+                                <a href="{{ route('admin.agents', ['editors', 'IN']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-video nav-icon"></i> Editores Internos
                                 </a>
                             </li>
+
+                            {{-- <li> ainda nao tem, talvez um dia
+                                <a href="{{ route('admin.agents', ['editors', 'EX']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-video nav-icon"></i> Editores Externos
+                                </a>
+                            </li> --}}
+
+                            {{-- NOVO CAMPO - ABA DE CRIATIVOS INTERNOS --}}
+                            
+                            <li>
+                                <a href="{{ route('admin.creatives', 'IN') }}" class="nav-link submenu-link">
+                                <i class="fas fa-layer-group nav-icon"></i> Criativos Internos
+                            </a>
+                        </li>
+
+                            {{-- NOVO CAMPO - ABA DE CRIATIVOS EXTERNOS --}}
+
+                        <li>
+                            <a href="{{ route('admin.creatives', 'EX') }}" class="nav-link submenu-link">
+                               <i class="fas fa-shapes nav-icon"></i> Criativos Externos
+                            </a>
+                        </li>
                         </ul>
                     </li>
 

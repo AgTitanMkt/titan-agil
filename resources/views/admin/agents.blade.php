@@ -1,14 +1,25 @@
 <x-layout>
+    {{-- @php
+        $isCopy = $type === 'copywriters';
+    @endphp --}}
+
+    {{-- ALTERACAO COLLABORATOR --}}
+    
     @php
+        $collaborator = $collaborator ?? 'IN';
+        $isExternal = $collaborator === 'EX';
         $isCopy = $type === 'copywriters';
     @endphp
 
+    {{-- ALTERACAO COLLABORATOR, VIEW EXTERNA OU INTERNA--}}
     <div class="titan-dashboard-wrapper">
         <header class="titan-unified-header">
             <div class="header-top-row">
                 <div class="header-brand">
                     <img src="/img/img-admin/logo titan.png" alt="Titan Logo">
-                    <span class="brand-name">{{ $isCopy ? 'Copywriters' : 'Editores' }}</span>
+                    <span class="brand-name">{{ $isCopy ? 'Copywriters' : 'Editores' }}
+                        {{ $isExternal ? 'Externos' : 'Internos' }}
+                    </span>
                 </div>
 
                 <div class="view-selector-wrapper">
@@ -22,9 +33,10 @@
                 </div>
             </div>
 
-
+            {{-- ALTERACAO COLLABORATOR --}}
             <nav class="filter-toolbar-container">
-                <form action="{{ route('admin.agents', $type) }}" method="GET" class="filter-main-form">
+                <form action="{{ route('admin.agents', ['type' => $type, 'collaborator' => $collaborator]) }}"
+                    method="GET" class="filter-main-form">
 
                     <div class="filter-item item-date">
                         <label>Escolha o Filtro Desejado:</label>
@@ -72,7 +84,21 @@
                             <option value="variation" {{ $typeFilter === 'variation' ? 'selected' : '' }}>Variação
                             </option>
                         </select>
+                    </div>
 
+                    {{-- NOVO FILTRO - ALTARACAO COLLABORATOR --}}
+                    <div class="filter-item">
+                        <label>Colaborador</label>
+
+                        <select name="collaborator" class="titan-select">
+                            <option value="IN" {{ $collaborator === 'IN' ? 'selected' : '' }}>
+                                Interno
+                            </option>
+
+                            <option value="EX" {{ $collaborator === 'EX' ? 'selected' : '' }}>
+                                Externo
+                            </option>
+                        </select>
                     </div>
 
                     <div class="filter-item item-agent">
@@ -683,7 +709,7 @@
                 <div class="editor-info-card glass-card">
                     <div class="editor-info-header">
                         <h3 id="copyNameTitle" class="editor-name-title">Nome do Editor</h3>
-                        <p id="copyRoleEmail" class="editor-role-email">Função: Editor | Email: email@corp.com</p>
+                        <p id="copyRoleEmail" class="editor-role-email">Função: Editor | Email: email@titan.com</p>
                     </div>
                 </div>
 

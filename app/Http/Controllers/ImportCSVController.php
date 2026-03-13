@@ -60,27 +60,67 @@ class ImportCSVController extends Controller
 
             $line = array_combine($headers, $row);
 
+            // EXTRAI A TAG
             $copyTag = isset($line['COPY RESPONSÁVEL'])
-                ? explode(" ", $line['COPY RESPONSÁVEL'])[0]
+                ? explode(" ", trim($line['COPY RESPONSÁVEL']))[0]
                 : null;
 
             $editorTag = isset($line['EDITOR'])
-                ? explode(" ", $line['EDITOR'])[0]
+                ? explode(" ", trim($line['EDITOR']))[0]
                 : null;
 
+            // BUSCA O COPY PELAS TAGS JA CADADTRADAS NO BANCO
             $copy = $copyTag && isset($tags[$copyTag])
                 ? $tags[$copyTag]->user
                 : null;
 
+            // SE NAO ACHOU O COPY ELE IRA CRIA-LO
+            if (!$copy && !empty($line['COPY RESPONSÁVEL'])) {
+                $copy = User::firstOrCreate(
+                    ['name' => trim($line['COPY RESPONSÁVEL'])],
+                    [
+                        'email' => strtolower($copyTag) . '@agencia-titan.com',
+                        // O tipo_colaborador o Model User.php define sozinho no booted(), ja coloquei la os prefixos $prefixos = ['GEX', 'BH', 'XMX', 'DAN', 'ROGERIO', 'IMP'];
+                        'password' => bcrypt('12345678'), // senha porque o laragon exive quando cria um user na hora
+                    ]
+                );
+
+                // CARGO DE COPY ID 2 PARA ELE APARECER NO SELECT
+                if ($copy->wasRecentlyCreated) {
+                    $copy->roles()->attach(2); 
+                }
+                
+                // array de tags para nao repetir a query
+                $tags[$copyTag] = (object)['user' => $copy];
+            }
+
+            // buscar editor pelas tags ja cadastradas
             $editor = $editorTag && isset($tags[$editorTag])
                 ? $tags[$editorTag]->user
                 : null;
+
+            // SE NAO ACHOU O EDITOR ELE IRA CRIA-LO
+            if (!$editor && !empty($line['EDITOR'])) {
+                $editor = User::firstOrCreate(
+                    ['name' => trim($line['EDITOR'])],
+                    [
+                        'email' => strtolower($editorTag) . '@agencia-titan.com',
+                        'password' => bcrypt('12345678'),
+                    ]
+                );
+
+                // CARGO DE EDITOR ID 3 PARA ELE APARECER NO SELECT 
+                if ($editor->wasRecentlyCreated) {
+                    $editor->roles()->attach(3); 
+                }
+
+                $tags[$editorTag] = (object)['user' => $editor];
+            }
 
             if (
                 !empty($line['ID CRIATIVO']) &&
                 (!empty($line['COPY RESPONSÁVEL']) || !empty($line['EDITOR']))
             ) {
-
                 $preview[] = [
                     'code'        => trim($line['ID CRIATIVO']),
                     'copy_name'   => $line['COPY RESPONSÁVEL'] ?? null,

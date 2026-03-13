@@ -1,6 +1,6 @@
 @php
     use Illuminate\Support\Str;
-    $uniqueId = 'multiselect-' . Str::random(8); 
+    $uniqueId = 'multiselect-' . Str::random(8);
 @endphp
 
 @props([
@@ -20,55 +20,77 @@
         'creative-11' => 'Creative ED555',
         'creative-12' => 'Creative ED3D407',
     ],
-    'selected' => ['creative-1', 'creative-2', 'creative-12'], 
+    'selected' => ['creative-1', 'creative-2', 'creative-12'],
     'placeholder' => 'Buscar ou Selecionar (digite para filtrar)',
     'id' => $uniqueId,
-    'maxTags' => 2, 
+    'maxTags' => 2,
 ])
 
 {{-- HTML  --}}
 <div class="filter-group {{ $id }}-container">
-    
+
     @if ($label)
         <label for="{{ $id }}">{{ $label }}</label>
     @endif
 
-    <select id="{{ $id }}" name="{{ $name }}[]" multiple class="original-select hidden">
-        @foreach ($options as $key => $value)
+
+    {{-- ALTERACOES PARA CONSEGUIR PUXAR O NOVO METODO DE COPY/EDITOR MANUALMENTE PELO SISTEMA --}}
+    
+    <select id="{{ $id }}" name="{{ $name }}[]" multiple class="hidden original-select">
+        {{-- ANTIGO METODO --}}
+        
+        {{-- @foreach ($options as $key => $value)
             <option value="{{ $value }}" data-label="{{ $value }}" @if (in_array($value, $selected)) selected @endif>
                 {{ $value }}
+            </option>
+        @endforeach --}} 
+        
+        {{-- NOVO METODO --}}
+        @foreach ($options as $option)
+            @php
+                $value = is_array($option) ? $option['value'] : $option;
+                $label = is_array($option) ? $option['label'] : $option;
+            @endphp
+
+            <option value="{{ $value }}" data-label="{{ $label }}"
+                @if (in_array($value, $selected)) selected @endif>
+
+                {{ $label }}
+
             </option>
         @endforeach
     </select>
 
     <div class="custom-multiselect" id="custom-{{ $id }}">
-        
+
         <div class="multiselect-header" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
             <div class="selected-summary-wrapper">
-                <span class="selected-summary"></span> 
+                <span class="selected-summary"></span>
             </div>
-            
+
             <div class="header-actions">
-                <button type="button" class="btn-clear-single-filter" title="Limpar todos os selecionados deste filtro">
-                    <i class="fas fa-eraser"></i> 
+                <button type="button" class="btn-clear-single-filter"
+                    title="Limpar todos os selecionados deste filtro">
+                    <i class="fas fa-eraser"></i>
                 </button>
                 <i class="fas fa-angle-down dropdown-icon"></i>
             </div>
         </div>
 
         <div class="multiselect-dropdown">
-            
+
             <div class="search-box">
                 <input type="text" placeholder="Buscar..." class="search-input" aria-label="Buscar opções de filtro">
                 <i class="fas fa-search search-icon"></i>
             </div>
-            
+
             <ul class="options-list" role="listbox" aria-multiselectable="true">
                 {{-- JS --}}
             </ul>
-            
+
             <div class="dropdown-footer">
-                <button type="button" class="btn-clear-all-filters" title="Limpar TODAS as seleções de TODOS os filtros na página">
+                <button type="button" class="btn-clear-all-filters"
+                    title="Limpar TODAS as seleções de TODOS os filtros na página">
                     Limpe os Filtros
                 </button>
             </div>
@@ -99,11 +121,11 @@
             label: opt.dataset.label,
             selected: opt.selected
         }));
-        
+
         let isOpen = false;
-        
+
         // FUNCAO LOGICA PADRAO
-        
+
         function updateOriginalSelect(value, isSelected) {
             const option = originalSelect.querySelector(`option[value="${value}"]`);
             if (option) {
@@ -123,16 +145,18 @@
 
         function clearSingleFilter() {
             allOptions.filter(o => o.selected).forEach(o => updateSelection(o.value, false));
-            originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            originalSelect.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
         }
-        
+
         function renderOptionsList(searchTerm = '') {
             optionsList.innerHTML = '';
             const lowerCaseTerm = searchTerm.toLowerCase();
 
             const selected = allOptions.filter(o => o.selected);
             const unselected = allOptions.filter(o => !o.selected);
-            
+
             const listToRender = selected.concat(unselected);
 
             listToRender.forEach(option => {
@@ -147,35 +171,36 @@
                     listItem.dataset.label = label;
                     listItem.setAttribute('role', 'option');
                     listItem.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-                    
+
                     listItem.innerHTML = `
                         <i class="fas fa-check check-icon"></i>
                         <span class="option-label">${label}</span>
                     `;
-                    
+
                     optionsList.appendChild(listItem);
                 }
             });
-            
+
             if (optionsList.children.length === 0) {
-                 optionsList.innerHTML = `<li class="no-results-item">Nenhum resultado encontrado para "${searchTerm}"</li>`;
+                optionsList.innerHTML =
+                    `<li class="no-results-item">Nenhum resultado encontrado para "${searchTerm}"</li>`;
             }
         }
-        
+
         function updateHeaderDisplay() {
             const selectedOptions = allOptions.filter(o => o.selected);
             const count = selectedOptions.length;
-            
+
             summarySpan.innerHTML = '';
-            
+
             if (count === 0) {
                 summarySpan.textContent = '{{ $placeholder }}';
                 header.classList.remove('has-selection');
                 btnClearSingle.style.display = 'none';
             } else {
                 header.classList.add('has-selection');
-                btnClearSingle.style.display = 'flex'; 
-                
+                btnClearSingle.style.display = 'flex';
+
                 selectedOptions.slice(0, maxTags).forEach(option => {
                     const tag = document.createElement('span');
                     tag.className = 'selected-tag';
@@ -188,7 +213,7 @@
                     `;
                     summarySpan.appendChild(tag);
                 });
-                
+
                 if (count > maxTags) {
                     const overflow = document.createElement('span');
                     overflow.className = 'selected-overflow';
@@ -198,7 +223,7 @@
             }
             header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
-        
+
         // EVENT LISTENERS 
 
         // alternar o dropdown abre e fecha
@@ -208,57 +233,62 @@
             header.setAttribute('aria-expanded', isOpen);
             if (isOpen) {
                 searchInput.focus();
-                renderOptionsList(searchInput.value); 
+                renderOptionsList(searchInput.value);
             }
         });
-        
+
         // selecao dos itens AGORA COM A PARADA DE PROPAGAÇÃO
         optionsList.addEventListener('click', (e) => {
             // 
-            e.stopPropagation(); 
-            
+            e.stopPropagation();
+
             const item = e.target.closest('.option-item');
             if (item && !item.classList.contains('no-results-item')) {
                 const value = item.getAttribute('data-value');
                 const isSelected = item.classList.contains('selected');
-                
-                updateSelection(value, !isSelected); 
-                originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                
+
+                updateSelection(value, !isSelected);
+                originalSelect.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
+
                 // foco no campo de busca para selecao
-                searchInput.focus(); 
+                searchInput.focus();
             }
         });
-        
+
         // remover a tagg individual
         summarySpan.addEventListener('click', (e) => {
             const removeButton = e.target.closest('.btn-remove-tag');
             if (removeButton) {
-                e.stopPropagation(); 
+                e.stopPropagation();
                 const tag = removeButton.closest('.selected-tag');
                 const value = tag.dataset.value;
-                updateSelection(value, false); 
-                originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                updateSelection(value, false);
+                originalSelect.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
             }
         });
 
         // buscar
         searchInput.addEventListener('input', (e) => {
-            renderOptionsList(e.target.value); 
+            renderOptionsList(e.target.value);
         });
 
         // limpa filtro unico selecao individual
         btnClearSingle.addEventListener('click', (e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
             clearSingleFilter();
         });
-        
+
         // limpa TODOS os filtros da pagina e RECEBE UM ALERTA
         btnClearAllGlobal.addEventListener('click', (e) => {
-             alert("🚨 Atenção! Esta ação irá limpar todos os filtros aplicados. Deseja realmente continuar?");
-             e.stopPropagation();
+            alert(
+                "🚨 Atenção! Esta ação irá limpar todos os filtros aplicados. Deseja realmente continuar?");
+            e.stopPropagation();
         });
-        
+
         // fecha ao clicar fora (MANTEM O FECHAMENTO AO CLICAR FORA, NAO E ACIONADO APOS CLICAR EM UMA UNICA SELECAO)
         document.addEventListener('click', (e) => {
             if (isOpen && !multiselectContainer.contains(e.target)) {
@@ -270,6 +300,6 @@
 
         // inicia tudo
         updateHeaderDisplay();
-        renderOptionsList(); 
+        renderOptionsList();
     });
 </script>

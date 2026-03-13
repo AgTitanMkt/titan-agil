@@ -34,11 +34,23 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-            Route::get('agents/{type}', [AdminController::class, 'agents'])
-                ->whereIn('type', ['editors', 'copywriters'])
-                ->name('admin.agents');
 
-        Route::get('creatives', [AdminController::class, 'creatives'])->name('admin.creatives');
+            // NOVAS ROTAS PARA INTERNO/EXTERNO COPY/EDITOR 
+
+            Route::get('agents/{type}/{collaborator?}', [AdminController::class, 'agents'])
+            ->whereIn('type', ['editors', 'copywriters'])
+            ->whereIn('collaborator', ['IN', 'EX'])
+            ->name('admin.agents');
+
+            Route::get('creatives/{collaborator?}', [AdminController::class, 'creatives'])
+            ->whereIn('collaborator', ['IN', 'EX'])
+            ->name('admin.creatives');
+
+            // NOVA ROTA PARA PUXAR MANUALMENTE O COPY/EDITOR NO SISTEMA
+
+            Route::post('/creative/assign', [AdminController::class, 'assignCreative'])
+            ->name('creative.assign');
+
 
             Route::get('editors/synergy', function (Request $request) {
                 return app(AdminController::class)->synergyData($request, 'editors');
