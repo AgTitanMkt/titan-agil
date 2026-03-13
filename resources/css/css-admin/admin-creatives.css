@@ -306,3 +306,45 @@
     filter: brightness(1.2);
     cursor: default;
 }
+
+/* NOVA ALTERACAO PARA COPY/EDITOR SELECIONAR MANUALMENTE NO SISTEMA */
+.assign-copy, .assign-editor {
+    background-color: rgba(255, 255, 255, 0.1); 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 10px 15px;
+    width: 100%;
+    font-size: 14px;
+    appearance: none; 
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.assign-copy:focus, .assign-editor:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+
+.assign-form label {
+    display: block;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+
+.assign-copy option, .assign-editor option {
+    background-color: #1e6cf0; 
+    color: white;
+}
+/* FIM DAS ALTERACOES NOVAS */

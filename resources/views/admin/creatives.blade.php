@@ -1,12 +1,22 @@
 <x-layout>
 
+    {{-- ALTERACAO COLLABORATOR --}}
+    @php
+        $collaborator = $collaborator ?? 'IN';
+        $isExternal = $collaborator === 'EX';
+        // $isCopy = $type === 'copywriters';
+    @endphp
+
     <div class="titan-dashboard-wrapper">
 
+        {{-- ALTERACAO COLLABORATOR VIEW EXTERNA OU INTERNA --}}
         <header class="titan-unified-header">
             <div class="header-top-row">
                 <div class="header-brand">
                     <img src="/img/img-admin/logo titan.png" alt="Titan Logo">
-                    <span class="brand-name">Métricas | Criativos</span>
+                    <span class="brand-name">Métricas | Criativos |
+                        {{ $isExternal ? 'Externos' : 'Internos' }}
+                    </span>
                 </div>
 
                 <div class="view-selector-wrapper">
@@ -18,8 +28,10 @@
                 </div>
             </div>
 
+            {{-- ALTERACAO COLLABORATOR --}}
             <nav class="filter-toolbar-container">
-                <form action="{{ route('admin.creatives') }}" method="GET" class="filter-main-form">
+                <form action="{{ route('admin.creatives', ['collaborator' => $collaborator]) }}" method="GET"
+                    class="filter-main-form">
 
                     <input type="hidden" name="type" value="{{ $type }}">
 
@@ -70,9 +82,22 @@
                             <option value="variation" {{ $typeFilter === 'variation' ? 'selected' : '' }}>Variação
                             </option>
                         </select>
-
                     </div>
+                    
+                    {{-- NOVO FILTRO - ALTARACAO COLLABORATOR --}}
+                    <div class="filter-item">
+                        <label>Colaborador</label>
 
+                        <select name="collaborator" class="titan-select">
+                            <option value="IN" {{ $collaborator === 'IN' ? 'selected' : '' }}>
+                                Interno
+                            </option>
+
+                            <option value="EX" {{ $collaborator === 'EX' ? 'selected' : '' }}>
+                                Externo
+                            </option>
+                        </select>
+                    </div>
 
                     <div class="filter-item item-agent">
                         <label>Copywriter</label>
@@ -131,8 +156,8 @@
                             </div>
                         </div>
 
-                        <div class="source-tag {{ strtolower($top->source) }}">
-                            {{ $top->source }}
+                        <div class="source-tag {{ strtolower($top->source ?? 'unknown') }}">
+                            {{ $top->source ?? '---' }}
                         </div>
                     </div>
                 @endforeach
@@ -216,13 +241,67 @@
                                     </th>
                                 </tr>
                             </thead>
-
+                            
+                            {{-- NOVO CAMPO COPY PARA CONSEGUIR PEGAR MANUALMENTE O COPYWRITER PELO SISTEMA --}}
+                            
                             <tbody id="creativesTable">
                                 @foreach ($creatives as $creative)
                                     <tr class="creative-row">
                                         <td>{{ $creative->creative_code }}</td>
-                                        <td>{{ $creative->copywriter ?? '---' }}</td>
-                                        <td>{{ $creative->editor ?? '---' }}</td>
+                                        {{-- <td>{{ $creative->copywriter ?? '---' }}</td> --}}
+                                        <td>
+                                            @if (!$creative->copywriter)
+                                                <form class="assign-form">
+
+                                                    <input type="hidden" name="creative_code"
+                                                        value="{{ $creative->creative_code }}">
+
+                                                    <select name="copywriter_id" class="assign-copy">
+
+                                                        <option value="">Selecionar</option>
+
+                                                        @foreach ($allCopywriters as $copy)
+                                                            <option value="{{ $copy['value'] }}">{{ $copy['label'] }}
+                                                            </option>
+                                                        @endforeach
+
+                                                    </select>
+
+                                                </form>
+                                            @else
+                                                {{ $creative->copywriter }}
+                                            @endif
+                                        </td>
+
+                                        {{-- NOVO CAMPO EDITOR PARA CONSEGUIR PEGAR MANUALMENTE O EDITOR PELO SISTEMA --}}
+                                        
+                                        {{-- <td>{{ trim(explode(',', $creative->editor ?? '---')[0]) }}</td> --}}
+                                        <td>
+
+                                            @if (!$creative->editor)
+                                                <form class="assign-form">
+
+                                                    <input type="hidden" name="creative_code"
+                                                        value="{{ $creative->creative_code }}">
+
+                                                    <select name="editor_id" class="assign-editor">
+
+                                                        <option value="">Selecionar</option>
+
+                                                        @foreach ($allEditors as $editor)
+                                                            <option value="{{ $editor['value'] }}">
+                                                                {{ $editor['label'] }}</option>
+                                                        @endforeach
+
+                                                    </select>
+
+                                                </form>
+                                            @else
+                                                {{ trim(explode(',', $creative->editor)[0]) }}
+                                            @endif
+
+                                        </td>
+
 
                                         {{-- testado/potencial --}}
                                         <td><span
@@ -325,6 +404,49 @@
 
         });
     </script>
+
+    {{-- SCRIPT PARA SALVAR AUTOMATICO E MANUAL OS COPY/EDITORES NO SISTEMA --}}
+
+    <script>
+        document.querySelectorAll(".assign-copy, .assign-editor").forEach(select => {
+
+            select.addEventListener("change", function() {
+
+                let form = this.closest("form");
+
+                let data = new FormData(form);
+
+                fetch("/creative/assign", {
+
+                        method: "POST",
+
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+
+                        body: data
+
+                    })
+                    .then(r => r.json())
+                    .then(() => {
+
+                        location.reload();
+
+                    });
+
+            });
+
+        });
+    </script>
+
+    {{-- CABO. --}}
+
+
+
+
+
+
+
 
 
 </x-layout>

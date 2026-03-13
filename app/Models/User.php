@@ -261,4 +261,38 @@ class User extends Authenticatable
 
         return $this;
     }
+
+    
+    /* helpers para verificar o tipo de colaborador */
+    public function isInternal()
+    {
+        return $this->tipo_colaborador === 'IN';
+    }
+
+    public function isExternal()
+    {
+        return $this->tipo_colaborador === 'EX';
+    }
+
+    /* executa sempre que um novo USER for CRIADO */
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            $prefixos = ['CEGEX', 'CEBH', 'CEXMX', 'CEDAN', 'CERB', 'CEIMP'];
+            
+            // PREFIX MAIUSCULO
+            $nomeSuperior = strtoupper($user->name);
+            
+            foreach ($prefixos as $prefixo) {
+                if (str_starts_with($nomeSuperior, $prefixo)) {
+                    $user->tipo_colaborador = 'EX';
+                    return; // sai do loop assim que encontrar o prefixo
+                }
+            }
+
+            // se o loop nao encontrar nenhum prefixo assume que o colaborador eh interno
+            $user->tipo_colaborador = 'IN';
+        });
+    }
+
 }
