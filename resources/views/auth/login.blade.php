@@ -19,11 +19,11 @@
             <div class="glass-header">
                 <span class="titan-marketing-text">TITAN MARKETING</span>
             </div>
-            
+
            <div class="proverb-text">
                 <p>
                     "SE TE MOSTRARES FRACO NO DIA DA ANGÚSTIA,
-                    <span class="proverb-highlight">A TUA FORÇA É PEQUENA.PEQUENA.</span>"
+                    <span class="proverb-highlight">A TUA FORÇA É PEQUENA.</span>"
                 </p>
             </div>
         </div>
@@ -34,7 +34,7 @@
 
                 <form method="POST" action="{{ route('login') }}" class="login-form">
                     @csrf
-                    
+
                     <div class="form-group">
                         <label for="email" class="input-label">Email</label>
                         <input id="email" class="input-field" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Seu endereço de email" />
