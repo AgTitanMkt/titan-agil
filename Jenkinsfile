@@ -3,6 +3,15 @@ pipeline {
 
     stages {
 
+        stage('Fix Workspace Permissions') {
+            steps {
+                sh '''
+                sudo chown -R jenkins:jenkins /var/lib/jenkins/workspace || true
+                sudo chmod -R 775 /var/lib/jenkins/workspace || true
+                '''
+            }
+        }
+
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -57,6 +66,15 @@ pipeline {
             }
         }
 
+        stage('Fix Docker Permissions') {
+            steps {
+                sh '''
+                docker exec laravel_app chown -R jenkins:jenkins /var/www || true
+                '''
+            }
+        }
+
+
         stage('Fix Permissions') {
             steps {
                 sh '''
@@ -98,14 +116,14 @@ pipeline {
             }
         }
 
-            stage('Laravel Optimize') {
-                steps {
-                    sh '''
-                    docker exec laravel_app php artisan optimize:clear
-                    docker exec laravel_app php artisan optimize
-                    '''
-                }
+        stage('Laravel Optimize') {
+            steps {
+                sh '''
+                docker exec laravel_app php artisan optimize:clear
+                docker exec laravel_app php artisan optimize
+                '''
             }
-
         }
+
+    }
 }
