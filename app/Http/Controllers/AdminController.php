@@ -1389,23 +1389,47 @@ class AdminController extends Controller
 
     // Funcao para copy/editor MANUALEMENTE pelo sistema
     public function assignCreative(Request $request)
-    {
+{
+    $creativeCode = $request->creative_code;
+    
+    // array criado
+    $updateData = [
+        'updated_at' => now(),
+    ];
 
-        $creative = $request->creative_code;
-
-        DB::table('creative_assignments')
-            ->updateOrInsert(
-                ['creative_code' => $creative],
-                [
-                    'copywriter_id' => $request->copywriter_id,
-                    'editor_id' => $request->editor_id,
-                    'updated_at' => now(),
-                    'created_at' => now()
-                ]
-            );
-
-        return response()->json(['success' => true]);
+    // se veio copywriter no request adiciona ao update
+    if ($request->has('copywriter_id') && $request->copywriter_id) {
+        $updateData['copywriter_id'] = $request->copywriter_id;
     }
+
+    // se veio editor no request adiciona ao update
+    if ($request->has('editor_id') && $request->editor_id) {
+        $updateData['editor_id'] = $request->editor_id;
+    }
+
+    
+    DB::table('creative_assignments')->updateOrInsert(
+        ['creative_code' => $creativeCode],
+        $updateData
+    );
+
+    // busca o nome do copywriter e editor para return
+    $copyName = null;
+    $editorName = null;
+
+    if (isset($updateData['copywriter_id'])) {
+        $copyName = DB::table('users')->where('id', $request->copywriter_id)->value('name');
+    }
+    if (isset($updateData['editor_id'])) {
+        $editorName = DB::table('users')->where('id', $request->editor_id)->value('name');
+    }
+
+    return response()->json([
+        'success' => true,
+        'copywriter' => $copyName,
+        'editor' => $editorName
+    ]);
+}
 
     
 

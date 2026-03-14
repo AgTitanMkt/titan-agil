@@ -83,7 +83,7 @@
                             </option>
                         </select>
                     </div>
-                    
+
                     {{-- NOVO FILTRO - ALTARACAO COLLABORATOR --}}
                     <div class="filter-item">
                         <label>Colaborador</label>
@@ -241,9 +241,9 @@
                                     </th>
                                 </tr>
                             </thead>
-                            
+
                             {{-- NOVO CAMPO COPY PARA CONSEGUIR PEGAR MANUALMENTE O COPYWRITER PELO SISTEMA --}}
-                            
+
                             <tbody id="creativesTable">
                                 @foreach ($creatives as $creative)
                                     <tr class="creative-row">
@@ -267,6 +267,10 @@
 
                                                     </select>
 
+                                                    <button type="button" class="btn-save-agent">
+                                                        Salvar Copy
+                                                    </button>
+
                                                 </form>
                                             @else
                                                 {{ $creative->copywriter }}
@@ -274,7 +278,7 @@
                                         </td>
 
                                         {{-- NOVO CAMPO EDITOR PARA CONSEGUIR PEGAR MANUALMENTE O EDITOR PELO SISTEMA --}}
-                                        
+
                                         {{-- <td>{{ trim(explode(',', $creative->editor ?? '---')[0]) }}</td> --}}
                                         <td>
 
@@ -294,6 +298,10 @@
                                                         @endforeach
 
                                                     </select>
+
+                                                    <button type="button" class="btn-save-agent">
+                                                        Salvar Editor
+                                                    </button>
 
                                                 </form>
                                             @else
@@ -408,35 +416,64 @@
     {{-- SCRIPT PARA SALVAR AUTOMATICO E MANUAL OS COPY/EDITORES NO SISTEMA --}}
 
     <script>
-        document.querySelectorAll(".assign-copy, .assign-editor").forEach(select => {
+        document.addEventListener("DOMContentLoaded", function() {
 
-            select.addEventListener("change", function() {
+            document.querySelectorAll(".btn-save-agent").forEach(button => {
 
-                let form = this.closest("form");
+                button.addEventListener("click", async function() {
 
-                let data = new FormData(form);
+                    const form = this.closest("form")
+                    const td = form.closest("td")
 
-                fetch("/creative/assign", {
+                    const data = new FormData(form)
 
-                        method: "POST",
+                    try {
+                        const response = await fetch("{{ route('creative.assign') }}", {
+                            method: "POST",
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: data
+                        });
 
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
+                        if (!response.ok) throw new Error('Erro na resposta do servidor');
 
-                        body: data
+                        const result = await response.json();
 
-                    })
-                    .then(r => r.json())
-                    .then(() => {
+                        if (result.success) {
+                            // pega o nome que voltou (seja copy ou editor)
+                            let name = result.copywriter || result.editor;
+                            if (name) {
+                                td.innerHTML = name; // substitui o form pelo nome salvo
+                                showToast();
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Erro detalhado:", error);
+                        // erro para caso ser bo ver no devtools
+                        alert("Erro: " + error.message);
+                    }
 
-                        location.reload();
+                })
 
-                    });
+            })
 
-            });
+            function showToast() {
 
-        });
+                const toast = document.getElementById("toast-success")
+
+                toast.style.display = "block"
+
+                setTimeout(() => {
+
+                    toast.style.display = "none"
+
+                }, 2500)
+
+            }
+
+        })
     </script>
 
     {{-- CABO. --}}
