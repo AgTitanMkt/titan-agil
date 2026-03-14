@@ -8,6 +8,7 @@ pipeline {
                 sh '''
                 sudo chown -R jenkins:jenkins /var/lib/jenkins/workspace || true
                 sudo chmod -R 775 /var/lib/jenkins/workspace || true
+
                 '''
             }
         }
