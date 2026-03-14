@@ -53,6 +53,15 @@ pipeline {
             }
         }
 
+        stage('Build Frontend') {
+            steps {
+                sh '''
+                docker exec laravel_app npm install
+                docker exec laravel_app npm run build
+                '''
+            }
+        }
+
         stage('Gerar APP_KEY') {
             steps {
                 sh 'docker exec laravel_app php artisan key:generate'
