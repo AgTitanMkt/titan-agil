@@ -52,7 +52,13 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
+        stage('Laravel Install') {
+            steps {
+                sh 'docker exec laravel_app composer install --no-dev --optimize-autoloader'
+            }
+        }
+
+        stage('Frontend Build') {
             steps {
                 sh '''
                 docker exec laravel_app npm install
