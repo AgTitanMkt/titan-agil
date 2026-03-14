@@ -6,8 +6,6 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: laravel_app
     restart: always
-    volumes:
-      - ../public:/var/www/public
     networks:
       - laravel
 
@@ -19,7 +17,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../public:/var/www/public
+      - ..:/var/www
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
