@@ -348,3 +348,46 @@
     color: white;
 }
 /* FIM DAS ALTERACOES NOVAS */
+
+.assign-form {
+    display: flex;
+    flex-direction: column; /* coloca o select em cima e o button embaixo */
+    gap: 5px;
+    min-width: 150px;
+}
+
+.btn-save-agent {
+    
+    background-color: #3b82f6; 
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    
+    
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    
+    cursor: pointer;
+    transition: all 0.3s ease; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+
+.btn-save-agent:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px); 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+
+.btn-save-agent:active {
+    transform: translateY(0);
+    filter: brightness(0.9);
+}
