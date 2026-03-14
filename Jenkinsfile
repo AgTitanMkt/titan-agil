@@ -53,6 +53,12 @@ pipeline {
             }
         }
 
+        stage('Gerar APP_KEY') {
+            steps {
+                sh 'docker exec laravel_app php artisan key:generate'
+            }
+        }
+
         stage('Laravel Migrate') {
             steps {
                 sh 'docker exec laravel_app php artisan migrate --force'
