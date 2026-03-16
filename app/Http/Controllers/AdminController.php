@@ -568,13 +568,33 @@ class AdminController extends Controller
             ->get();
         // puxando apenas os actives do banco
 
+        // REMOVIDO PORQUE ESTAVA DUPLICANDO OS IDS DE CRIATIVO. 
+        // foreach ($agents as $agent) {
+        //     $agent->applyFilter(
+        //         $startDate,
+        //         $endDate,
+        //     );
+        //     $agent->metrics = $metricsAgents[$agent->id] ?? collect();
+        // }
+
+        // NOVA LOGICA QUE PERMITE; reverse() inverte a ordem da collection, mantem o mais recente. unique('code') remove duplicados usando creative_code. values() reindexa a collection
         foreach ($agents as $agent) {
-            $agent->applyFilter(
-                $startDate,
-                $endDate,
-            );
-            $agent->metrics = $metricsAgents[$agent->id] ?? collect();
-        }
+        $agent->applyFilter(
+        $startDate,
+        $endDate,
+    );
+
+    $metrics = $metricsAgents[$agent->id] ?? collect();
+
+    // REMOVE DUPLICADOS USANDO creative_code
+    $metrics = $metrics
+        ->reverse()
+        ->unique('code')
+        ->values()
+        ->reverse();
+
+    $agent->metrics = $metrics;
+}
 
         // contando produzidos no periodo
         $agents = $agents->map(function ($agent) {
