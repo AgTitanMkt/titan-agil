@@ -47,7 +47,7 @@ pipeline {
         stage('Build Containers') {
             steps {
                 sh '''
-                docker compose -p laravel_docker up -d --build
+                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
                 '''
             }
         }
