@@ -25,7 +25,7 @@ services:
     volumes:
       - ..:/var/www
       - ./nginx/dash.conf:/etc/nginx/conf.d/dash.conf
-      - /var/www/jenkins/workspace/titan-vsl/docker/nginx/vsl.conf:/etc/nginx/conf.d/vsl.conf
+      - /var/lib/jenkins/workspace/titan-vsl/docker/nginx/vsl.conf:/etc/nginx/conf.d/vsl.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
     depends_on:
