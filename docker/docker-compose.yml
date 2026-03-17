@@ -1,3 +1,7 @@
+networks:
+  titan_network:
+    external: true
+
 services:
 
   app:
@@ -9,7 +13,7 @@ services:
     volumes:
       - ..:/var/www
     networks:
-      - laravel
+      - titan_network
 
   nginx:
     image: nginx:latest
@@ -20,13 +24,10 @@ services:
       - "443:443"
     volumes:
       - ..:/var/www
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/dash.conf:/etc/nginx/conf.d/dash.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
     depends_on:
       - app
     networks:
-      - laravel
-
-networks:
-  laravel:
+      - titan_network
