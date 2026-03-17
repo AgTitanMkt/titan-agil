@@ -308,15 +308,16 @@
 }
 
 /* NOVA ALTERACAO PARA COPY/EDITOR SELECIONAR MANUALMENTE NO SISTEMA */
-.assign-copy, .assign-editor {
-    background-color: rgba(255, 255, 255, 0.1); 
-    border: 1px solid rgba(255, 255, 255, 0.2); 
+.assign-copy,
+.assign-editor {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     color: #ffffff;
     padding: 10px 15px;
     width: 100%;
     font-size: 14px;
-    appearance: none; 
+    appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -325,7 +326,8 @@
     transition: border-color 0.2s;
 }
 
-.assign-copy:focus, .assign-editor:focus {
+.assign-copy:focus,
+.assign-editor:focus {
     outline: none;
     border-color: rgba(255, 255, 255, 0.5);
 }
@@ -343,36 +345,39 @@
 }
 
 
-.assign-copy option, .assign-editor option {
-    background-color: #1e6cf0; 
+.assign-copy option,
+.assign-editor option {
+    background-color: #1e6cf0;
     color: white;
 }
+
 /* FIM DAS ALTERACOES NOVAS */
 
 .assign-form {
     display: flex;
-    flex-direction: column; /* coloca o select em cima e o button embaixo */
+    flex-direction: column;
+    /* coloca o select em cima e o button embaixo */
     gap: 5px;
     min-width: 150px;
 }
 
 .btn-save-agent {
-    
-    background-color: #3b82f6; 
+
+    background-color: #3b82f6;
     color: #ffffff;
     padding: 10px 20px;
     border-radius: 8px;
     border: none;
-    
-    
+
+
     font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    
-    
+
+
     cursor: pointer;
-    transition: all 0.3s ease; 
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -382,7 +387,7 @@
 
 .btn-save-agent:hover {
     background-color: #2563eb;
-    transform: translateY(-2px); 
+    transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
@@ -391,3 +396,64 @@
     transform: translateY(0);
     filter: brightness(0.9);
 }
+
+
+/* CONTAINER DE ALERTA PARA APLICAR OS DOIS AGENTES */
+
+.alert-custom-container {
+    position: relative;
+    z-index: 999;
+    margin-bottom: 15px;
+    width: 100%;
+    margin-top: 15px;
+
+}
+
+.alert-custom {
+    display: flex;
+    align-items: center;
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid #dc3545;
+    color: #ff808b;
+    padding: 12px 20px;
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+    animation: fadeInDown 0.4s ease-out;
+}
+
+.alert-icon {
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+.alert-content {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.3s;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

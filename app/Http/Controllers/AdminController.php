@@ -579,22 +579,22 @@ class AdminController extends Controller
 
         // NOVA LOGICA QUE PERMITE; reverse() inverte a ordem da collection, mantem o mais recente. unique('code') remove duplicados usando creative_code. values() reindexa a collection
         foreach ($agents as $agent) {
-        $agent->applyFilter(
-        $startDate,
-        $endDate,
-    );
+            $agent->applyFilter(
+                $startDate,
+                $endDate,
+            );
 
-    $metrics = $metricsAgents[$agent->id] ?? collect();
+            $metrics = $metricsAgents[$agent->id] ?? collect();
 
-    // REMOVE DUPLICADOS USANDO creative_code
-    $metrics = $metrics
-        ->reverse()
-        ->unique('code')
-        ->values()
-        ->reverse();
+            // REMOVE DUPLICADOS USANDO creative_code
+            $metrics = $metrics
+                ->reverse()
+                ->unique('code')
+                ->values()
+                ->reverse();
 
-    $agent->metrics = $metrics;
-}
+            $agent->metrics = $metrics;
+        }
 
         // contando produzidos no periodo
         $agents = $agents->map(function ($agent) {
@@ -1211,7 +1211,15 @@ class AdminController extends Controller
 
         $nicho = $request->input('nicho', 'TOTAL');
         $source = $request->input('source', 'TOTAL');
-        $agentsFilter = $request->input($isCopy ? 'copywriters' : 'editors');
+        // $agentsFilter = $request->input($isCopy ? 'copywriters' : 'editors');
+        $copyFilter = $request->input('copywriters');
+        $editorFilter = $request->input('editors');
+
+        if (($copyFilter && !$editorFilter) || (!$copyFilter && $editorFilter)) {
+            return back()
+                ->withInput()
+                ->with('error_cohesion', 'Atenção: Para filtrar por agentes, selecione o Copywriter e o Editor juntos.');
+        }
 
 
 
@@ -1231,6 +1239,10 @@ class AdminController extends Controller
             ->leftJoin('users as manual_copy', 'manual_copy.id', '=', 'ca.copywriter_id')
             ->leftJoin('users as manual_editor', 'manual_editor.id', '=', 'ca.editor_id')
 
+            // JOIN PARA PUXAR NICHOS POR ID DE CRIATIVO MM - MEMOMORIA; WL - EMAGRECIMENTO E ETC, VER Nichos.php
+            ->leftJoin('nichos as n', function ($join) {
+                $join->on(DB::raw('LEFT(t.code, 2)'), '=', 'n.sigla');
+            })
 
 
 
@@ -1240,11 +1252,22 @@ class AdminController extends Controller
 
             ->select(
 
+                // NICHO CORRETO
+                'n.name as nicho_name',
                 't.code as creative_code',
 
                 // alterado para 
                 // se existir override manual → usa manual
                 // se nao → usa o que vier do redtrack
+
+                // VARIACAO PEGA PELO ID V2,V3, V4, validar
+                DB::raw("
+                CASE 
+                    WHEN t.code REGEXP '-V[0-9]+' THEN 'variacao'
+                    ELSE 'original'
+                END as tipo
+            "),
+
 
                 DB::raw("
                 COALESCE(
@@ -1281,22 +1304,108 @@ class AdminController extends Controller
 
             ->whereBetween('r.date', [$startDate, $endDate]);
 
+        //  PUXANDO SOMENTES OS ACTIVES + rota de IN - somente criativos dos IN; rota de EX - somente criativo dos EX
+        // mostra apenas o criativo da rota atual (IN ou EX) e remove quem esta active = 0
+        $query->where(function ($q) use ($collaborator) {
+            $q->whereExists(function ($sub) use ($collaborator) {
+                $sub->select(DB::raw(1))
+                    ->from('users as u_filter')
+                    ->join('user_tasks as ut_filter', 'ut_filter.user_id', '=', 'u_filter.id')
+                    ->join('sub_tasks as st_filter', 'st_filter.id', '=', 'ut_filter.sub_task_id')
+                    ->join('user_roles as ur_filter', 'ur_filter.user_id', '=', 'u_filter.id')
+                    ->whereColumn('st_filter.task_id', 't.id')
+                    ->where('u_filter.tipo_colaborador', $collaborator)
+                    ->where('u_filter.active', 1)
+                    ->where('ur_filter.role_id', 2); // Role 2 = Copywriter
+            })
+                ->orWhereExists(function ($sub) use ($collaborator) {
+                    $sub->select(DB::raw(1))
+                        ->from('users as u_manual')
+                        ->whereColumn('u_manual.id', 'ca.copywriter_id')
+                        ->where('u_manual.tipo_colaborador', $collaborator)
+                        ->where('u_manual.active', 1);
+                });
+        });
 
 
-        if ($source !== 'TOTAL') {
-            $query->where('r.source', strtolower($source));
+
+
+        // source validar 
+        $source = $request->input('source', 'TOTAL');
+
+        $sourceCompare = $source ? strtolower(trim($source)) : 'total';
+
+        if ($sourceCompare !== 'total') {
+
+            $query->whereRaw('LOWER(TRIM(r.source)) LIKE ?', ["%{$sourceCompare}%"]);
         }
 
-        if ($agentsFilter) {
-            $query->where('u.name', $agentsFilter);
+
+        // FILTRO DE COPY E EDITORES FUNCIONANDO
+        if (!empty($copyFilter) && !empty($editorFilter)) {
+            $copyIds = is_array($copyFilter) ? $copyFilter : [$copyFilter];
+            $editorIds = is_array($editorFilter) ? $editorFilter : [$editorFilter];
+
+            // escopo onde o criativo precisa satisfazer as duas condições de copy e editor
+            $query->where(function ($q) use ($copyIds, $editorIds) {
+
+                // FILTRO DE COPYWRITER (manual OU puxa automaticamente)
+                $q->where(function ($sub) use ($copyIds) {
+                    $sub->whereIn('ca.copywriter_id', $copyIds)
+                        ->orWhereExists(function ($exists) use ($copyIds) {
+                            $exists->select(DB::raw(1))
+                                ->from('user_tasks as ut_copy')
+                                ->join('sub_tasks as st_copy', 'st_copy.id', '=', 'ut_copy.sub_task_id')
+                                ->join('user_roles as ur_copy', 'ur_copy.user_id', '=', 'ut_copy.user_id')
+                                ->whereColumn('st_copy.task_id', 't.id')
+                                ->whereIn('ut_copy.user_id', $copyIds)
+                                ->where('ur_copy.role_id', 2);
+                        });
+                });
+
+                // FILTRO DE EDITOR (manual OU puxa automaticamente)
+                $q->where(function ($sub) use ($editorIds) {
+                    $sub->whereIn('ca.editor_id', $editorIds)
+                        ->orWhereExists(function ($exists) use ($editorIds) {
+                            $exists->select(DB::raw(1))
+                                ->from('user_tasks as ut_editor')
+                                ->join('sub_tasks as st_editor', 'st_editor.id', '=', 'ut_editor.sub_task_id')
+                                ->join('user_roles as ur_editor', 'ur_editor.user_id', '=', 'ut_editor.user_id')
+                                ->whereColumn('st_editor.task_id', 't.id')
+                                ->whereIn('ut_editor.user_id', $editorIds)
+                                ->where('ur_editor.role_id', 3);
+                        });
+                });
+            });
         }
 
+
+
+
+        // FILTRO DE NICHO CORRETO FUNCIONANDO
+        if ($nicho && $nicho !== 'TOTAL') {
+            $query->where('n.name', $nicho);
+        }
+
+
+        $tipo = $request->input('creation_type');
+
+        if ($tipo && $tipo !== 'TOTAL') {
+            $query->having('tipo', $tipo);
+        }
 
 
         $creatives = $query
-            ->groupBy('t.code')
+            ->groupBy('t.code', 'n.name')
             ->orderByDesc(DB::raw('SUM(r.profit)'))
             ->get();
+
+        // SEM CRIATIVO REPETIDO E IGUAL DENTRO DA PRODUCAO DOS CRIATIVOS/TABELA
+        $creatives = $creatives
+            ->reverse()
+            ->unique('creative_code')
+            ->values()
+            ->reverse();
 
 
 
@@ -1409,49 +1518,49 @@ class AdminController extends Controller
 
     // Funcao para copy/editor MANUALEMENTE pelo sistema
     public function assignCreative(Request $request)
-{
-    $creativeCode = $request->creative_code;
-    
-    // array criado
-    $updateData = [
-        'updated_at' => now(),
-    ];
+    {
+        $creativeCode = $request->creative_code;
 
-    // se veio copywriter no request adiciona ao update
-    if ($request->has('copywriter_id') && $request->copywriter_id) {
-        $updateData['copywriter_id'] = $request->copywriter_id;
+        // array criado
+        $updateData = [
+            'updated_at' => now(),
+        ];
+
+        // se veio copywriter no request adiciona ao update
+        if ($request->has('copywriter_id') && $request->copywriter_id) {
+            $updateData['copywriter_id'] = $request->copywriter_id;
+        }
+
+        // se veio editor no request adiciona ao update
+        if ($request->has('editor_id') && $request->editor_id) {
+            $updateData['editor_id'] = $request->editor_id;
+        }
+
+
+        DB::table('creative_assignments')->updateOrInsert(
+            ['creative_code' => $creativeCode],
+            $updateData
+        );
+
+        // busca o nome do copywriter e editor para return
+        $copyName = null;
+        $editorName = null;
+
+        if (isset($updateData['copywriter_id'])) {
+            $copyName = DB::table('users')->where('id', $request->copywriter_id)->value('name');
+        }
+        if (isset($updateData['editor_id'])) {
+            $editorName = DB::table('users')->where('id', $request->editor_id)->value('name');
+        }
+
+        return response()->json([
+            'success' => true,
+            'copywriter' => $copyName,
+            'editor' => $editorName
+        ]);
     }
 
-    // se veio editor no request adiciona ao update
-    if ($request->has('editor_id') && $request->editor_id) {
-        $updateData['editor_id'] = $request->editor_id;
-    }
 
-    
-    DB::table('creative_assignments')->updateOrInsert(
-        ['creative_code' => $creativeCode],
-        $updateData
-    );
-
-    // busca o nome do copywriter e editor para return
-    $copyName = null;
-    $editorName = null;
-
-    if (isset($updateData['copywriter_id'])) {
-        $copyName = DB::table('users')->where('id', $request->copywriter_id)->value('name');
-    }
-    if (isset($updateData['editor_id'])) {
-        $editorName = DB::table('users')->where('id', $request->editor_id)->value('name');
-    }
-
-    return response()->json([
-        'success' => true,
-        'copywriter' => $copyName,
-        'editor' => $editorName
-    ]);
-}
-
-    
 
 
     public function synergyData(Request $request, $type = 'editors')
