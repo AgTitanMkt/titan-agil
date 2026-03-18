@@ -3,9 +3,9 @@ pipeline {
 
     stages {
 
-        stage('Force Clean') {
+        stage('Clean') {
             steps {
-                sh 'sudo rm -rf /var/lib/jenkins/workspace/Titan-Agil/* || true'
+                cleanWs()
             }
         }
 
@@ -40,18 +40,31 @@ pipeline {
 
                     sed -i "s|REDTRACK_BASE_URL=.*|REDTRACK_BASE_URL=$REDTRACK_BASE_URL|" .env
                     sed -i "s|REDTRACK_API_KEY=.*|REDTRACK_API_KEY=$REDTRACK_API_KEY|" .env
+
+                    echo "APP_URL=https://dash.agenciatitandev.com" >> .env
                     '''
                 }
             }
         }
 
-        stage('Build & Up') {
+        stage('Build Frontend') {
             steps {
-                sh 'docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build'
+                sh '''
+                npm install
+                npm run build
+                '''
             }
         }
 
-        stage('Wait App Ready') {
+        stage('Deploy Containers') {
+            steps {
+                sh '''
+                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
+                '''
+            }
+        }
+
+        stage('Wait App') {
             steps {
                 sh '''
                 until docker compose -p laravel_docker exec -T app php -v > /dev/null 2>&1; do
@@ -73,6 +86,5 @@ pipeline {
                 '''
             }
         }
-
     }
 }
