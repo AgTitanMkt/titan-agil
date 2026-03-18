@@ -10,7 +10,7 @@ services:
     restart: always
     networks:
       - titan_network
-
+      
   nginx:
     image: nginx:latest
     container_name: laravel_nginx
@@ -19,6 +19,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
       - ./docker/nginx/dash.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
