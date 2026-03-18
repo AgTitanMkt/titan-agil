@@ -1,34 +1,32 @@
-name: laravel_docker
-
-networks:
-  titan_network:
-    external: true
+version: '3.8'
 
 services:
 
   app:
     build:
-      context: ..
+      context: .
       dockerfile: docker/php/Dockerfile
+    container_name: laravel_app
     restart: always
-    volumes:
-      - ..:/var/www
     networks:
       - titan_network
 
   nginx:
     image: nginx:latest
+    container_name: laravel_nginx
     restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ..:/var/www
-      - ./nginx/dash.conf:/etc/nginx/conf.d/dash.conf
-      - /var/lib/jenkins/workspace/titan-vsl/docker/nginx/vsl.conf:/etc/nginx/conf.d/vsl.conf
+      - ./docker/nginx/dash.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
     depends_on:
       - app
     networks:
       - titan_network
+
+networks:
+  titan_network:
+    external: true

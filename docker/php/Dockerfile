@@ -1,45 +1,30 @@
 FROM php:8.3-fpm
 
+# dependências do sistema
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    zip \
-    unzip \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev
+    git curl zip unzip \
+    libpng-dev libonig-dev libxml2-dev
 
-# Node
+# Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# extensões php
+# extensões PHP
 RUN docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd
+    pdo_mysql mbstring exif pcntl bcmath gd
 
-# composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# otimização de cache
-COPY composer.json composer.lock ./
-
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction \
-    --no-scripts
-
-# agora copia o resto do projeto
+# copia tudo
 COPY . .
 
-# build frontend
+# instala backend
+RUN composer install --no-dev --optimize-autoloader
+
+# build frontend (Vite 🔥)
 RUN npm install && npm run build
 
 # permissões

@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -44,60 +45,27 @@ pipeline {
             }
         }
 
-        stage('Build Containers') {
+        stage('Build Image') {
+            steps {
+                sh 'docker compose -p laravel_docker -f docker/docker-compose.yml build --no-cache'
+            }
+        }
+
+        stage('Deploy Containers') {
             steps {
                 sh '''
-                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
-                echo "Aguardando containers iniciarem..."
-                sleep 10
+                docker compose -p laravel_docker -f docker/docker-compose.yml down
+                docker compose -p laravel_docker -f docker/docker-compose.yml up -d
                 '''
             }
         }
 
-        stage('Laravel Install') {
-            steps {
-                sh 'docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader'
-            }
-        }
-
-        stage('Frontend Build') {
+        stage('Laravel Setup') {
             steps {
                 sh '''
-                echo "Instalando dependências npm..."
-                docker compose -p laravel_docker exec -T app npm install --verbose || { echo "❌ npm install falhou"; exit 1; }
-                
-                echo "Buildando assets com Vite..."
-                docker compose -p laravel_docker exec -T app npm run build --verbose || { echo "❌ npm run build falhou"; exit 1; }
-                
-                echo "Verificando se assets foram gerados..."
-                docker compose -p laravel_docker exec -T app test -d public/build || { echo "❌ Pasta public/build não foi criada!"; exit 1; }
-                docker compose -p laravel_docker exec -T app test -f public/build/manifest.json || { echo "❌ manifest.json não foi gerado!"; exit 1; }
-                
-                echo "Assets gerados com sucesso!"
-                docker compose -p laravel_docker exec -T app ls -la public/build/ | head -20
-                '''
-            }
-        }
-
-        stage('Gerar APP_KEY') {
-            steps {
-                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate'
-            }
-        }
-
-        stage('Laravel Migrate') {
-            steps {
-                sh 'docker compose -p laravel_docker exec -T app php artisan migrate --force'
-            }
-        }
-
-        stage('Laravel Optimize') {
-            steps {
-                sh '''
-                docker compose -p laravel_docker exec -T app php artisan optimize:clear
-                docker compose -p laravel_docker exec -T app php artisan config:cache
-                docker compose -p laravel_docker exec -T app php artisan route:cache
-                docker compose -p laravel_docker exec -T app php artisan view:cache
+                docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan key:generate
+                docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan migrate --force
+                docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan optimize
                 '''
             }
         }
@@ -105,11 +73,7 @@ pipeline {
         stage('Verificação Final') {
             steps {
                 sh '''
-                echo "Verificando aplicação..."
-                docker compose -p laravel_docker exec -T app php artisan --version
-                echo "Assets gerados:"
-                docker compose -p laravel_docker exec -T app find public/build -type f | wc -l
-                echo "Deploy concluído com sucesso!"
+                docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan --version
                 '''
             }
         }
@@ -118,9 +82,7 @@ pipeline {
     post {
         failure {
             sh '''
-            echo "Deploy falhou!"
-            echo "Verificando logs do Docker..."
-            docker compose -p laravel_docker logs app | tail -50
+            docker compose -p laravel_docker -f docker/docker-compose.yml logs app | tail -50
             '''
         }
     }
