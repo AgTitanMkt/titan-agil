@@ -3,7 +3,7 @@ pipeline {
 
     stages {
 
-        stage('Clean') {
+        stage('Clean Workspace') {
             steps {
                 cleanWs()
             }
@@ -40,36 +40,60 @@ pipeline {
 
                     sed -i "s|REDTRACK_BASE_URL=.*|REDTRACK_BASE_URL=$REDTRACK_BASE_URL|" .env
                     sed -i "s|REDTRACK_API_KEY=.*|REDTRACK_API_KEY=$REDTRACK_API_KEY|" .env
-
-                    echo "APP_URL=https://dash.agenciatitandev.com" >> .env
                     '''
                 }
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                sh '''
-                npm install
-                npm run build
-                '''
-            }
-        }
-
-        stage('Deploy Containers') {
+        stage('Build Containers') {
             steps {
                 sh '''
                 docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
+
+                echo "Aguardando container app ficar pronto..."
+
+                until docker compose -p laravel_docker exec -T app php -v > /dev/null 2>&1; do
+                  sleep 2
+                done
+
+                echo "Container pronto"
                 '''
             }
         }
 
-        stage('Wait App') {
+        stage('Laravel Install') {
             steps {
                 sh '''
-                until docker compose -p laravel_docker exec -T app php -v > /dev/null 2>&1; do
-                    sleep 3
-                done
+                echo "Rodando composer install..."
+
+                docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader \
+                || { echo "composer install falhou"; exit 1; }
+
+                echo "Verificando vendor..."
+
+                docker compose -p laravel_docker exec -T app test -f /var/www/vendor/autoload.php \
+                || { echo "vendor não foi gerado"; exit 1; }
+
+                echo "Composer OK"
+                '''
+            }
+        }
+
+        stage('Frontend Build') {
+            steps {
+                sh '''
+                echo "Instalando npm..."
+                docker compose -p laravel_docker exec -T app npm install \
+                || { echo "npm install falhou"; exit 1; }
+
+                echo "Buildando assets..."
+                docker compose -p laravel_docker exec -T app npm run build \
+                || { echo "npm build falhou"; exit 1; }
+
+                docker compose -p laravel_docker exec -T app test -d public/build \
+                || { echo "build não gerado"; exit 1; }
+
+                echo "Frontend OK"
                 '''
             }
         }
@@ -78,13 +102,40 @@ pipeline {
             steps {
                 sh '''
                 docker compose -p laravel_docker exec -T app php artisan key:generate --force
+
                 docker compose -p laravel_docker exec -T app php artisan migrate --force
+
                 docker compose -p laravel_docker exec -T app php artisan optimize:clear
                 docker compose -p laravel_docker exec -T app php artisan config:cache
                 docker compose -p laravel_docker exec -T app php artisan route:cache
                 docker compose -p laravel_docker exec -T app php artisan view:cache
+
+                echo "Laravel OK"
                 '''
             }
+        }
+
+        stage('Verificação Final') {
+            steps {
+                sh '''
+                echo "Verificando app..."
+
+                docker compose -p laravel_docker exec -T app php artisan --version
+
+                docker compose -p laravel_docker exec -T app ls -la public/build | head -20
+
+                echo "Deploy finalizado com sucesso"
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+            sh '''
+            echo "Deploy falhou"
+            docker compose -p laravel_docker logs app | tail -50
+            '''
         }
     }
 }
