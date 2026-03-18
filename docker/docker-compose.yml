@@ -4,13 +4,13 @@ services:
 
   app:
     build:
-      context: .
+      context: ..
       dockerfile: docker/php/Dockerfile
     container_name: laravel_app
     restart: always
     networks:
       - titan_network
-      
+
   nginx:
     image: nginx:latest
     container_name: laravel_nginx
