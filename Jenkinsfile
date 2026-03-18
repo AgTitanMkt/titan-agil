@@ -44,6 +44,15 @@ pipeline {
             }
         }
 
+        stage('Frontend Build') {
+            steps {
+                sh '''
+                npm install
+                npm run build
+                '''
+            }
+        }
+
         stage('Build + Deploy') {
             steps {
                 sh '''
