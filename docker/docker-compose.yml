@@ -26,12 +26,8 @@ services:
     depends_on:
       - app
     networks:
-<<<<<<< HEAD
-      - titan_network
-=======
       - titan_network
 
 networks:
   titan_network:
     external: true
->>>>>>> feature/validacao-usuario

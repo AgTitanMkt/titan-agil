@@ -29,11 +29,6 @@ stages {
                 string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
             ]) {
                 sh '''
-<<<<<<< HEAD
-                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
-                echo "Aguardando containers iniciarem..."
-                sleep 10
-=======
                 cd /var/lib/jenkins/workspace/Titan-Agil
 
                 cp .env.example .env
@@ -50,7 +45,6 @@ stages {
 
                 sed -i "s|REDTRACK_BASE_URL=.*|REDTRACK_BASE_URL=$REDTRACK_BASE_URL|" .env
                 sed -i "s|REDTRACK_API_KEY=.*|REDTRACK_API_KEY=$REDTRACK_API_KEY|" .env
->>>>>>> feature/validacao-usuario
                 '''
             }
         }
@@ -67,25 +61,6 @@ stages {
         }
     }
 
-<<<<<<< HEAD
-        stage('Frontend Build') {
-            steps {
-                sh '''
-                echo "Instalando dependências npm..."
-                docker compose -p laravel_docker exec -T app npm install --verbose || { echo "❌ npm install falhou"; exit 1; }
-                
-                echo "Buildando assets com Vite..."
-                docker compose -p laravel_docker exec -T app npm run build --verbose || { echo "❌ npm run build falhou"; exit 1; }
-                
-                echo "Verificando se assets foram gerados..."
-                docker compose -p laravel_docker exec -T app test -d public/build || { echo "❌ Pasta public/build não foi criada!"; exit 1; }
-                docker compose -p laravel_docker exec -T app test -f public/build/manifest.json || { echo "❌ manifest.json não foi gerado!"; exit 1; }
-                
-                echo "Assets gerados com sucesso!"
-                docker compose -p laravel_docker exec -T app ls -la public/build/ | head -20
-                '''
-            }
-=======
     stage('Build + Deploy') {
         steps {
             sh '''
@@ -96,7 +71,6 @@ stages {
 
             sleep 10
             '''
->>>>>>> feature/validacao-usuario
         }
     }
 
@@ -121,43 +95,6 @@ stages {
             docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan --version
             '''
         }
-<<<<<<< HEAD
-
-        stage('Laravel Optimize') {
-            steps {
-                sh '''
-                docker compose -p laravel_docker exec -T app php artisan optimize:clear
-                docker compose -p laravel_docker exec -T app php artisan config:cache
-                docker compose -p laravel_docker exec -T app php artisan route:cache
-                docker compose -p laravel_docker exec -T app php artisan view:cache
-                '''
-            }
-        }
-
-        stage('Verificação Final') {
-            steps {
-                sh '''
-                echo "Verificando aplicação..."
-                docker compose -p laravel_docker exec -T app php artisan --version
-                echo "Assets gerados:"
-                docker compose -p laravel_docker exec -T app find public/build -type f | wc -l
-                echo "Deploy concluído com sucesso!"
-                '''
-            }
-        }
-    }
-
-    post {
-        failure {
-            sh '''
-            echo "Deploy falhou!"
-            echo "Verificando logs do Docker..."
-            docker compose -p laravel_docker logs app | tail -50
-            '''
-        }
-    }
-}
-=======
     }
 }
 
@@ -172,4 +109,3 @@ post {
 }
 
 }
->>>>>>> feature/validacao-usuario
