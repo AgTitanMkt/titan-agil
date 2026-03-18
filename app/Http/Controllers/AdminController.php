@@ -491,8 +491,7 @@ class AdminController extends Controller
         string $type = 'editors',
         string $collaborator = 'IN'
     ) {
-        $collaborator = $request->input('collaborator', $collaborator);
-
+        // 🔹 Validar o parâmetro - vem via URL, não via query string
         $collaborator = in_array($collaborator, ['IN', 'EX'])
             ? $collaborator
             : 'IN';
@@ -1178,8 +1177,7 @@ class AdminController extends Controller
     // Estrutura da Rota Creatives: Ler filtros da request; Normalizar Datas; Carregar Nichos; Carregar agentes; Enviar tudo para a view e Copy/editor MANUALMENTE pelo sistema
     public function creatives(Request $request, string $collaborator = 'IN')
     {
-
-        $collaborator = $request->input('collaborator', $collaborator);
+        // 🔹 Validar o parâmetro - vem via URL, não via query string
         $collaborator = in_array($collaborator, ['IN', 'EX']) ? $collaborator : 'IN';
 
         $type = $request->get('type', 'copywriters');
