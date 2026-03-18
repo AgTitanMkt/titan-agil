@@ -119,6 +119,39 @@
 
                 </form>
             </nav>
+
+
+            {{-- CONTAINER DE ALERTA PARA APLICAR OS DOIS AGENTES --}}
+
+            {{-- ERRO APOS FILTRAR POR APENAS UM AGENTE --}}
+            @if (session('error_cohesion'))
+                <div class="alert-custom-container">
+                    <div class="shadow-lg alert-custom">
+                        <div class="alert-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="alert-content">
+                            {{ session('error_cohesion') }}
+                        </div>
+                        <button type="button" class="alert-close" onclick="this.parentElement.parentElement.remove();">
+                            &times;
+                        </button>
+                    </div>
+                </div>
+            @endif
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(function() {
+                        let alert = document.querySelector('.alert-custom-container');
+                        if (alert) {
+                            alert.style.transition = "opacity 0.5s ease";
+                            alert.style.opacity = "0";
+                            setTimeout(() => alert.remove(), 500);
+                        }
+                    }, 5000);
+                });
+            </script>
+            {{-- FIM DO ALERT --}}
         </header>
 
         <section id="section-creatives" class="content-section">
@@ -410,71 +443,72 @@
                 }
             });
 
-        });
-    </script>
+        }); <
+        />
 
-    {{-- SCRIPT PARA SALVAR AUTOMATICO E MANUAL OS COPY/EDITORES NO SISTEMA --}}
+        {{-- SCRIPT PARA SALVAR AUTOMATICO E MANUAL OS COPY/EDITORES NO SISTEMA --}}
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
+            <
+            script >
+            document.addEventListener("DOMContentLoaded", function() {
 
-            document.querySelectorAll(".btn-save-agent").forEach(button => {
+                document.querySelectorAll(".btn-save-agent").forEach(button => {
 
-                button.addEventListener("click", async function() {
+                    button.addEventListener("click", async function() {
 
-                    const form = this.closest("form")
-                    const td = form.closest("td")
+                        const form = this.closest("form")
+                        const td = form.closest("td")
 
-                    const data = new FormData(form)
+                        const data = new FormData(form)
 
-                    try {
-                        const response = await fetch("{{ route('creative.assign') }}", {
-                            method: "POST",
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: data
-                        });
+                        try {
+                            const response = await fetch("{{ route('creative.assign') }}", {
+                                method: "POST",
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: data
+                            });
 
-                        if (!response.ok) throw new Error('Erro na resposta do servidor');
+                            if (!response.ok) throw new Error('Erro na resposta do servidor');
 
-                        const result = await response.json();
+                            const result = await response.json();
 
-                        if (result.success) {
-                            // pega o nome que voltou (seja copy ou editor)
-                            let name = result.copywriter || result.editor;
-                            if (name) {
-                                td.innerHTML = name; // substitui o form pelo nome salvo
-                                showToast();
+                            if (result.success) {
+                                // pega o nome que voltou (seja copy ou editor)
+                                let name = result.copywriter || result.editor;
+                                if (name) {
+                                    td.innerHTML = name; // substitui o form pelo nome salvo
+                                    showToast();
+                                }
                             }
+                        } catch (error) {
+                            console.error("Erro detalhado:", error);
+                            // erro para caso ser bo ver no devtools
+                            alert("Erro: " + error.message);
                         }
-                    } catch (error) {
-                        console.error("Erro detalhado:", error);
-                        // erro para caso ser bo ver no devtools
-                        alert("Erro: " + error.message);
-                    }
+
+                    })
 
                 })
 
+                function showToast() {
+
+                    const toast = document.getElementById("toast-success")
+
+                    toast.style.display = "block"
+
+                    setTimeout(() => {
+
+                        toast.style.display = "none"
+
+                    }, 2500)
+
+                }
+
             })
-
-            function showToast() {
-
-                const toast = document.getElementById("toast-success")
-
-                toast.style.display = "block"
-
-                setTimeout(() => {
-
-                    toast.style.display = "none"
-
-                }, 2500)
-
-            }
-
-        })
-    </script>
+    </>
 
     {{-- CABO. --}}
 
