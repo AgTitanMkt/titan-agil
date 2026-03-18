@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nicho;
 use App\Models\RedtrackReport;
+use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\ValidatedCreative;
@@ -14,6 +15,7 @@ use App\Services\Tasks\TasksService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -825,45 +827,23 @@ class AdminController extends Controller
 
     public function time(Request $request)
     {
-        // Subquery consolidando criativos (sem duplicar por source)
-        $sub = DB::table('vw_creatives_performance')
+        // 🚀 OTIMIZAÇÃO: Query simplificada e sem dupla agregação
+        $query = DB::table('vw_creatives_performance')
             ->select(
                 'role_id',
                 'role_name',
                 'user_id',
                 'agent_name',
-                'creative_code',
-                DB::raw('SUM(clicks) AS clicks'),
-                DB::raw('SUM(conversions) AS conversions'),
-                DB::raw('SUM(cost) AS cost'),
-                DB::raw('SUM(profit) AS profit'),
-                DB::raw('SUM(revenue) AS revenue'),
-                DB::raw('AVG(roi) AS roi'),
-                DB::raw('AVG(roas) AS roas'),
-                DB::raw('AVG(ctr) AS ctr'),
-                DB::raw('AVG(cpm) AS cpm')
-            )
-            ->groupBy('role_id', 'role_name', 'user_id', 'agent_name', 'creative_code');
-
-        // Query principal: consolida por pessoa dentro do time
-        $query = DB::query()
-            ->fromSub($sub, 't')
-            ->select(
-                'role_id',
-                'role_name',
-                'user_id',
-                'agent_name',
-                DB::raw('COUNT(creative_code) AS total_creatives'),
+                DB::raw('COUNT(DISTINCT creative_code) AS total_creatives'),
                 DB::raw('SUM(clicks) AS total_clicks'),
                 DB::raw('SUM(conversions) AS total_conversions'),
                 DB::raw('SUM(cost) AS total_cost'),
                 DB::raw('SUM(profit) AS total_profit'),
                 DB::raw('SUM(revenue) AS total_revenue'),
-                DB::raw('ROUND((AVG(profit) / NULLIF(AVG(cost), 0)), 4) AS avg_roi'),
                 DB::raw('ROUND((SUM(profit) / NULLIF(SUM(cost), 0)), 4) AS total_roi'),
-                DB::raw('ROUND(AVG(roas), 4) AS avg_roas'),
+                DB::raw('ROUND(AVG(roas), 2) AS avg_roas'),
                 DB::raw('ROUND(AVG(ctr), 4) AS avg_ctr'),
-                DB::raw('ROUND(AVG(cpm), 4) AS avg_cpm')
+                DB::raw('ROUND(AVG(cpm), 2) AS avg_cpm')
             )
             ->groupBy('role_id', 'role_name', 'user_id', 'agent_name');
 
@@ -883,7 +863,11 @@ class AdminController extends Controller
 
         // 🔹 Para dropdowns e filtros
         $roles = DB::table('roles')->select('id', 'title')->get();
-        $users = User::select('id', 'name', 'email')->get();
+        $users = User::select('id', 'name', 'email')
+            ->whereIn('id', function ($q) {
+                $q->select('user_id')->from('user_roles');
+            })
+            ->get();
 
         return view('admin.time', compact('teamPerformance', 'roles', 'users'));
     }
@@ -1509,5 +1493,65 @@ class AdminController extends Controller
                 'testados' => (int)$d->tested
             ])->values()
         );
+    }
+
+    /**
+     * Mostrar formulário para criar novo usuário
+     */
+    public function createUser()
+    {
+        $roles = Role::all();
+        return view('admin.users-create', compact('roles'));
+    }
+
+    /**
+     * Armazenar novo usuário no banco
+     */
+    public function storeUser(Request $request)
+    {
+        // Validar os dados
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
+            'role_id' => ['required', 'exists:roles,id'],
+        ], [
+            'name.required' => 'O nome é obrigatório',
+            'email.required' => 'O email é obrigatório',
+            'email.email' => 'O email deve ser válido',
+            'email.unique' => 'Este email já está registrado',
+            'password.required' => 'A senha é obrigatória',
+            'password.min' => 'A senha deve ter no mínimo 8 caracteres',
+            'role_id.required' => 'Você deve selecionar uma função',
+            'role_id.exists' => 'A função selecionada é inválida',
+        ]);
+
+        try {
+            // Criar o usuário
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'active' => true, // Ativa o usuário por padrão
+            ]);
+
+            // Atribuir role
+            $role = Role::find($validated['role_id']);
+            $user->roles()->attach($validated['role_id']);
+
+            // Redirecionar com mensagem de sucesso e dados do usuário
+            return redirect()->route('admin.users.create')
+                ->with('success', "Usuário '{$user->name}' criado com sucesso!")
+                ->with('newUser', [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'password' => $validated['password'], // Senha em texto plano para mostrar apenas uma vez
+                    'role' => $role->title,
+                ]);
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erro ao criar usuário: ' . $e->getMessage());
+        }
     }
 }

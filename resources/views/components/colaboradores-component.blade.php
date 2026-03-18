@@ -39,32 +39,197 @@
 
             <nav class="sidebar-nav">
                 <ul>
+                    {{-- ADMIN, HEAD, MANAGER -> DASHBOARD --}}
+                    @if(auth()->user()->hasAnyRole(['ADMIN', 'HEAD', 'MANAGER']))
+                    <li class="nav-item active">
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link">
+                            <i class="fas fa-chart-line nav-icon"></i> Dashboard
+                        </a>
+                    </li>
+
+                    {{-- Seção: DADOS (visível para ADMIN, HEAD, MANAGER) --}}
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fas fa-database nav-icon"></i> Dados
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('admin.time') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-users nav-icon"></i> Time
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.faturamento') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-wallet nav-icon"></i> Faturamento
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.gestores') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-users-cog nav-icon"></i> Gestores
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {{-- Seção: MÉTRICAS (visível para ADMIN, HEAD, MANAGER) --}}
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fas fa-chart-bar nav-icon"></i> Métricas
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('colaboradores.metas') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-bullseye nav-icon"></i> Metas
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.agents', ['copywriters', 'IN']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.agents', ['copywriters', 'EX']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-edit nav-icon"></i> Copywriters Externos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.agents', ['editors', 'IN']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-video nav-icon"></i> Editores Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'IN') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-layer-group nav-icon"></i> Criativos Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'EX') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-shapes nav-icon"></i> Criativos Externos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {{-- Gerenciar (apenas ADMIN e MANAGER) --}}
+                    @if(auth()->user()->hasAnyRole(['ADMIN', 'MANAGER']))
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fas fa-sliders-h nav-icon"></i> Gerenciar
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('admin.users.create') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-user-plus nav-icon"></i> Cadastrar novo usuário
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endif
+
+                    @else
+                    {{-- COPY, EDITOR, DEVELOPER, ANALYST, ASSISTANT -> METAS ao entrar --}}
                     <li class="nav-item active">
                         <a href="{{ route('colaboradores.metas') }}" class="nav-link">
-                            <i class="fas fa-bullseye nav-icon"></i> Metas - Copa Profit
+                            <i class="fas fa-bullseye nav-icon"></i> Metas
                         </a>
                     </li>
-                    </li>
-                </ul>
 
-
-                <div class="nav-divider"></div>
-                <p class="nav-section-title">PÁGINAS DE CONTA</p>
-
-                <ul>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-user-circle nav-icon"></i> Perfil
+                    {{-- COPYWRITER -> vê Copy (INT/EXT) e Criativos (INT/EXT) --}}
+                    @if(auth()->user()->hasRole('COPYWRITER'))
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fas fa-pen-fancy nav-icon"></i> Copywriting
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
                         </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('admin.agents', ['copywriters', 'IN']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.agents', ['copywriters', 'EX']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-pen-fancy nav-icon"></i> Copywriters Externos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'IN') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-layer-group nav-icon"></i> Criativos Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'EX') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-shapes nav-icon"></i> Criativos Externos
+                                </a>
+                            </li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-sign-in-alt nav-icon"></i> Sign In
+                    @endif
+
+                    {{-- EDITOR -> vê Editor (INT) e Criativos (INT/EXT) --}}
+                    @if(auth()->user()->hasRole('EDITOR'))
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fas fa-video nav-icon"></i> Edição
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
                         </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('admin.agents', ['editors', 'IN']) }}" class="nav-link submenu-link">
+                                    <i class="fas fa-video nav-icon"></i> Editores Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'IN') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-layer-group nav-icon"></i> Criativos Internos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.creatives', 'EX') }}" class="nav-link submenu-link">
+                                    <i class="fas fa-shapes nav-icon"></i> Criativos Externos
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+                    @endif
+
+                    @endif
+
+                    {{-- TAREFAS - Visível para TODOS --}}
+                    <li class="nav-item has-submenu">
+                        <a href="#" class="nav-link submenu-toggle">
+                            <i class="fa fa-bars nav-icon"></i> Tarefas
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+
+                        <ul class="submenu">
+                            <li>
+                                <a href="{{ route('tarefas.listagem') }}" class="nav-link submenu-link">
+                                    <i class="fa-solid fa-list nav-icon"></i> Listagem
+                                </a>
+                            </li>
+                            @if(auth()->user()->hasAnyRole(['ADMIN', 'HEAD', 'MANAGER', 'GESTOR']))
+                            <li>
+                                <a href="{{ route('tarefas.cadastro') }}" class="nav-link submenu-link">
+                                    <i class="fa-solid fa-file-circle-plus nav-icon"></i> Cadastro
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </li>
+
+                    {{-- IMPORTAR CSV - Visível para TODOS --}}
                     <li class="nav-item">
-                        <a href="/logout" class="nav-link">
-                            <i class="fas fa-rocket nav-icon"></i> Sign Up
+                        <a href="{{ route('admin.import.index') }}" class="nav-link">
+                            <i class="fas fa-file-excel nav-icon"></i> Importar CSV
                         </a>
                     </li>
                 </ul>
@@ -79,9 +244,25 @@
         <div class="main-content-area">
 
             <header class="header-bar">
-                <div class="header-user">
-                    <i class="fas fa-user-tie user-avatar-icon"></i>
-                    <span class="user-name">{{ auth()->user()->name }}</span>
+                <button class="menu-toggle" id="menuToggle">
+                    <div id="burger-toggle" class="burger-btn">
+                        <i class="fa fa-bars"></i>
+                    </div>
+                </button>
+
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="header-user">
+                        <i class="fas fa-user-tie user-avatar-icon"></i>
+                        <span class="user-name">{{ auth()->user()->name }}</span>
+                    </div>
+
+                    <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+
+                    <form id="logout-form" action="/logout" method="POST" style="display: none;">
+                        @csrf
+                    </form>
                 </div>
             </header>
 
@@ -109,77 +290,45 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-
-
-        <header class="header-bar">
-            <button class="menu-toggle" id="menuToggle">
-                <div id="burger-toggle" class="burger-btn">
-                    <i class="fa fa-bars"></i>
-                </div>
-            </button>
-
-            <div class="header-user">
-                <div class="user-avatar-icon">
-                    <i class="fas fa-user"></i>
-                </div>
-                <span class="user-name">{{ auth()->user()->name }}</span>
-            </div>
-        </header>
-
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', () => {
                 const menuToggle = document.getElementById('menuToggle');
                 const adminWrapper = document.querySelector('.admin-page-wrapper');
-                const mainContentArea = document.querySelector('.main-content-area');
+                const mainContent = document.querySelector('.main-content-area');
 
-                if (menuToggle && adminWrapper && mainContentArea) {
-
-                    // abrir/fechar o menu ao clicar no botao
-                    menuToggle.addEventListener('click', function() {
+                // Toggle menu on button click
+                if (menuToggle) {
+                    menuToggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
                         adminWrapper.classList.toggle('sidebar-open');
                     });
+                }
 
-                    // 
-                    mainContentArea.addEventListener('click', function(event) {
-                        // verifica se o sidebar esta aberto e se o clique foi fora do menu
+                // Close menu when clicking on content
+                if (mainContent) {
+                    mainContent.addEventListener('click', (event) => {
                         if (adminWrapper.classList.contains('sidebar-open')) {
-                            // impede o clique em elementos internos do conteudo de fechar o menu
                             if (event.target.closest('.page-content')) {
                                 adminWrapper.classList.remove('sidebar-open');
                             }
                         }
                     });
-
-                    // menu fechado em desktop
-                    window.addEventListener('resize', function() {
-                        if (window.innerWidth > 1024) {
-                            adminWrapper.classList.remove('sidebar-open');
-                        }
-                    });
                 }
-            });
-        </script>
-        {{-- script do burger --}}
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const burger = document.getElementById("burger-toggle");
-                const sidebar = document.querySelector(".sidebar");
-                const mainContent = document.querySelector(".main-content-area");
 
-                burger.addEventListener("click", () => {
-                    sidebar.classList.toggle("sidebar-open");
-                    mainContent.classList.toggle("sidebar-open");
+                // Close menu on resize to desktop
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 1024) {
+                        adminWrapper.classList.remove('sidebar-open');
+                    }
                 });
 
-                // Fechar clicando fora da sidebar (mobile)
-                document.addEventListener("click", (e) => {
-                    const clickedInsideSidebar = sidebar.contains(e.target);
-                    const clickedBurger = burger.contains(e.target);
-
-                    if (!clickedInsideSidebar && !clickedBurger) {
-                        sidebar.classList.remove("sidebar-open");
-                        mainContent.classList.remove("sidebar-open");
-                    }
+                // Submenu toggle
+                document.querySelectorAll('.submenu-toggle').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const item = btn.parentElement;
+                        item.classList.toggle('open');
+                    });
                 });
             });
         </script>

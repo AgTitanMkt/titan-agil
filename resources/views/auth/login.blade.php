@@ -65,10 +65,6 @@
                     </div>
                 </form>
 
-                <div class="register-link">
-                    Não tem uma conta? <a href="{{ route('register') }}" class="register-text">Cadastre-se</a>
-                </div>
-
                 @if (Route::has('password.request'))
                     <div class="forgot-password-link">
                         <a href="{{ route('password.request') }}" class="forgot-password-text">Esqueceu sua senha?</a>
