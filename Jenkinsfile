@@ -47,45 +47,45 @@ pipeline {
         stage('Build Containers') {
             steps {
                 sh '''
-                docker compose -f docker/docker-compose.yml up -d --build
+                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
                 '''
             }
         }
 
         stage('Laravel Install') {
             steps {
-                sh 'docker exec laravel_app composer install --no-dev --optimize-autoloader'
+                sh 'docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader'
             }
         }
 
         stage('Frontend Build') {
             steps {
                 sh '''
-                docker exec laravel_app npm install
-                docker exec laravel_app npm run build
+                docker compose -p laravel_docker exec -T app npm install
+                docker compose -p laravel_docker exec -T app npm run build
                 '''
             }
         }
 
         stage('Gerar APP_KEY') {
             steps {
-                sh 'docker exec laravel_app php artisan key:generate'
+                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate'
             }
         }
 
         stage('Laravel Migrate') {
             steps {
-                sh 'docker exec laravel_app php artisan migrate --force'
+                sh 'docker compose -p laravel_docker exec -T app php artisan migrate --force'
             }
         }
 
         stage('Laravel Optimize') {
             steps {
                 sh '''
-                docker exec laravel_app php artisan optimize:clear
-                docker exec laravel_app php artisan config:cache
-                docker exec laravel_app php artisan route:cache
-                docker exec laravel_app php artisan view:cache
+                docker compose -p laravel_docker exec -T app php artisan optimize:clear
+                docker compose -p laravel_docker exec -T app php artisan config:cache
+                docker compose -p laravel_docker exec -T app php artisan route:cache
+                docker compose -p laravel_docker exec -T app php artisan view:cache
                 '''
             }
         }
