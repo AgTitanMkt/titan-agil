@@ -27,21 +27,25 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# copia composer primeiro (cache de build)
+# cache de dependências
 COPY composer.json composer.lock ./
 
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
-    --no-interaction
+    --no-interaction \
+    --no-scripts
 
-# copia resto do projeto
+# copia projeto inteiro
 COPY . .
+
+# agora o artisan existe
+RUN php artisan package:discover
 
 # build frontend
 RUN npm install && npm run build
 
-# permissões corretas
+# permissões
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
