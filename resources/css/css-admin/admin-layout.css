@@ -22,30 +22,35 @@ html {
 
 html,
 body {
-    overflow-y: auto !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    height: 100vh;
 }
 
-.admin-page-wrapper {
-    display: flex;
-    /* ajustado para min-height: 100vh; */
-    min-height: 100vh;
-    position: relative;
-    /* background-image, cover, position, outros... */
+body {
     background-image: url('/resources/img/img-admin/Main\ Dashboard.png');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
 }
 
-.admin-page-wrapper::before {
+body::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.3);
-    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.admin-page-wrapper {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    position: relative;
 }
 
 
@@ -53,19 +58,22 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
+    flex-shrink: 0;
     background-color: var(--primary-dark);
     /* DEFINE FLEX PARA POSICIONAR HEADER/NAV/FOOTER */
     display: flex;
     flex-direction: column;
 
     height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 10;
+    position: relative;
     padding-top: 20px;
     box-shadow: 6px 0 15px rgba(0, 0, 0, 0.5);
-    transition: transform var(--transition-speed);
+    margin-left: calc(-1 * var(--sidebar-width));
+    transition: margin-left var(--transition-speed);
+}
+
+.sidebar-open .sidebar {
+    margin-left: 0;
 }
 
 /* header da sidebar */
@@ -202,18 +210,16 @@ body {
 
 
 
-/*  */
-
 /* MAIN/HEADER */
 
 .main-content-area {
-
     flex-grow: 1;
     position: relative;
-    z-index: 1;
-    width: calc(100% - var(--sidebar-width));
-    transition: transform var(--transition-speed);
-    /* empurrar o main-header */
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 /* HEADER BAR  */
@@ -222,57 +228,43 @@ body {
     background-color: rgba(6, 11, 38, 0.6);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-subtle);
-    position: fixed;
+    position: sticky;
     top: 0;
-    width: 100%;
-    z-index: 500;
+    z-index: 100;
 
     display: flex;
-    /* garante que o menu-toggle (se visivel) fique na esquerda e o user-header na direita */
-    justify-content: space-between;
     align-items: center;
     padding: 0 30px;
-    transition: left var(--transition-speed), width var(--transition-speed), transform var(--transition-speed);
+    gap: 20px;
+    flex-shrink: 0;
 }
 
-/* CTA DE MENU (Hidden in Desktop) */
+/* CTA DE MENU */
 .menu-toggle {
     background: none;
     border: none;
     color: var(--text-white);
     font-size: 1.5rem;
     cursor: pointer;
-    /* removido pois margin-right: auto; para usar justify-content: space-between; */
     padding: 10px;
     z-index: 600;
     transition: color 0.2s;
-}
-
-/* GARANTIR QUE O USUARIO ADMIN FIQUE NO CANTO DIREITO */
-.header-bar {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    /* empurra tudo para a direita */
-    padding-right: 40px;
+    justify-content: center;
+    margin-right: auto;
 }
 
-.header-user {
+.menu-toggle:hover {
+    color: var(--accent-blue);
+}
+
+.burger-btn {
     display: flex;
     align-items: center;
-    color: var(--text-white);
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 50px;
-    transition: background-color 0.2s;
-    margin-left: auto;
-    /* garante que fique no extremo direito */
+    justify-content: center;
 }
 
-
-/* PERFIL COM USER */
 .header-user {
     display: flex;
     align-items: center;
@@ -287,6 +279,22 @@ body {
 
 .header-user:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 123, 100, 0.1);
+    color: var(--text-white);
 }
 
 /* ICONE DE AVATAR BONECO */
@@ -312,8 +320,9 @@ body {
 
 /* AREA DO CONTENT */
 .page-content {
-    padding: calc(var(--header-height) + 30px) 30px 30px 30px;
+    padding: 30px 30px 30px 30px;
     min-height: 100vh;
+    flex-grow: 1;
 }
 
 
@@ -323,14 +332,16 @@ body {
 
 /* LOGICA DE ANIMACAO (via JS) */
 
-
 .sidebar-open .sidebar {
     transform: translateX(0);
 }
 
-.sidebar-open .main-content-area,
+.sidebar-open .main-content-area {
+    /* O main-content não deve se mover - o sidebar aparece em overlay */
+}
+
 .sidebar-open .header-bar {
-    transform: translateX(var(--sidebar-width));
+    /* O header não deve se mover - o sidebar aparece em overlay */
 }
 
 
@@ -350,17 +361,21 @@ body {
 /* Sidebar recolhida inicialmente */
 .sidebar {
     transform: translateX(-100%);
-    transition: transform .3s ease;
+    transition: transform 0.3s ease;
 }
 
 /* Sidebar aberta */
-.sidebar.sidebar-open {
+.sidebar-open .sidebar {
     transform: translateX(0);
 }
 
-/* Conteúdo empurrado quando sidebar abrir */
-.main-content-area.sidebar-open {
-    transition: margin-left .3s ease;
+/* Conteúdo - sem transições para evitar layout shifts */
+.main-content-area {
+    /* NO transitions - sidebar is pure overlay */
+}
+
+.header-bar {
+    /* NO transitions - sidebar is pure overlay */
 }
 
 /* Submenu container */
@@ -400,38 +415,42 @@ body {
 }
 
 
-/* Em telas menores — não empurra o conteúdo */
+/* MEDIA QUERY (max 1024px) - MOBILE */
 @media (max-width: 1024px) {
-    .main-content-area.sidebar-open {
-        margin-left: 0;
+    .admin-page-wrapper {
+        position: relative;
     }
-}
 
-/* MEDIA QUERY (max 1024px) */
-
-
-@media (max-width: 1024px) {
+    /* SIDEBAR: muda para fixed overlay em mobile */
+    .sidebar {
+        margin-left: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1001;
+        transform: translateX(-100%);
+        transition: transform var(--transition-speed);
+    }
 
     /* REVELA O CTA de toggle em mobile */
     .menu-toggle {
-        display: block;
+        display: flex;
     }
 
-    /* SIDEBAR (esconde por padrao) */
-    .sidebar {
-        transform: translateX(calc(var(--sidebar-width) * -1));
+    /* SIDEBAR ABRE: overlay appears */
+    .sidebar-open .sidebar {
+        transform: translateX(0);
+        margin-left: 0;
     }
 
     /* MAIN CONTENT (ocupa 100% da tela) */
     .main-content-area {
-        margin-left: 0;
         width: 100%;
     }
 
     /* HEADER BAR (ocupa 100% da tela) */
     .header-bar {
-        left: 0;
-        right: 0;
         width: 100%;
         padding: 0 15px;
     }

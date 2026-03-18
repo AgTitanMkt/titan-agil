@@ -29,8 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ], 403);
                 }
 
-                return redirect('/')
-                    ->with('error', 'Você não tem permissão para acessar essa área.');
+                return response()->view('errors.403', [], 403);
             }
         });
     })->create();
