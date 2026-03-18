@@ -64,12 +64,17 @@ pipeline {
         stage('Laravel Install') {
             steps {
                 sh '''
+                echo "Corrigindo permissões..."
+
+                docker compose -p laravel_docker exec -T app git config --global --add safe.directory /var/www
+
+                docker compose -p laravel_docker exec -T app mkdir -p /var/www/vendor
+                docker compose -p laravel_docker exec -T app chmod -R 775 /var/www
+
                 echo "Rodando composer install..."
 
                 docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader \
                 || { echo "composer install falhou"; exit 1; }
-
-                echo "Verificando vendor..."
 
                 docker compose -p laravel_docker exec -T app test -f /var/www/vendor/autoload.php \
                 || { echo "vendor não foi gerado"; exit 1; }
