@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     stages {
-        stage('Clean Workspace') {
+
+        stage('Force Clean') {
             steps {
-                cleanWs()
+                sh 'sudo rm -rf /var/lib/jenkins/workspace/Titan-Agil/* || true'
             }
         }
 
@@ -44,36 +45,27 @@ pipeline {
             }
         }
 
-        stage('Build Containers') {
+        stage('Build & Up') {
+            steps {
+                sh 'docker compose -p laravel_docker up -d --build'
+            }
+        }
+
+        stage('Wait App Ready') {
             steps {
                 sh '''
-                docker compose -p laravel_docker build --no-cache
-                docker compose -p laravel_docker up -d
+                until docker compose -p laravel_docker exec -T app php -v > /dev/null 2>&1; do
+                    sleep 3
+                done
                 '''
             }
         }
 
-        stage('Wait Containers') {
-            steps {
-                sh 'sleep 8'
-            }
-        }
-
-        stage('Gerar APP_KEY') {
-            steps {
-                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate --force'
-            }
-        }
-
-        stage('Laravel Migrate') {
-            steps {
-                sh 'docker compose -p laravel_docker exec -T app php artisan migrate --force'
-            }
-        }
-
-        stage('Laravel Optimize') {
+        stage('Laravel Setup') {
             steps {
                 sh '''
+                docker compose -p laravel_docker exec -T app php artisan key:generate --force
+                docker compose -p laravel_docker exec -T app php artisan migrate --force
                 docker compose -p laravel_docker exec -T app php artisan optimize:clear
                 docker compose -p laravel_docker exec -T app php artisan config:cache
                 docker compose -p laravel_docker exec -T app php artisan route:cache
@@ -81,7 +73,6 @@ pipeline {
                 '''
             }
         }
-
 
     }
 }
