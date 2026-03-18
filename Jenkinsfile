@@ -47,29 +47,21 @@ pipeline {
         stage('Build Containers') {
             steps {
                 sh '''
-                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
+                docker compose -p laravel_docker build --no-cache
+                docker compose -p laravel_docker up -d
                 '''
             }
         }
 
-        stage('Laravel Install') {
+        stage('Wait Containers') {
             steps {
-                sh 'docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader'
-            }
-        }
-
-        stage('Frontend Build') {
-            steps {
-                sh '''
-                docker compose -p laravel_docker exec -T app npm install
-                docker compose -p laravel_docker exec -T app npm run build
-                '''
+                sh 'sleep 8'
             }
         }
 
         stage('Gerar APP_KEY') {
             steps {
-                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate'
+                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate --force'
             }
         }
 

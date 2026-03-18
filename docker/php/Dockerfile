@@ -27,23 +27,24 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# otimização de cache
+# copia composer primeiro (cache de build)
 COPY composer.json composer.lock ./
 
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
-    --no-interaction \
-    --no-scripts
+    --no-interaction
 
-# agora copia o resto do projeto
+# copia resto do projeto
 COPY . .
 
 # build frontend
 RUN npm install && npm run build
 
-# permissões
+# permissões corretas
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+USER www-data
 
 CMD ["php-fpm"]

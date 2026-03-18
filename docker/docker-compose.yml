@@ -11,8 +11,6 @@ services:
       context: ..
       dockerfile: docker/php/Dockerfile
     restart: always
-    volumes:
-      - ..:/var/www
     networks:
       - titan_network
 
