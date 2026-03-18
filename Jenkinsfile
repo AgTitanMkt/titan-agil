@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -49,73 +48,56 @@ pipeline {
             steps {
                 sh '''
                 docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
-
-                echo "Aguardando container app ficar pronto..."
-
-                until docker compose -p laravel_docker exec -T app php -v > /dev/null 2>&1; do
-                  sleep 2
-                done
-
-                echo "Container pronto"
+                echo "Aguardando containers iniciarem..."
+                sleep 10
                 '''
             }
         }
 
         stage('Laravel Install') {
             steps {
-                sh '''
-                echo "Corrigindo permissões..."
-
-                docker compose -p laravel_docker exec -T app git config --global --add safe.directory /var/www
-
-                docker compose -p laravel_docker exec -T app mkdir -p /var/www/vendor
-                docker compose -p laravel_docker exec -T app chmod -R 775 /var/www
-
-                echo "Rodando composer install..."
-
-                docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader \
-                || { echo "composer install falhou"; exit 1; }
-
-                docker compose -p laravel_docker exec -T app test -f /var/www/vendor/autoload.php \
-                || { echo "vendor não foi gerado"; exit 1; }
-
-                echo "Composer OK"
-                '''
+                sh 'docker compose -p laravel_docker exec -T app composer install --no-dev --optimize-autoloader'
             }
         }
 
         stage('Frontend Build') {
             steps {
                 sh '''
-                echo "Instalando npm..."
-                docker compose -p laravel_docker exec -T app npm install \
-                || { echo "npm install falhou"; exit 1; }
-
-                echo "Buildando assets..."
-                docker compose -p laravel_docker exec -T app npm run build \
-                || { echo "npm build falhou"; exit 1; }
-
-                docker compose -p laravel_docker exec -T app test -d public/build \
-                || { echo "build não gerado"; exit 1; }
-
-                echo "Frontend OK"
+                echo "Instalando dependências npm..."
+                docker compose -p laravel_docker exec -T app npm install --verbose || { echo "❌ npm install falhou"; exit 1; }
+                
+                echo "Buildando assets com Vite..."
+                docker compose -p laravel_docker exec -T app npm run build --verbose || { echo "❌ npm run build falhou"; exit 1; }
+                
+                echo "Verificando se assets foram gerados..."
+                docker compose -p laravel_docker exec -T app test -d public/build || { echo "❌ Pasta public/build não foi criada!"; exit 1; }
+                docker compose -p laravel_docker exec -T app test -f public/build/manifest.json || { echo "❌ manifest.json não foi gerado!"; exit 1; }
+                
+                echo "Assets gerados com sucesso!"
+                docker compose -p laravel_docker exec -T app ls -la public/build/ | head -20
                 '''
             }
         }
 
-        stage('Laravel Setup') {
+        stage('Gerar APP_KEY') {
+            steps {
+                sh 'docker compose -p laravel_docker exec -T app php artisan key:generate'
+            }
+        }
+
+        stage('Laravel Migrate') {
+            steps {
+                sh 'docker compose -p laravel_docker exec -T app php artisan migrate --force'
+            }
+        }
+
+        stage('Laravel Optimize') {
             steps {
                 sh '''
-                docker compose -p laravel_docker exec -T app php artisan key:generate --force
-
-                docker compose -p laravel_docker exec -T app php artisan migrate --force
-
                 docker compose -p laravel_docker exec -T app php artisan optimize:clear
                 docker compose -p laravel_docker exec -T app php artisan config:cache
                 docker compose -p laravel_docker exec -T app php artisan route:cache
                 docker compose -p laravel_docker exec -T app php artisan view:cache
-
-                echo "Laravel OK"
                 '''
             }
         }
@@ -123,13 +105,11 @@ pipeline {
         stage('Verificação Final') {
             steps {
                 sh '''
-                echo "Verificando app..."
-
+                echo "Verificando aplicação..."
                 docker compose -p laravel_docker exec -T app php artisan --version
-
-                docker compose -p laravel_docker exec -T app ls -la public/build | head -20
-
-                echo "Deploy finalizado com sucesso"
+                echo "Assets gerados:"
+                docker compose -p laravel_docker exec -T app find public/build -type f | wc -l
+                echo "Deploy concluído com sucesso!"
                 '''
             }
         }
@@ -138,7 +118,8 @@ pipeline {
     post {
         failure {
             sh '''
-            echo "Deploy falhou"
+            echo "Deploy falhou!"
+            echo "Verificando logs do Docker..."
             docker compose -p laravel_docker logs app | tail -50
             '''
         }
