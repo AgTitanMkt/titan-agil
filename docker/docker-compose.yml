@@ -20,7 +20,7 @@ services:
       - "443:443"
     volumes:
       - /var/lib/jenkins/workspace/Titan-Agil/public:/var/www/public
-      - ./nginx/dash.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
     depends_on:
