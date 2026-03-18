@@ -2,6 +2,7 @@ pipeline {
 agent any
 
 stages {
+
     stage('Clean Workspace') {
         steps {
             cleanWs()
@@ -28,6 +29,8 @@ stages {
                 string(credentialsId: 'REDTRACK_API_KEY', variable: 'REDTRACK_API_KEY'),
             ]) {
                 sh '''
+                cd /var/lib/jenkins/workspace/Titan-Agil
+
                 cp .env.example .env
 
                 sed -i "s|APP_KEY=.*|APP_KEY=$APP_KEY|" .env
@@ -50,6 +53,8 @@ stages {
     stage('Frontend Build') {
         steps {
             sh '''
+            cd /var/lib/jenkins/workspace/Titan-Agil
+
             npm install
             npm run build
             '''
@@ -59,7 +64,11 @@ stages {
     stage('Build + Deploy') {
         steps {
             sh '''
+            cd /var/lib/jenkins/workspace/Titan-Agil
+
+            docker compose -p laravel_docker -f docker/docker-compose.yml down
             docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
+
             sleep 10
             '''
         }
@@ -68,6 +77,8 @@ stages {
     stage('Laravel Setup') {
         steps {
             sh '''
+            cd /var/lib/jenkins/workspace/Titan-Agil
+
             docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan config:clear
             docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan cache:clear
             docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan migrate --force
@@ -79,6 +90,8 @@ stages {
     stage('Verificação Final') {
         steps {
             sh '''
+            cd /var/lib/jenkins/workspace/Titan-Agil
+
             docker compose -p laravel_docker -f docker/docker-compose.yml exec -T app php artisan --version
             '''
         }
@@ -88,6 +101,8 @@ stages {
 post {
     failure {
         sh '''
+        cd /var/lib/jenkins/workspace/Titan-Agil
+
         docker compose -p laravel_docker -f docker/docker-compose.yml logs app | tail -50
         '''
     }
