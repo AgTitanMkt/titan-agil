@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -45,17 +44,11 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
-            steps {
-                sh 'docker compose -p laravel_docker -f docker/docker-compose.yml build --no-cache'
-            }
-        }
-
-        stage('Deploy Containers') {
+        stage('Build + Deploy') {
             steps {
                 sh '''
-                docker compose -p laravel_docker -f docker/docker-compose.yml down
-                docker compose -p laravel_docker -f docker/docker-compose.yml up -d
+                docker compose -p laravel_docker -f docker/docker-compose.yml up -d --build
+                sleep 10
                 '''
             }
         }
