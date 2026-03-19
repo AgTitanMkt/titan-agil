@@ -442,14 +442,12 @@
                     row.querySelector(".roi-value").classList.add("roi-negative");
                 }
             });
-
-        }); <
-        />
+        }); 
+        </script>
 
         {{-- SCRIPT PARA SALVAR AUTOMATICO E MANUAL OS COPY/EDITORES NO SISTEMA --}}
 
-            <
-            script >
+            <script>
             document.addEventListener("DOMContentLoaded", function() {
 
                 document.querySelectorAll(".btn-save-agent").forEach(button => {
@@ -508,7 +506,7 @@
                 }
 
             })
-    </>
+    </script>
 
     {{-- CABO. --}}
 
