@@ -157,7 +157,15 @@ body::before {
     color: var(--text-white);
 }
 
-.nav-item.active .nav-link {
+.nav-item.active > .nav-link {
+    background-color: var(--accent-blue);
+    color: var(--text-white);
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+/* submenu links ativos individualmente */
+.nav-link.submenu-link.active {
     background-color: var(--accent-blue);
     color: var(--text-white);
     font-weight: 700;
@@ -171,12 +179,11 @@ body::before {
     margin-right: 15px;
     font-size: 1.1rem;
     color: var(--text-light);
+}
 
-    /* cor branca */
-    /* icon ATIVO/HOVER fique branco apos clicar ou passar mouse */
-    .nav-item.active & {
-        color: var(--text-white);
-    }
+.nav-item.active > .nav-link .nav-icon,
+.nav-link.submenu-link.active .nav-icon {
+    color: var(--text-white);
 }
 
 .nav-divider {
