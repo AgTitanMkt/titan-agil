@@ -1623,62 +1623,61 @@ class AdminController extends Controller
     }
 
     /**
-     * Mostrar formulário para criar novo usuário
+     * Mostrar formulário para ativar usuário
      */
     public function createUser()
     {
         $roles = Role::all();
-        return view('admin.users-create', compact('roles'));
+        $inactiveUsers = User::where('active', 0)->get(['id', 'name', 'email']);
+        return view('admin.users-create', compact('roles', 'inactiveUsers'));
     }
 
     /**
-     * Armazenar novo usuário no banco
+     * Ativar usuário existente
      */
     public function storeUser(Request $request)
     {
-        // Validar os dados
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'user_id' => ['required', 'exists:users,id'],
             'role_id' => ['required', 'exists:roles,id'],
         ], [
-            'name.required' => 'O nome é obrigatório',
-            'email.required' => 'O email é obrigatório',
-            'email.email' => 'O email deve ser válido',
-            'email.unique' => 'Este email já está registrado',
-            'password.required' => 'A senha é obrigatória',
-            'password.min' => 'A senha deve ter no mínimo 8 caracteres',
+            'user_id.required' => 'Você deve selecionar um usuário',
+            'user_id.exists' => 'O usuário selecionado é inválido',
             'role_id.required' => 'Você deve selecionar uma função',
             'role_id.exists' => 'A função selecionada é inválida',
         ]);
 
+        $user = User::where('id', $validated['user_id'])->where('active', 0)->first();
+
+        if (!$user) {
+            return back()->with('error', 'O usuário selecionado já está ativo ou não existe.');
+        }
+
         try {
-            // Criar o usuário
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'active' => true, // Ativa o usuário por padrão
+            // Gerar senha no padrão #Agenciatitan + 4 dígitos
+            $plainPassword = '#Agenciatitan' . str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
+            // Ativar usuário e definir senha
+            $user->update([
+                'password' => Hash::make($plainPassword),
+                'active' => true,
+                'must_change_password' => true,
             ]);
 
-            // Atribuir role
+            // Atribuir role (remover roles antigas e atribuir nova)
             $role = Role::find($validated['role_id']);
-            $user->roles()->attach($validated['role_id']);
+            $user->roles()->sync([$validated['role_id']]);
 
-            // Redirecionar com mensagem de sucesso e dados do usuário
             return redirect()->route('admin.users.create')
-                ->with('success', "Usuário '{$user->name}' criado com sucesso!")
+                ->with('success', "Usuário '{$user->name}' ativado com sucesso!")
                 ->with('newUser', [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'password' => $validated['password'], // Senha em texto plano para mostrar apenas uma vez
+                    'password' => $plainPassword,
                     'role' => $role->title,
                 ]);
         } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'Erro ao criar usuário: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao ativar usuário: ' . $e->getMessage());
         }
     }
 }
