@@ -1,4 +1,6 @@
 <x-layout>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         .users-create-container {
             padding: 40px 30px;
@@ -157,16 +159,6 @@
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        .success-alert {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #86efac;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
-
         .error-alert {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -187,28 +179,6 @@
             color: #93c5fd;
         }
 
-        .btn-generate-password {
-            padding: 6px 12px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .btn-generate-password:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-generate-password:active {
-            transform: translateY(0);
-        }
-
         .btn-toggle-password {
             padding: 10px 12px;
             background: rgba(255, 255, 255, 0.1);
@@ -224,37 +194,6 @@
             background: rgba(255, 255, 255, 0.15);
             color: #e5e7eb;
             border-color: rgba(255, 255, 255, 0.25);
-        }
-
-        .password-strength {
-            margin-top: 8px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            display: none;
-        }
-
-        .password-strength.visible {
-            display: block;
-        }
-
-        .password-strength.weak {
-            background: rgba(239, 68, 68, 0.1);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .password-strength.medium {
-            background: rgba(245, 158, 11, 0.1);
-            color: #fcd34d;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .password-strength.strong {
-            background: rgba(34, 197, 94, 0.1);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .new-user-card {
@@ -337,12 +276,111 @@
         .btn-copy-data:active {
             transform: translateY(0);
         }
+
+        /* Select2 Custom Theme - Blue */
+        .select2-container--default .select2-selection--single {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 8px !important;
+            height: 46px !important;
+            padding: 6px 16px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #fff !important;
+            line-height: 32px !important;
+            font-size: 14px !important;
+            padding-left: 0 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #6b7280 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px !important;
+            right: 12px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #9ca3af transparent transparent transparent !important;
+        }
+
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: rgba(59, 130, 246, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            background: #1f2937 !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 8px !important;
+            overflow: hidden;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 6px !important;
+            color: #fff !important;
+            padding: 8px 12px !important;
+            font-size: 14px !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
+            color: #6b7280 !important;
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 10px 16px !important;
+            color: #e5e7eb !important;
+            font-size: 14px !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background: rgba(59, 130, 246, 0.3) !important;
+            color: #fff !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected="true"] {
+            background: rgba(59, 130, 246, 0.15) !important;
+            color: #93c5fd !important;
+        }
+
+        .select2-container--default .select2-results__option .user-option-email {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #4b5563;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #6b7280;
+        }
     </style>
 
     <div class="users-create-container">
         <div class="create-header">
-            <h1>Novo Usuário</h1>
-            <p>Crie uma nova conta de usuário e atribua uma função</p>
+            <h1>Ativar Usuário</h1>
+            <p>Selecione um usuário inativo para ativá-lo e atribuir uma função</p>
         </div>
 
         @if ($errors->any())
@@ -367,7 +405,7 @@
                     <div class="new-user-card">
                         <div class="new-user-header">
                             <i class="fas fa-user-check"></i>
-                            <h3>Dados do Novo Usuário</h3>
+                            <h3>Dados do Usuário Ativado</h3>
                         </div>
 
                         <div class="new-user-data">
@@ -384,7 +422,7 @@
                                 <div class="data-value">{{ session('newUser.email') }}</div>
                             </div>
                             <div class="data-item" style="grid-column: 1 / -1;">
-                                <div class="data-label">Senha</div>
+                                <div class="data-label">Senha (provisória - será alterada no primeiro acesso)</div>
                                 <div class="data-value" id="passwordDisplay">{{ session('newUser.password') }}</div>
                             </div>
                         </div>
@@ -397,229 +435,181 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.users.store') }}" method="POST" class="form-section">
-            @csrf
-
-            <!-- Nome -->
-            <div class="form-group">
-                <label for="name" class="form-label">Nome Completo</label>
-                <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    class="form-input @error('name') border-red-500 @enderror"
-                    placeholder="João Silva"
-                    value="{{ old('name') }}"
-                    required
-                >
-                @error('name')
-                    <span class="form-error">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    class="form-input @error('email') border-red-500 @enderror"
-                    placeholder="joao@example.com"
-                    value="{{ old('email') }}"
-                    required
-                >
-                @error('email')
-                    <span class="form-error">{{ $message }}</span>
-                @enderror
-                <span class="form-help">O email deve ser único</span>
-            </div>
-
-            <!-- Senha -->
-            <div class="form-group">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                    <label for="password" class="form-label" style="margin: 0;">Senha</label>
-                    <button
-                        type="button"
-                        id="generatePasswordBtn"
-                        class="btn-generate-password"
-                        title="Gerar senha forte automaticamente"
-                    >
-                        <i class="fas fa-magic" style="margin-right: 4px;"></i> Gerar Senha
-                    </button>
+        @if ($inactiveUsers->isEmpty())
+            <div class="form-section">
+                <div class="empty-state">
+                    <i class="fas fa-users-slash"></i>
+                    <h3>Nenhum usuário inativo</h3>
+                    <p>Todos os usuários do sistema já estão ativos.</p>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        class="form-input @error('password') border-red-500 @enderror"
-                        placeholder="••••••••"
-                        readonly
+            </div>
+        @else
+            <form action="{{ route('admin.users.store') }}" method="POST" class="form-section">
+                @csrf
+
+                <!-- Usuário Inativo -->
+                <div class="form-group">
+                    <label for="user_id" class="form-label">Selecionar Usuário Inativo</label>
+                    <select
+                        id="user_id"
+                        name="user_id"
+                        class="form-select @error('user_id') border-red-500 @enderror"
                         required
                     >
-                    <button
-                        type="button"
-                        id="togglePasswordVisibility"
-                        class="btn-toggle-password"
-                        title="Mostrar/Ocultar senha"
+                        <option value="">-- Buscar usuário --</option>
+                        @foreach($inactiveUsers as $user)
+                            <option value="{{ $user->id }}" data-email="{{ $user->email }}" @selected(old('user_id') == $user->id)>
+                                {{ $user->name }} ({{ $user->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('user_id')
+                        <span class="form-error">{{ $message }}</span>
+                    @enderror
+                    <span class="form-help">Busque pelo nome ou email do usuário</span>
+                </div>
+
+                <!-- Senha (readonly, gerada automaticamente) -->
+                <div class="form-group">
+                    <label class="form-label">Senha Provisória</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input
+                            id="password_preview"
+                            type="text"
+                            class="form-input"
+                            readonly
+                            style="font-family: 'Courier New', monospace; color: #93c5fd;"
+                        >
+                        <button
+                            type="button"
+                            id="togglePasswordVisibility"
+                            class="btn-toggle-password"
+                            title="Mostrar/Ocultar senha"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="form-help">A senha será gerada automaticamente no padrão #Agenciatitan + 4 dígitos. O usuário deverá alterá-la no primeiro acesso.</span>
+                </div>
+
+                <!-- Role -->
+                <div class="form-group">
+                    <label for="role_id" class="form-label">Função</label>
+                    <select
+                        id="role_id"
+                        name="role_id"
+                        class="form-select @error('role_id') border-red-500 @enderror"
+                        required
                     >
-                        <i class="fas fa-eye"></i>
+                        <option value="">-- Selecione uma função --</option>
+                        @forelse($roles as $role)
+                            <option value="{{ $role->id }}" @selected(old('role_id') == $role->id)>
+                                {{ $role->title }}
+                            </option>
+                        @empty
+                            <option disabled>Nenhuma role disponível</option>
+                        @endforelse
+                    </select>
+                    @error('role_id')
+                        <span class="form-error">{{ $message }}</span>
+                    @enderror
+                    <div class="role-info">
+                        <strong>Funções Disponíveis:</strong><br>
+                        • <strong>ADMIN</strong> - Papel de administrador<br>
+                        • <strong>COPYWRITER</strong> - Papel de copy<br>
+                        • <strong>EDITOR</strong> - Papel de editor<br>
+                        • <strong>DEVELOPER</strong> - Papel de desenvolvedor<br>
+                        • <strong>MANAGER</strong> - Papel de gestor<br>
+                        • <strong>HEAD</strong> - Papel de head<br>
+                        • <strong>ANALYST</strong> - Papel de analista<br>
+                        • <strong>ASSISTANT</strong> - Papel de assistente
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-user-check" style="margin-right: 8px;"></i> Ativar Usuário
                     </button>
+                    <a href="{{ route('admin.dashboard') }}" class="btn-cancel">
+                        Cancelar
+                    </a>
                 </div>
-                @error('password')
-                    <span class="form-error">{{ $message }}</span>
-                @enderror
-                <span class="form-help">Clique em "Gerar Senha" para criar uma senha forte automaticamente</span>
-            </div>
-
-            <!-- Role -->
-            <div class="form-group">
-                <label for="role_id" class="form-label">Função</label>
-                <select
-                    id="role_id"
-                    name="role_id"
-                    class="form-select @error('role_id') border-red-500 @enderror"
-                    required
-                >
-                    <option value="">-- Selecione uma função --</option>
-                    @forelse($roles as $role)
-                        <option value="{{ $role->id }}" @selected(old('role_id') == $role->id)>
-                            {{ $role->title }}
-                        </option>
-                    @empty
-                        <option disabled>Nenhuma role disponível</option>
-                    @endforelse
-                </select>
-                @error('role_id')
-                    <span class="form-error">{{ $message }}</span>
-                @enderror
-                <div class="role-info">
-                    <strong>Funções Disponíveis:</strong><br>
-                    • <strong>ADMIN</strong> - Papel de administrador<br>
-                    • <strong>COPYWRITER</strong> - Papel de copy<br>
-                    • <strong>EDITOR</strong> - Papel de editor<br>
-                    • <strong>DEVELOPER</strong> - Papel de desenvolvedor<br>
-                    • <strong>MANAGER</strong> - Papel de gestor<br>
-                    • <strong>HEAD</strong> - Papel de head<br>
-                    • <strong>ANALYST</strong> - Papel de analista<br>
-                    • <strong>ASSISTANT</strong> - Papel de assistente
-                </div>
-            </div>
-
-            <!-- Botões -->
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-plus" style="margin-right: 8px;"></i> Criar Usuário
-                </button>
-                <a href="{{ route('admin.dashboard') }}" class="btn-cancel">
-                    Cancelar
-                </a>
-            </div>
-        </form>
+            </form>
+        @endif
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Função para gerar senha forte
-        function generateStrongPassword(length = 16) {
-            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-            const numbers = '0123456789';
-            const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-            
-            const allChars = uppercase + lowercase + numbers + symbols;
-            let password = '';
-            
-            // Garantir que tem pelo menos um de cada tipo
-            password += uppercase[Math.floor(Math.random() * uppercase.length)];
-            password += lowercase[Math.floor(Math.random() * lowercase.length)];
-            password += numbers[Math.floor(Math.random() * numbers.length)];
-            password += symbols[Math.floor(Math.random() * symbols.length)];
-            
-            // Preencher o resto aleatoriamente
-            for (let i = password.length; i < length; i++) {
-                password += allChars[Math.floor(Math.random() * allChars.length)];
-            }
-            
-            // Embaralhar
-            return password.split('').sort(() => Math.random() - 0.5).join('');
-        }
-
-        // Botão gerar senha
-        document.getElementById('generatePasswordBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            const newPassword = generateStrongPassword(16);
-            document.getElementById('password').value = newPassword;
-            
-            // Feedback visual
-            const btn = e.target.closest('.btn-generate-password');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check" style="margin-right: 4px;"></i> Senha Gerada!';
-            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.background = '';
-            }, 2000);
-        });
-
-        // Toggle de visibilidade
-        document.getElementById('togglePasswordVisibility').addEventListener('click', (e) => {
-            e.preventDefault();
-            const passwordInput = document.getElementById('password');
-            const icon = e.currentTarget.querySelector('i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-
-        // Gerar senha automaticamente ao carregar a página
-        window.addEventListener('load', () => {
-            const passwordInput = document.getElementById('password');
-            if (!passwordInput.value) {
-                document.getElementById('generatePasswordBtn').click();
-            }
-        });
-
-        // Copiar dados do novo usuário
-        const copyDataBtn = document.getElementById('copyDataBtn');
-        if (copyDataBtn) {
-            copyDataBtn.addEventListener('click', () => {
-                const name = document.querySelector('.new-user-data .data-value')?.textContent || '';
-                const role = document.querySelectorAll('.new-user-data .data-value')[1]?.textContent || '';
-                const email = document.querySelectorAll('.new-user-data .data-value')[2]?.textContent || '';
-                const password = document.querySelectorAll('.new-user-data .data-value')[3]?.textContent || '';
-
-                const dataToCopy = `Credenciais de Acesso:
-
-URL: ${window.location.origin}/login
-Nome: ${name}
-Função: ${role}
-Email: ${email}
-Senha: ${password}`;
-
-                navigator.clipboard.writeText(dataToCopy).then(() => {
-                    // Feedback visual
-                    const originalText = copyDataBtn.innerHTML;
-                    copyDataBtn.innerHTML = '<i class="fas fa-check" style="margin-right: 8px;"></i> Copiado!';
-                    copyDataBtn.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
-                    
-                    setTimeout(() => {
-                        copyDataBtn.innerHTML = originalText;
-                        copyDataBtn.style.background = '';
-                    }, 2500);
-                }).catch(err => {
-                    console.error('Erro ao copiar:', err);
-                    alert('Erro ao copiar dados. Tente novamente.');
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Select2
+            $('#user_id').select2({
+                placeholder: '-- Buscar usuário pelo nome ou email --',
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() { return 'Nenhum usuário inativo encontrado'; },
+                    searching: function() { return 'Buscando...'; }
+                }
             });
-        }
+
+            // Gerar preview da senha ao selecionar usuário
+            $('#user_id').on('change', function() {
+                const userId = $(this).val();
+                const preview = document.getElementById('password_preview');
+
+                if (userId) {
+                    const randomNum = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+                    preview.value = '#Agenciatitan' + randomNum;
+                } else {
+                    preview.value = '';
+                }
+            });
+
+            // Toggle visibilidade da senha
+            document.getElementById('togglePasswordVisibility')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                const input = document.getElementById('password_preview');
+                const icon = this.querySelector('i');
+
+                if (input.type === 'text') {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+
+            // Copiar dados do usuário ativado
+            const copyDataBtn = document.getElementById('copyDataBtn');
+            if (copyDataBtn) {
+                copyDataBtn.addEventListener('click', function() {
+                    const values = document.querySelectorAll('.new-user-data .data-value');
+                    const name = values[0]?.textContent?.trim() || '';
+                    const role = values[1]?.textContent?.trim() || '';
+                    const email = values[2]?.textContent?.trim() || '';
+                    const password = values[3]?.textContent?.trim() || '';
+
+                    const dataToCopy = `Credenciais de Acesso:\n\nURL: ${window.location.origin}/login\nNome: ${name}\nFunção: ${role}\nEmail: ${email}\nSenha: ${password}`;
+
+                    navigator.clipboard.writeText(dataToCopy).then(function() {
+                        const originalText = copyDataBtn.innerHTML;
+                        copyDataBtn.innerHTML = '<i class="fas fa-check" style="margin-right: 8px;"></i> Copiado!';
+                        copyDataBtn.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+
+                        setTimeout(function() {
+                            copyDataBtn.innerHTML = originalText;
+                            copyDataBtn.style.background = '';
+                        }, 2500);
+                    }).catch(function(err) {
+                        console.error('Erro ao copiar:', err);
+                    });
+                });
+            }
+        });
     </script>
 </x-layout>
