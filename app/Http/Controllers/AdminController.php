@@ -1226,9 +1226,25 @@ class AdminController extends Controller
                 $join->on(DB::raw('LEFT(t.code, 2)'), '=', 'n.sigla');
             })
 
+            // correcao para criativos VARIACOES APARECEREM NA LISTA + METRICAS CORRETAS
+            ->leftJoin(DB::raw("
+            (
+                SELECT 
+                    ad_code,
+                    MAX(source) as source,
+                    SUM(clicks) as total_clicks,
+                    SUM(conversions) as total_conversions,
+                    SUM(cost) as total_cost,
+                    SUM(profit) as total_profit
+                FROM redtrack_reports
+                WHERE date BETWEEN '{$startDate}' AND '{$endDate}'
+                GROUP BY ad_code
+            ) as r
+            "), 'r.ad_code', '=', 't.code')
 
 
-            ->leftJoin('redtrack_reports as r', 'r.ad_code', '=', 't.code')
+            // removido por duplicacao de join, foi la para cima fazendo o leftjoin com filtro de data junto 
+            // ->leftJoin('redtrack_reports as r', 'r.ad_code', '=', 't.code')
 
             ->leftJoin('validated_creatives as v', 'v.ad', '=', 't.code')
 
@@ -1245,7 +1261,7 @@ class AdminController extends Controller
                 // VARIACAO PEGA PELO ID V2,V3, V4, validar
                 DB::raw("
                 CASE 
-                    WHEN t.code REGEXP '-V[0-9]+' THEN 'variacao'
+                    WHEN t.code REGEXP '(^|[^A-Z])V[0-9]+' THEN 'variation'
                     ELSE 'original'
                 END as tipo
             "),
@@ -1270,21 +1286,21 @@ class AdminController extends Controller
                 ) as editor
                 "),
 
-                DB::raw('MAX(r.source) as source'),
+                // DB::raw('MAX(r.source) as source'),
 
-                DB::raw('SUM(r.clicks) as total_clicks'),
-                DB::raw('SUM(r.conversions) as total_conversions'),
-                DB::raw('SUM(r.cost) as total_cost'),
-                DB::raw('SUM(r.profit) as total_profit'),
+                'r.total_clicks',
+                'r.total_conversions',
+                'r.total_cost',
+                'r.total_profit',
 
-                DB::raw('ROUND(SUM(r.profit)/NULLIF(SUM(r.cost),0),4) as roi_decimal'),
+                DB::raw('ROUND(r.total_profit / NULLIF(r.total_cost,0),4) as roi_decimal'),
 
                 DB::raw('MAX(v.is_Potential) as potential'),
                 DB::raw('MAX(v.is_Validated) as validated')
 
-            )
+            );
 
-            ->whereBetween('r.date', [$startDate, $endDate]);
+        // ->whereBetween('r.date', [$startDate, $endDate]); foi la para cima fazendo o leftjoin com filtro de data junto - para os valores de criativos VARIACOES aparecerem
 
         //  PUXANDO SOMENTES OS ACTIVES + rota de IN - somente criativos dos IN; rota de EX - somente criativo dos EX
         // mostra apenas o criativo da rota atual (IN ou EX) e remove quem esta active = 0
@@ -1318,7 +1334,6 @@ class AdminController extends Controller
         $sourceCompare = $source ? strtolower(trim($source)) : 'total';
 
         if ($sourceCompare !== 'total') {
-
             $query->whereRaw('LOWER(TRIM(r.source)) LIKE ?', ["%{$sourceCompare}%"]);
         }
 
@@ -1373,13 +1388,22 @@ class AdminController extends Controller
         $tipo = $request->input('creation_type');
 
         if ($tipo && $tipo !== 'TOTAL') {
-            $query->having('tipo', $tipo);
+
+            if ($tipo === 'variation') {
+                $query->whereRaw("t.code REGEXP '(^|[^A-Z])V[0-9]+'");
+            }
+
+            // REGEXP '(^|[^A-Z])(^|[^A-Z])V[0-9]+'
+
+            if ($tipo === 'original') {
+                $query->whereRaw("t.code NOT REGEXP '(^|[^A-Z])V[0-9]+'");
+            }
         }
 
-
+        // METRICAS GERAIS
         $creatives = $query
-            ->groupBy('t.code', 'n.name')
-            ->orderByDesc(DB::raw('SUM(r.profit)'))
+            ->groupBy('t.code', 'n.name', 'r.total_clicks', 'r.total_conversions', 'r.total_cost', 'r.total_profit')
+            ->orderByDesc('r.total_profit')
             ->get();
 
         // SEM CRIATIVO REPETIDO E IGUAL DENTRO DA PRODUCAO DOS CRIATIVOS/TABELA
@@ -1393,7 +1417,11 @@ class AdminController extends Controller
 
         /* TOP CRIATIVOS  */
 
-        $topCreatives = $creatives->take(3);
+        $topCreatives = $creatives
+            ->sortByDesc('total_profit') // garante a ordem correta da lista, 3,2 1 critivos mais lucrativos
+            ->take(3)
+            ->values();
+        // $topCreatives = $creatives->take(3)->values();
 
 
         /* METRICAS GERAIS  */
@@ -1408,12 +1436,21 @@ class AdminController extends Controller
             ? ($totalValidados / $totalTestado) * 100
             : 0;
 
+        $totals = DB::table('redtrack_reports')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->selectRaw('
+                SUM(cost) as total_cost,
+                SUM(profit) as total_profit,
+                SUM(clicks) as total_clicks,
+                SUM(conversions) as total_conversions
+            ')
+            ->first();
 
 
-        $totalClicks = $creatives->sum('total_clicks');
-        $totalConversions = $creatives->sum('total_conversions');
-        $totalCost = $creatives->sum('total_cost');
-        $totalProfit = $creatives->sum('total_profit');
+        $totalClicks = $totals->total_clicks ?? 0;
+        $totalConversions = $totals->total_conversions ?? 0;
+        $totalCost = $totals->total_cost ?? 0;
+        $totalProfit = $totals->total_profit ?? 0;
 
         $totalROI = $totalCost > 0
             ? ($totalProfit / $totalCost) * 100

@@ -8,6 +8,7 @@ use App\Http\Controllers\RhController;
 use App\Http\Controllers\TarefasController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ImportVariationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -126,6 +127,13 @@ Route::middleware('auth')->group(function () {
         Route::post('preview', [ImportCSVController::class, 'preview'])->name('admin.import.preview');
         Route::post('store', [ImportCSVController::class, 'store'])->name('admin.import.store');
     });
+
+    // NOVA ROTA/TELA: IMPORTAR VARIAÇÕES 
+    Route::prefix('admin/import-variations')->middleware('role:ADMIN,HEAD,MANAGER')->group(function () {
+    Route::get('index', [ImportVariationController::class, 'index'])->name('admin.import.variations');
+    Route::post('preview', [ImportVariationController::class, 'preview'])->name('admin.import.variations.preview');
+    Route::post('store', [ImportVariationController::class, 'store'])->name('admin.import.variations.store');
+});
 
     Route::prefix('ajax')->group(function () {
         Route::get('criativos', [TarefasController::class, 'getCriativos'])->name('ajax.criativos');
