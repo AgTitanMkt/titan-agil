@@ -48,26 +48,49 @@ class ImportCSVController extends Controller
         $handle = fopen($path, 'r');
 
         $headers = fgetcsv($handle);
-        $headers = array_map('trim', $headers);
+        $headers = array_map(function ($header) {
+            $header = trim($header);
+            $header = preg_replace('/^\xEF\xBB\xBF/', '', $header); // remove BOM
+            return $header;
+        }, $headers);
 
         $preview = [];
 
         while (($row = fgetcsv($handle)) !== false) {
 
-            if (count($headers) !== count($row)) {
+            if (count($row) < count($headers)) {
+                if (count($headers) !== count($row)) {
+                    dd($headers, $row);
+                }
                 continue;
             }
+
+            $row = array_pad($row, count($headers), null);
 
             $line = array_combine($headers, $row);
 
             // EXTRAI A TAG
-            $copyTag = isset($line['COPY RESPONSÁVEL'])
-                ? explode(" ", trim($line['COPY RESPONSÁVEL']))[0]
-                : null;
+            $copyTag = null;
 
-            $editorTag = isset($line['EDITOR'])
-                ? explode(" ", trim($line['EDITOR']))[0]
-                : null;
+            if (!empty($line['COPY RESPONSÁVEL'])) {
+                $parts = preg_split('/\s+/', trim($line['COPY RESPONSÁVEL']));
+                $copyTag = strtoupper(trim($parts[0] ?? ''));
+
+                if ($copyTag === '' || strlen($copyTag) < 2) {
+                    $copyTag = null;
+                }
+            }
+
+            $editorTag = null;
+
+            if (!empty($line['EDITOR'])) {
+                $parts = preg_split('/\s+/', trim($line['EDITOR']));
+                $editorTag = strtoupper(trim($parts[0] ?? ''));
+
+                if ($editorTag === '' || strlen($editorTag) < 2) {
+                    $editorTag = null;
+                }
+            }
 
             // BUSCA O COPY PELAS TAGS JA CADADTRADAS NO BANCO
             $copy = $copyTag && isset($tags[$copyTag])
@@ -76,20 +99,25 @@ class ImportCSVController extends Controller
 
             // SE NAO ACHOU O COPY ELE IRA CRIA-LO
             if (!$copy && !empty($line['COPY RESPONSÁVEL'])) {
-                $copy = User::firstOrCreate(
-                    ['name' => trim($line['COPY RESPONSÁVEL'])],
-                    [
-                        'email' => strtolower($copyTag) . '@agencia-titan.com',
-                        // O tipo_colaborador o Model User.php define sozinho no booted(), ja coloquei la os prefixos $prefixos = ['GEX', 'BH', 'XMX', 'DAN', 'ROGERIO', 'IMP'];
-                        'password' => bcrypt('12345678'), // senha porque o laragon exive quando cria um user na hora
-                    ]
-                );
+                $email = $copyTag
+                    ? strtolower($copyTag) . '@agencia-titan.com'
+                    : null;
+
+                if ($email) {
+                    $copy = User::firstOrCreate(
+                        ['email' => $email], // EMAIL COMO CHAVE
+                        [
+                            'name' => trim($line['COPY RESPONSÁVEL']),
+                            'password' => bcrypt('12345678'),
+                        ]
+                    );
+                }
 
                 // CARGO DE COPY ID 2 PARA ELE APARECER NO SELECT
                 if ($copy->wasRecentlyCreated) {
-                    $copy->roles()->attach(2); 
+                    $copy->roles()->attach(2);
                 }
-                
+
                 // array de tags para nao repetir a query
                 $tags[$copyTag] = (object)['user' => $copy];
             }
@@ -101,17 +129,23 @@ class ImportCSVController extends Controller
 
             // SE NAO ACHOU O EDITOR ELE IRA CRIA-LO
             if (!$editor && !empty($line['EDITOR'])) {
-                $editor = User::firstOrCreate(
-                    ['name' => trim($line['EDITOR'])],
-                    [
-                        'email' => strtolower($editorTag) . '@agencia-titan.com',
-                        'password' => bcrypt('12345678'),
-                    ]
-                );
+                $email = $editorTag
+                    ? strtolower($editorTag) . '@agencia-titan.com'
+                    : null;
+
+                if ($email) {
+                    $editor = User::firstOrCreate(
+                        ['email' => $email], // EMAIL COMO CHAVE
+                        [
+                            'name' => trim($line['EDITOR']),
+                            'password' => bcrypt('12345678'),
+                        ]
+                    );
+                }
 
                 // CARGO DE EDITOR ID 3 PARA ELE APARECER NO SELECT 
                 if ($editor->wasRecentlyCreated) {
-                    $editor->roles()->attach(3); 
+                    $editor->roles()->attach(3);
                 }
 
                 $tags[$editorTag] = (object)['user' => $editor];
