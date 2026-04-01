@@ -238,38 +238,42 @@ class CopaProfitService
        MÉTODO FINAL — MONTA O OBJETO PARA A VIEW
     ============================================================ */
     public function make(): array
-    {
+{
+    $cacheKey = 'copa_profit_' . $this->quarterStart->format('Y-m') . '_' . $this->quarterEnd->format('Y-m');
+
+    return \Illuminate\Support\Facades\Cache::store('file')->remember($cacheKey, 300, function () {
         [$chartData, $maxValue] = $this->getMonthlyChart();
 
-        // Nome dos meses
         $months = [
             $this->quarterStart->translatedFormat('F'),
             $this->quarterStart->copy()->addMonth()->translatedFormat('F'),
             $this->quarterEnd->translatedFormat('F'),
         ];
-        return [
-            'totals'            => $this->getTotals(),
-            'startDate'         => $this->startDate,
-            'endDate'           => $this->endDate,
-            'chartData'         => $chartData,
-            'maxValue'          => $maxValue,
-            'aliases'           => $this->aliases,
-            'sources'           => $this->getAliasMetrics(),
-            'accountsByAlias'   => $this->getAccountsByAlias(),
-            'lastUpdate'        => RedtrackReport::max('updated_at'),
-            'podium'            => $this->getSquadPodium(),
-            'copiesPodium'      => $this->getAgentsPodiums()['copies'],
-            'editorsPodium'     => $this->getAgentsPodiums()['editors'],
-            'expectedMonthlyProfit' => 1000000,
 
-            // ⬇️ Dados adicionais para o header
-            'copaYear'          => $this->quarterStart->year,
-            'copaMonths'        => $months,
-            'copaPrize'         => 130000, // pode vir do banco depois
-            'editorPrize'       => 10000,
-            'copiePrize'        => 20000,
+        $agentsPodiums = $this->getAgentsPodiums();
+
+        return [
+            'totals'                => $this->getTotals(),
+            'startDate'             => $this->startDate,
+            'endDate'               => $this->endDate,
+            'chartData'             => $chartData,
+            'maxValue'              => $maxValue,
+            'aliases'               => $this->aliases,
+            'sources'               => $this->getAliasMetrics(),
+            'accountsByAlias'       => $this->getAccountsByAlias(),
+            'lastUpdate'            => RedtrackReport::max('updated_at'),
+            'podium'                => $this->getSquadPodium(),
+            'copiesPodium'          => $agentsPodiums['copies'],
+            'editorsPodium'         => $agentsPodiums['editors'],
+            'expectedMonthlyProfit' => 1000000,
+            'copaYear'              => $this->quarterStart->year,
+            'copaMonths'            => $months,
+            'copaPrize'             => 130000,
+            'editorPrize'           => 10000,
+            'copiePrize'            => 20000,
         ];
-    }
+    });
+}
 
 
     private function initials(string $name): string
