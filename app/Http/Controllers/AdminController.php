@@ -892,254 +892,140 @@ class AdminController extends Controller
     }
 
     public function dashboard(Request $request)
-    {
+{
+    $startDate = $request->input('date_from')
+        ? Carbon::parse($request->input('date_from'))->startOfDay()
+        : Carbon::now()->startOfMonth();
+
+    $endDate = $request->input('date_to')
+        ? Carbon::parse($request->input('date_to'))->endOfDay()
+        : Carbon::now()->endOfMonth();
+
+    $aliasFilter = $request->input('alias', []);
+
+    $cacheKey = 'dashboard_' . md5($startDate . $endDate . implode(',', $aliasFilter));
+
+    $cached = cache()->remember($cacheKey, 300, function () use ($startDate, $endDate, $aliasFilter) {
+
         $lastTask = RedtrackReport::orderBy('updated_at', 'desc')->first()->updated_at;
         $lastUpdate = Carbon::create($lastTask)->format('d/m/Y H:i:s');
-        $startDate = $request->input('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
-
-        $endDate = $request->input('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfMonth();
-        // filtros opcionais
-        $aliasFilter = $request->input('alias', []);
-
-        // =====================================================================
-        // 🔹 BUSCA DADOS GERAIS (totais no período)
-        // =====================================================================
 
         $reports = RedtrackReport::whereBetween('date', [$startDate, $endDate]);
-
         if (!empty($aliasFilter)) {
             $reports = $reports->whereIn('alias', $aliasFilter);
         }
-
         $totalCost = (clone $reports)->sum('cost');
         $totalProfit = (clone $reports)->sum('profit');
-
         $roi = $totalCost > 0 ? $totalProfit / $totalCost : 0;
+        $totals = ['cost' => $totalCost, 'profit' => $totalProfit, 'roi' => $roi];
 
-        $totals = [
-            'cost'   => $totalCost,
-            'profit' => $totalProfit,
-            'roi'    => $roi,
-        ];
-
-        // =====================================================================
-        // 🔹 LISTA DE MESES FIXA (Jan–Dez)
-        // =====================================================================
-        $monthsList = [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec'
-        ];
-
-        // =====================================================================
-        // 🔹 ALIASES FIXOS DO GRÁFICO
-        // =====================================================================
-
+        $monthsList = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         $aliases = ['facebook', 'tiktok', 'google', 'native'];
 
-        // =====================================================================
-        // 🔹 BUSCA LUCRO POR MÊS E POR ALIAS
-        // =====================================================================
-
         $monthlyProfit = RedtrackReport::selectRaw("
-                YEAR(date)  AS year,
-                MONTH(date) AS month_number,
+                YEAR(date) AS year, MONTH(date) AS month_number,
                 DATE_FORMAT(date, '%b') AS month_name,
-                LOWER(alias) AS alias,
-                SUM(profit) AS profit,
-                SUM(cost) AS cost
+                LOWER(alias) AS alias, SUM(profit) AS profit, SUM(cost) AS cost
             ")
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('year', 'month_number', 'month_name', 'alias')
-            ->orderBy('year')
-            ->orderBy('month_number');
-
+            ->orderBy('year')->orderBy('month_number');
 
         if ($aliasFilter) {
             $monthlyProfit->whereIn('alias', $aliasFilter);
         }
         $monthlyProfit = $monthlyProfit->get();
-        // =====================================================================
-        // 🔹 INICIA CHARTDATA: todos meses com valores zerados
-        // =====================================================================
 
         $chartData = [];
         foreach ($monthsList as $m) {
             $chartData[$m] = [
-                'facebook' => [
-                    'profit' => 0,
-                    'cost'   => 0,
-                    'roi'    => 0,
-                ],
-                'tiktok'   => [
-                    'profit' => 0,
-                    'cost'   => 0,
-                    'roi'    => 0,
-                ],
-                'google'  => [
-                    'profit' => 0,
-                    'cost'   => 0,
-                    'roi'    => 0,
-                ],
-                'native'   => [
-                    'profit' => 0,
-                    'cost'   => 0,
-                    'roi'    => 0,
-                ],
+                'facebook' => ['profit' => 0, 'cost' => 0, 'roi' => 0],
+                'tiktok'   => ['profit' => 0, 'cost' => 0, 'roi' => 0],
+                'google'   => ['profit' => 0, 'cost' => 0, 'roi' => 0],
+                'native'   => ['profit' => 0, 'cost' => 0, 'roi' => 0],
             ];
         }
-        // =====================================================================
-        // 🔹 PREENCHER OS DADOS (agrupando NATIVE)
-        // =====================================================================
 
         foreach ($monthlyProfit as $row) {
-            $monthName = $row->month_name;        // Jan / Fev / Mar
-            $alias     = strtolower($row->alias); // facebook / tiktok / ...
-            $profit    = (float) $row->profit;
-            $cost    = (float) $row->cost;
+            $monthName = $row->month_name;
+            $alias = strtolower($row->alias);
+            $profit = (float) $row->profit;
+            $cost = (float) $row->cost;
             if (in_array($alias, ['facebook', 'tiktok', 'google'])) {
-                // plataforma conhecida
                 $chartData[$monthName][$alias]['profit'] += $profit;
                 $chartData[$monthName][$alias]['cost'] += $cost;
             } else {
-                // qualquer outra entra em NATIVE
                 $chartData[$monthName]['native']['profit'] += $profit;
                 $chartData[$monthName]['native']['cost'] += $cost;
             }
         }
-        $chartWithRoi = $chartData;
 
-        foreach ($chartWithRoi as $month => $platforms) {
-            foreach ($platforms as $aliasName => $values) {
-
-                $profit = $values['profit'] ?? 0;
-                $cost   = $values['cost']   ?? 0;
-
-                $roi = ($cost > 0)
-                    ? round($profit / $cost, 4)
-                    : 0;
-
-                // Atualiza no array FINAL
-                $chartWithRoi[$month][$aliasName]['roi'] = $roi;
-            }
-        }
-
-        $chartData = $chartWithRoi;
-
-        // =====================================================================
-        // 🔹 CALCULA MAIOR VALOR PARA ESCALA DO GRAFICO
-        // =====================================================================
-        $maxValue = 0;
         foreach ($chartData as $month => $platforms) {
-            foreach ($platforms as $value) {
-                if ($value['profit'] > $maxValue) {
-                    $maxValue = $value['profit'];
-                }
+            foreach ($platforms as $aliasName => $values) {
+                $p = $values['profit'] ?? 0;
+                $c = $values['cost'] ?? 0;
+                $chartData[$month][$aliasName]['roi'] = $c > 0 ? round($p / $c, 4) : 0;
             }
         }
-        if ($maxValue <= 0) {
-            $maxValue = 1; // evita divisão por zero
-        }
 
-        // =====================================================================
-        // 🔹 BUSCA OUTRAS MÉTRICAS (SUAS TABELAS DE FONTE)
-        // =====================================================================
+        $maxValue = 0;
+        foreach ($chartData as $platforms) {
+            foreach ($platforms as $value) {
+                if ($value['profit'] > $maxValue) $maxValue = $value['profit'];
+            }
+        }
+        if ($maxValue <= 0) $maxValue = 1;
 
         $sources = RedtrackReport::selectRaw("
-            alias,
-            SUM(cost) as total_cost,
-            SUM(profit) as total_profit,
-            SUM(clicks) as total_clicks,
-            SUM(conversions) as total_conversions,
+            alias, SUM(cost) as total_cost, SUM(profit) as total_profit,
+            SUM(clicks) as total_clicks, SUM(conversions) as total_conversions,
             (SUM(profit)/NULLIF(SUM(cost),0)) as roi
-        ")
-            ->whereBetween('date', [$startDate, $endDate])
-            ->groupBy('alias')
-            ->orderBy('total_profit', 'desc')
-            ->get();
+        ")->whereBetween('date', [$startDate, $endDate])->groupBy('alias')->orderBy('total_profit', 'desc')->get();
 
-        // agrupamento das contas por alias
         $accountsByAlias = RedtrackReport::selectRaw("
-            alias,
-            source,
-            SUM(cost) as total_cost,
-            SUM(profit) as total_profit,
-            SUM(conversions) as total_conversions,
-            SUM(clicks) as total_clicks,
+            alias, source, SUM(cost) as total_cost, SUM(profit) as total_profit,
+            SUM(conversions) as total_conversions, SUM(clicks) as total_clicks,
             (SUM(profit)/NULLIF(SUM(cost),0)) as roi
-        ")
-            ->whereBetween('date', [$startDate, $endDate])
-            ->groupBy('alias', 'source')
-            ->orderBy('total_profit', 'desc')
-            ->get()
-            ->groupBy('alias');
+        ")->whereBetween('date', [$startDate, $endDate])->groupBy('alias', 'source')->orderBy('total_profit', 'desc')->get()->groupBy('alias');
 
         $copaService = new CopaProfitService(null, null);
         $copaData = $copaService->make();
-        $podium = $copaData['podium'];
-        $copiesPodium = $copaData['copiesPodium'];
-        $editorsPodium = $copaData['editorsPodium'];
-        $copaYear = $copaData['copaYear'];
-        $copaMonths = $copaData['copaMonths'];
-        $copaPrize = $copaData['copaPrize'];
-        $editorPrize = $copaData['editorPrize'];
-        $copiePrize = $copaData['copiePrize'];
+
         $aliasRanking = (new SquadService())->rankByAlias(4);
-        $aliasRanking = $aliasRanking->filter(function ($item) {
-            return $item['profit'] > 0;
-        });
+        $aliasRanking = $aliasRanking->filter(fn($item) => $item['profit'] > 0);
 
         $expectedMonthlyProfit = 1000000;
-
-        //calculando status da meta
         $month = substr(Carbon::now()->locale('en')->monthName, 0, 3);
         $total = 0;
-        $profitMonth = collect($chartData[$month])->map(function ($data) use (&$total) {
+        collect($chartData[$month])->each(function ($data) use (&$total) {
             $total += $data['profit'];
-            return $data['profit'];
         });
         $target = number_format($total / $expectedMonthlyProfit, 2) * 100;
 
+        return compact(
+            'totals', 'chartData', 'aliases', 'maxValue', 'sources',
+            'accountsByAlias', 'lastUpdate', 'expectedMonthlyProfit',
+            'aliasRanking', 'target', 'copaData'
+        );
+    });
 
-        // =====================================================================
-        // 🔹 RETORNO FINAL PARA A VIEW
-        // =====================================================================
-        return view("admin.dashboard", compact(
-            'totals',
-            'startDate',
-            'endDate',
-            'chartData',
-            'aliases',
-            'maxValue',
-            'sources',
-            'accountsByAlias',
-            'lastUpdate',
-            'expectedMonthlyProfit',
-            'podium',
-            'copiesPodium',
-            'editorsPodium',
-            'copaYear',
-            'copaMonths',
-            'copaPrize',
-            'editorPrize',
-            'copiePrize',
-            'aliasRanking',
-            'target',
-        ));
-    }
+    $startDate = $startDate;
+    $endDate = $endDate;
+    $copaData = $cached['copaData'];
+
+    return view("admin.dashboard", array_merge($cached, [
+        'startDate'      => $startDate,
+        'endDate'        => $endDate,
+        'podium'         => $copaData['podium'],
+        'copiesPodium'   => $copaData['copiesPodium'],
+        'editorsPodium'  => $copaData['editorsPodium'],
+        'copaYear'       => $copaData['copaYear'],
+        'copaMonths'     => $copaData['copaMonths'],
+        'copaPrize'      => $copaData['copaPrize'],
+        'editorPrize'    => $copaData['editorPrize'],
+        'copiePrize'     => $copaData['copiePrize'],
+    ]));
+}
 
 
 
