@@ -3,32 +3,27 @@ version: '3.8'
 services:
 
   app:
-    build:
-      context: ..
-      dockerfile: docker/php/Dockerfile
-    # remove essa linha
-    restart: always
-    volumes:
-      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
-    networks:
-      - titan_network
+  build:
+    context: ..
+    dockerfile: docker/php/Dockerfile
+  restart: always
+  networks:
+    - titan_network
 
   nginx:
-    image: nginx:latest
-    # remove essa linha
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
-      - ./nginx:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot
-    depends_on:
-      - app
-    networks:
-      - titan_network
+  image: nginx:latest
+  restart: always
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ./nginx:/etc/nginx/conf.d
+    - /etc/letsencrypt:/etc/letsencrypt:ro
+    - /var/www/certbot:/var/www/certbot
+  depends_on:
+    - app
+  networks:
+    - titan_network
 
   # 🔥 WORKER (FILA - ESSENCIAL)
   worker:
@@ -38,8 +33,7 @@ services:
     # remove essa linha
     restart: always
     command: php artisan queue:work --sleep=3 --tries=3 --timeout=600
-    volumes:
-      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
+    
     depends_on:
       - app
     networks:
@@ -53,8 +47,7 @@ services:
     # remove essa linha
     restart: always
     command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
-    volumes:
-      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
+    
     depends_on:
       - app
     networks:
