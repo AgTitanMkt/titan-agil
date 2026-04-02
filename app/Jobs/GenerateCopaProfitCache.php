@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log; // 🔥 AQUI
+use Illuminate\Support\Facades\Log; // AQUI
 
 class GenerateCopaProfitCache implements ShouldQueue
 {
@@ -22,7 +22,12 @@ class GenerateCopaProfitCache implements ShouldQueue
         Log::info('Iniciando geração de cache CopaProfit');
 
         $service = new CopaProfitService(null, null);
-        $service->make();
+
+        $data = $service->make();
+
+        $cacheKey = 'copa_profit_' . now()->format('Y-m');
+
+        Cache::put($cacheKey, $data, 3600); // 1 hora 
 
         Cache::forget('copa_profit_generating');
 

@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
@@ -988,8 +989,34 @@ class AdminController extends Controller
             (SUM(profit)/NULLIF(SUM(cost),0)) as roi
         ")->whereBetween('date', [$startDate, $endDate])->groupBy('alias', 'source')->orderBy('total_profit', 'desc')->get()->groupBy('alias');
 
-        $copaService = new CopaProfitService(null, null);
-        $copaData = $copaService->make();
+        // $copaService = new CopaProfitService(null, null);
+        // $copaData = $copaService->make();
+        $cacheKey = 'copa_profit_' . now()->format('Y-m');
+
+$copaData = Cache::get($cacheKey);
+
+if (!$copaData) {
+
+    // evita flood de jobs
+    if (!Cache::has('copa_profit_generating')) {
+
+        Cache::put('copa_profit_generating', true, 600);
+
+        dispatch(new \App\Jobs\GenerateCopaProfitCache());
+    }
+
+    // dados
+    $copaData = [
+        'podium' => [],
+        'copiesPodium' => [],
+        'editorsPodium' => [],
+        'copaYear' => now()->year,
+        'copaMonths' => [],
+        'copaPrize' => 0,
+        'editorPrize' => 0,
+        'copiePrize' => 0,
+    ];
+}
 
         $aliasRanking = (new SquadService())->rankByAlias(4);
         $aliasRanking = $aliasRanking->filter(fn($item) => $item['profit'] > 0);
