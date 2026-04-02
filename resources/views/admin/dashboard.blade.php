@@ -674,9 +674,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 @php
                     // Reorganiza visualmente o pódio
                     $orderedPlatforms = [
-                        $podium[1], // 2º lugar
-                        $podium[0], // 1º lugar
-                        $podium[2], // 3º lugar
+                        {{ $podium[1]['name'] ?? '-' }}, // 2º lugar
+                        {{ $podium[0]['name'] ?? '-' }}, // 1º lugar
+                        {{ $podium[2]['name'] ?? '-' }}, // 3º lugar
                     ];
                 @endphp
 
