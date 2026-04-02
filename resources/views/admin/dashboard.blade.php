@@ -384,34 +384,35 @@
         }
     </style>
 
-        {{-- ADICIONADO OS PRINCIPIOS TITAN  --}}
-        <div class="titan-portal-container">
-    <div class="portal-card">
-        <div class="divine-light"></div>
-        
-        <div class="portal-content">
-            <div class="portal-header">
-                <div class="line"></div>
-                <span class="portal-title"><i class="fas fa-crown"></i> OS PRINCÍPIOS DA TITAN <i class="fas fa-crown"></i></span>
-                <div class="line"></div>
-            </div>
+    {{-- ADICIONADO OS PRINCIPIOS TITAN  --}}
+    <div class="titan-portal-container">
+        <div class="portal-card">
+            <div class="divine-light"></div>
 
-            <div class="principle-display">
-                <h2 id="rotating-principle" class="golden-text">Velocidade acima de conforto</h2>
-            </div>
+            <div class="portal-content">
+                <div class="portal-header">
+                    <div class="line"></div>
+                    <span class="portal-title"><i class="fas fa-crown"></i> OS PRINCÍPIOS DA TITAN <i
+                            class="fas fa-crown"></i></span>
+                    <div class="line"></div>
+                </div>
 
-            <div class="portal-footer">
-                <div class="progress-track">
-                    <div id="principle-progress" class="progress-fill"></div>
+                <div class="principle-display">
+                    <h2 id="rotating-principle" class="golden-text">Velocidade acima de conforto</h2>
+                </div>
+
+                <div class="portal-footer">
+                    <div class="progress-track">
+                        <div id="principle-progress" class="progress-fill"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-        {{-- CSS DO PRINCIPIO TITAN --}}
-        <style>
+    {{-- CSS DO PRINCIPIO TITAN --}}
+    <style>
         :root {
             --gold-primary: #0075FF;
             --gold-dark: #1395ff;
@@ -420,7 +421,7 @@
 
         .titan-portal-container {
             margin-bottom: 40px;
-            padding: 2px; 
+            padding: 2px;
             background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
             border-radius: 15px;
             position: relative;
@@ -498,7 +499,7 @@
             letter-spacing: 2px;
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: 'serif', 'Cinzel', Georgia; 
+            font-family: 'serif', 'Cinzel', Georgia;
         }
 
         /* animacao de transicao */
@@ -530,60 +531,60 @@
             background: var(--gold-primary);
             box-shadow: 0 0 10px var(--gold-primary);
         }
-        </style>
-       
+    </style>
 
-{{-- SCRIPT QUE VAI COLOCAR TODOS OS PRINCIPIOS TROCANDO AUTOMATICAMENTE --}}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const principles = [
-        "Velocidade acima de conforto",
-        "Lucro é a bússola, ego nunca",
-        "Autorresponsabilidade é o motor",
-        "Performance sem caráter não tem espaço"
-    ];
+    {{-- SCRIPT QUE VAI COLOCAR TODOS OS PRINCIPIOS TROCANDO AUTOMATICAMENTE --}}
 
-    let currentIndex = 0;
-    const textElement = document.getElementById('rotating-principle');
-    const progressBar = document.getElementById('principle-progress');
-    const displayTime = 8000; // 8 SEGUNDOS PARA LER
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const principles = [
+                "Velocidade acima de conforto",
+                "Lucro é a bússola, ego nunca",
+                "Autorresponsabilidade é o motor",
+                "Performance sem caráter não tem espaço"
+            ];
 
-    function updatePrinciple() {
-        // sai o texto e entra o outro
-        textElement.classList.add('principle-hide');
-        textElement.classList.remove('principle-show');
-        
-        setTimeout(() => {
-            currentIndex = (currentIndex + 1) % principles.length;
-            textElement.textContent = principles[currentIndex];
-            
-            
-            textElement.classList.remove('principle-hide');
+            let currentIndex = 0;
+            const textElement = document.getElementById('rotating-principle');
+            const progressBar = document.getElementById('principle-progress');
+            const displayTime = 8000; // 8 SEGUNDOS PARA LER
+
+            function updatePrinciple() {
+                // sai o texto e entra o outro
+                textElement.classList.add('principle-hide');
+                textElement.classList.remove('principle-show');
+
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % principles.length;
+                    textElement.textContent = principles[currentIndex];
+
+
+                    textElement.classList.remove('principle-hide');
+                    textElement.classList.add('principle-show');
+
+                    startProgress();
+                }, 800);
+            }
+
+            function startProgress() {
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+
+                setTimeout(() => {
+                    progressBar.style.transition = `width ${displayTime - 800}ms linear`;
+                    progressBar.style.width = '100%';
+                }, 50);
+            }
+
+            // inicia
             textElement.classList.add('principle-show');
-            
             startProgress();
-        }, 800);
-    }
+            setInterval(updatePrinciple, displayTime);
+        });
+    </script>
 
-    function startProgress() {
-        progressBar.style.transition = 'none';
-        progressBar.style.width = '0%';
-        
-        setTimeout(() => {
-            progressBar.style.transition = `width ${displayTime - 800}ms linear`;
-            progressBar.style.width = '100%';
-        }, 50);
-    }
-
-    // inicia
-    textElement.classList.add('principle-show');
-    startProgress();
-    setInterval(updatePrinciple, displayTime);
-});
-</script>
-
-{{-- fIM DE TODO O PRINCIPIO TITAN --}}
+    {{-- fIM DE TODO O PRINCIPIO TITAN --}}
 
 
 
@@ -672,11 +673,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="podium-grid-container">
 
                 @php
-                    // Reorganiza visualmente o pódio
                     $orderedPlatforms = [
-                        {{ $podium[1]['name'] ?? '-' }}, // 2º lugar
-                        {{ $podium[0]['name'] ?? '-' }}, // 1º lugar
-                        {{ $podium[2]['name'] ?? '-' }}, // 3º lugar
+                        $podium[1]['name'] ?? '-',
+                        $podium[0]['name'] ?? '-',
+                        $podium[2]['name'] ?? '-',
                     ];
                 @endphp
 
@@ -2082,8 +2082,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 width: 100px;
             }
         }
-        .sub-view-font{
-            margin-left: 1rem; 
+
+        .sub-view-font {
+            margin-left: 1rem;
         }
     </style>
 
@@ -2343,7 +2344,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
 
                                     {{-- contas da subfonte --}}
-                                    <div class="sub-view-font" id="details-{{ $subKey }}" style="display:none;">
+                                    <div class="sub-view-font" id="details-{{ $subKey }}"
+                                        style="display:none;">
                                         @foreach ($accounts as $acc)
                                             <div
                                                 class="account-row 

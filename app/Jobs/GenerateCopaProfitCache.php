@@ -18,19 +18,30 @@ class GenerateCopaProfitCache implements ShouldQueue
     public $tries = 1;
 
     public function handle()
-    {
+{
+    try {
         Log::info('Iniciando geração de cache CopaProfit');
 
         $service = new CopaProfitService(null, null);
-
         $data = $service->make();
 
         $cacheKey = 'copa_profit_' . now()->format('Y-m');
 
-        Cache::put($cacheKey, $data, 3600); // 1 hora 
+        Cache::put($cacheKey, $data, 600);
 
         Cache::forget('copa_profit_generating');
 
         Log::info('Finalizado cache CopaProfit');
+
+    } catch (\Throwable $e) {
+
+        Log::error('ERRO NO JOB COPA PROFIT', [
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ]);
+
+        throw $e;
     }
+}
 }
