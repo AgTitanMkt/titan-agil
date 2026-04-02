@@ -93,6 +93,17 @@ stages {
             '''
         }
     }
+
+    stage('Start Queue Worker') {
+    steps {
+        sh '''
+        cd /var/lib/jenkins/workspace/Titan-Agil
+
+        docker compose -p laravel_docker -f docker/docker-compose.yml exec -d app \
+        sh -c "while true; do php artisan queue:work --timeout=600 --tries=1; sleep 3; done"
+        '''
+    }
+}
 }
 
 post {

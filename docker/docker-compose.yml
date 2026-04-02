@@ -8,6 +8,8 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: laravel_app
     restart: always
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
     networks:
       - titan_network
 
@@ -19,7 +21,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/lib/jenkins/workspace/Titan-Agil/public:/var/www/public
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
       - ./nginx:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
