@@ -8,6 +8,8 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: laravel_app
     restart: always
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
     networks:
       - titan_network
 
@@ -23,6 +25,36 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
+    depends_on:
+      - app
+    networks:
+      - titan_network
+
+  # 🔥 WORKER (FILA - ESSENCIAL)
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
+    container_name: laravel_worker
+    restart: always
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=600
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
+    depends_on:
+      - app
+    networks:
+      - titan_network
+
+  # 🔥 SCHEDULER (CRON DO LARAVEL)
+  scheduler:
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
+    container_name: laravel_scheduler
+    restart: always
+    command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
+    volumes:
+      - /var/lib/jenkins/workspace/Titan-Agil:/var/www
     depends_on:
       - app
     networks:
