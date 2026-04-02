@@ -673,24 +673,29 @@
             <div class="podium-grid-container">
 
                 @php
-                    $orderedPlatforms = [
-                        $podium[1]['name'] ?? '-',
-                        $podium[0]['name'] ?? '-',
-                        $podium[2]['name'] ?? '-',
-                    ];
-                @endphp
+    $orderedPlatforms = [
+        $podium[1] ?? null, // 2º lugar
+        $podium[0] ?? null, // 1º lugar
+        $podium[2] ?? null, // 3º lugar
+    ];
+@endphp
 
                 <div class="podium-structure">
 
                     @foreach ($orderedPlatforms as $item)
-                        @php
-                            $placeClass = match ($item['rank']) {
-                                1 => 'place-1 champion',
-                                2 => 'place-2',
-                                3 => 'place-3',
-                                default => '',
-                            };
-                        @endphp
+
+    @if (!$item)
+        @continue
+    @endif
+
+    @php
+        $placeClass = match ($item['rank']) {
+            1 => 'place-1 champion',
+            2 => 'place-2',
+            3 => 'place-3',
+            default => '',
+        };
+    @endphp
 
                         <div class="podium-place {{ $placeClass }}">
 
