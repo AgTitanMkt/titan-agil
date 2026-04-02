@@ -6,7 +6,7 @@ services:
     build:
       context: ..
       dockerfile: docker/php/Dockerfile
-    container_name: laravel_app
+    # remove essa linha
     restart: always
     volumes:
       - /var/lib/jenkins/workspace/Titan-Agil:/var/www
@@ -15,7 +15,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: laravel_nginx
+    # remove essa linha
     restart: always
     ports:
       - "80:80"
@@ -35,7 +35,7 @@ services:
     build:
       context: ..
       dockerfile: docker/php/Dockerfile
-    container_name: laravel_worker
+    # remove essa linha
     restart: always
     command: php artisan queue:work --sleep=3 --tries=3 --timeout=600
     volumes:
@@ -50,7 +50,7 @@ services:
     build:
       context: ..
       dockerfile: docker/php/Dockerfile
-    container_name: laravel_scheduler
+    # remove essa linha
     restart: always
     command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
     volumes:
