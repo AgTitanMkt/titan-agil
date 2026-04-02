@@ -53,4 +53,4 @@ services:
 
 networks:
   titan_network:
-    external: true
+    driver: bridge
