@@ -541,7 +541,7 @@
             const principles = [
                 "Velocidade acima de conforto",
                 "Lucro é a bússola, ego nunca",
-                "Autorresponsabilidade é o motor",
+                "Autoresponsabilidade é o motor",
                 "Performance sem caráter não tem espaço"
             ];
 
@@ -653,9 +653,9 @@
     <div class="chart-dashboard-wrapper-vertical">
 
         {{--  COPA PROFIT VISUAL AAA/BATTLE PASS --}}
-        <div class="copa-profit-section">
+        {{-- <div class="copa-profit-section"> --}}
             {{-- header da copa --}}
-            <div class="copa-header">
+            {{-- <div class="copa-header">
                 <div class="copa-title-wrapper">
                     <h1 class="copa-main-title">COPA PROFIT <span class="year">{{ $copaYear }}</span></h1>
                     <p class="copa-subtitle">
@@ -666,11 +666,11 @@
                     <span class="prize-label">PREMIAÇÃO TOTAL EM JOGO</span>
                     <span class="prize-value">@real($copaPrize)</span>
                 </div>
-            </div>
+            </div> --}}
 
 
             {{-- PODIO 1: plataformas --}}
-            <div class="podium-grid-container">
+            {{-- <div class="podium-grid-container">
 
                 @php
     $orderedPlatforms = [
@@ -730,11 +730,11 @@
                             </div>
                         </div>
                     @endforeach
-                </div>
+                </div> --}}
 
 
                 {{-- PODIO 2: COPYS (R$ 20K) --}}
-                <div class="podium-category copy-category">
+                {{-- <div class="podium-category copy-category">
                     <div class="category-header-podium">
                         <h3 class="category-title"><i class="fas fa-pen-nib"></i> MELHOR COPY</h3>
                         <div class="category-prize silver">@real($copiePrize)</div>
@@ -744,10 +744,10 @@
                         <div class="podium-flat-list">
 
                             @foreach ($copiesPodium as $copy)
-                                <div class="flat-item rank-{{ $copy['rank'] }}">
+                                <div class="flat-item rank-{{ $copy['rank'] }}"> --}}
 
                                     {{-- Ícone apenas para o primeiro lugar --}}
-                                    @if ($copy['rank'] === 1)
+                                    {{-- @if ($copy['rank'] === 1)
                                         <i class="fas fa-crown gold-icon"></i>
                                     @else
                                         <div class="flat-rank">#{{ $copy['rank'] }}</div>
@@ -766,11 +766,11 @@
 
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
 
                 {{-- PODIO 3: EDITORES --}}
-                <div class="podium-category editor-category">
+                {{-- <div class="podium-category editor-category">
                     <div class="category-header-podium">
                         <h3 class="category-title"><i class="fas fa-video"></i> MELHOR EDITOR</h3>
                         <div class="category-prize bronze">@real($editorPrize)</div>
@@ -805,9 +805,9 @@
 
 
             </div>
-        </div>
+        </div> --}}
 
-    </div> {{-- fim copa profit --}}
+    {{-- </div> fim copa profit --}}
 
 
     <style>
