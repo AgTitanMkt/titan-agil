@@ -16,12 +16,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     if (auth()->check()) {
         $user = auth()->user();
-        
+
         // ADMIN, HEAD, MANAGER -> Dashboard
         if ($user->hasAnyRole(['ADMIN', 'HEAD', 'MANAGER'])) {
             return redirect()->route('admin.dashboard');
         }
-        
+
         // Restante (COPY, EDITOR, DEVELOPER, ANALYST, ASSISTANT) -> Metas
         return redirect()->route('colaboradores.metas');
     }
@@ -55,13 +55,13 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:ADMIN,HEAD,MANAGER,COPYWRITER,EDITOR')
         ->group(function () {
             Route::get('agents/{type}/{collaborator?}', [AdminController::class, 'agents'])
-            ->whereIn('type', ['editors', 'copywriters'])
-            ->whereIn('collaborator', ['IN', 'EX'])
-            ->name('admin.agents');
+                ->whereIn('type', ['editors', 'copywriters'])
+                ->whereIn('collaborator', ['IN', 'EX'])
+                ->name('admin.agents');
 
             Route::get('creatives/{collaborator?}', [AdminController::class, 'creatives'])
-            ->whereIn('collaborator', ['IN', 'EX'])
-            ->name('admin.creatives');
+                ->whereIn('collaborator', ['IN', 'EX'])
+                ->name('admin.creatives');
 
             Route::get('editors/synergy', function (Request $request) {
                 return app(AdminController::class)->synergyData($request, 'editors');
@@ -72,7 +72,22 @@ Route::middleware('auth')->group(function () {
             })->name('admin.copies.synergy');
 
             Route::post('/creative/assign', [AdminController::class, 'assignCreative'])
-            ->name('creative.assign');
+                ->name('creative.assign');
+
+            // NOVA ROTA: CORRIDA DO PROFIT (ADMIN, HEAD, MANAGER)
+            Route::get(
+                '/corrida-profit',
+                [\App\Http\Controllers\Admin\CorridaProfitController::class, 'corrida']
+            )->name('admin.corrida-profit.corrida');
+
+            Route::post(
+                '/corrida-profit/refresh',
+                [\App\Http\Controllers\Admin\CorridaProfitController::class, 'refresh']
+            )->name('admin.corrida-profit.refresh');
+
+            //quando alguem fizer um POST nessa URL ira executar o metodo refresh dentro do controller
+
+
         });
     Route::prefix('rh')
         ->middleware('role:ADMIN')
@@ -130,10 +145,10 @@ Route::middleware('auth')->group(function () {
 
     // NOVA ROTA/TELA: IMPORTAR VARIAÇÕES 
     Route::prefix('admin/import-variations')->middleware('role:ADMIN,HEAD,MANAGER')->group(function () {
-    Route::get('index', [ImportVariationController::class, 'index'])->name('admin.import.variations');
-    Route::post('preview', [ImportVariationController::class, 'preview'])->name('admin.import.variations.preview');
-    Route::post('store', [ImportVariationController::class, 'store'])->name('admin.import.variations.store');
-});
+        Route::get('index', [ImportVariationController::class, 'index'])->name('admin.import.variations');
+        Route::post('preview', [ImportVariationController::class, 'preview'])->name('admin.import.variations.preview');
+        Route::post('store', [ImportVariationController::class, 'store'])->name('admin.import.variations.store');
+    });
 
     Route::prefix('ajax')->group(function () {
         Route::get('criativos', [TarefasController::class, 'getCriativos'])->name('ajax.criativos');

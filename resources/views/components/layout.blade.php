@@ -61,6 +61,13 @@
                                 </a>
                             </li>
 
+                            {{-- CORRIDA DO PROFIT - NOVO --}}
+                            <li class="nav-item {{ request()->routeIs('admin.corrida-profit.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.corrida-profit.corrida') }}" class="nav-link">
+                                    <i class="fas fa-trophy nav-icon"></i> Corrida do Profit
+                                </a>
+                            </li>
+
                             {{-- Seção: DADOS (visível para ADMIN, HEAD, MANAGER) --}}
                             <li
                                 class="nav-item has-submenu {{ request()->routeIs('admin.time', 'admin.faturamento', 'admin.gestores') ? 'active' : '' }}">
