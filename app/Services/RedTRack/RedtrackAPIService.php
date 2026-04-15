@@ -32,7 +32,8 @@ class RedtrackAPIService
     public function fetchReport(
         string $dateFrom,
         string $dateTo,
-        ?string $group = 'source,rt_ad',
+        // ?string $group = 'source,rt_ad',
+        ?string $group = 'date,source,rt_ad',
         ?int $per = 1000,
         ?array $extra = []
     ) {
@@ -59,8 +60,14 @@ class RedtrackAPIService
                 'total'     => 'false',
             ], $extra);
 
+            $http = Http::timeout(90);
+
+if (config('app.env') === 'local') {
+    $http = $http->withoutVerifying();
+}
+
             try {
-                $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
+                $response = $http->get($this->baseUrl . '/report', $params);
 
                 // Se falhar, tenta algumas vezes antes de desistir
                 $retryCount = 0;
@@ -71,7 +78,7 @@ class RedtrackAPIService
                         'status' => $response->status(),
                     ]);
                     sleep(2);
-                    $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
+                    $response = $http->get($this->baseUrl . '/report', $params);
                 }
 
                 // Se ainda falhou após retries
@@ -92,6 +99,12 @@ class RedtrackAPIService
                 // Decodifica de forma mais leve que ->json()
                 $data = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
                 $items = $data['items'] ?? $data ?? [];
+
+                if (!empty($items)) {
+    Log::info('TODAS AS KEYS DO ITEM', array_keys($items[0]));
+    Log::info('VALORES DO PRIMEIRO ITEM', $items[0]);
+}
+
                 if (empty($items)) {
                     Log::info("RedTrack → Nenhum item encontrado na página {$page}");
                     break;
@@ -113,23 +126,29 @@ class RedtrackAPIService
                         // ---------------------------
 
                         RedtrackReport::updateOrCreate(
-                            [
-                                'name'   => $item['rt_ad'],
-                                'source' => $item['source'],
-                                'alias'  => $item['source_alias'],
-                                'date'   => $dateFrom
-                            ],
-                            [
-                                'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
-                                'ad_code' => $taskCode, // Salva o código limpo no report também
-                                'clicks'       => $item['clicks'] ?? 0,
-                                'conversions'  => $item['conversions'] ?? 0,
-                                'cost'         => $item['cost'] ?? 0,
-                                'profit'       => $item['profit'] ?? 0,
-                                'roi'          => $item['roi'] ?? 0,
-                                'date'         => $dateFrom
-                            ]
-                        );
+    [
+        'name'   => $item['rt_ad'],
+        'source' => $item['source'],
+        'alias'  => $item['source_alias'],
+        'date'   => $item['date'] ?? $dateFrom
+    ],
+    [
+        'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
+        'ad_code'      => $taskCode,
+        'clicks'       => $item['clicks'] ?? 0,
+        'conversions'  => $item['conversions'] ?? 0,
+        'cost'         => $item['cost'] ?? 0,
+
+        'revenue' => $item['revenue'] 
+            ?? $item['total_revenue'] 
+            ?? $item['conversion_revenue'] 
+            ?? 0,
+
+        'profit'       => $item['profit'] ?? 0,
+        'roi'          => $item['roi'] ?? 0,
+        'date'         => $item['date'] ?? $dateFrom
+    ]
+);
 
                         if (preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $item['rt_ad'])) {
 
@@ -204,6 +223,14 @@ class RedtrackAPIService
                         throw new Exception($innerEx->getMessage());
                     }
                 }
+
+                // Logo após o foreach ($items as $item) {
+Log::info('RedTrack item sample', [
+    'pub_revenue' => $item['pub_revenue'] ?? 'NÃO EXISTE',
+    'revenue'     => $item['revenue'] ?? 'NÃO EXISTE',
+    'cost'        => $item['cost'] ?? 0,
+    'profit'      => $item['profit'] ?? 0,
+]);
 
                 Log::info("RedTrack → Página {$page} processada", [
                     'itens_processados' => count($items),
