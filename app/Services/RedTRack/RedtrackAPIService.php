@@ -10,7 +10,6 @@ use App\Models\Task;
 use App\Models\UserTask;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -26,25 +25,29 @@ class RedtrackAPIService
     }
 
     /**
-     * Busca relatórios paginados da API RedTrack,
-     * mantém dados parciais mesmo em caso de erro.
+     * busca relatorios de paginas da API RedTrack, com base no script Python validado que retorna os valores corretos.
+     *
+     * python:
+     *   by_ad[ad]["revenue"] += float(row.get("revenue", 0) or 0)  c
+     *   by_ad[ad]["cost"]    += float(row.get("cost", 0) or 0)
+     *   ad = row.get("rt_ad") or "(sem rt_ad)"                      
      */
     public function fetchReport(
         string $dateFrom,
         string $dateTo,
-        ?string $group = 'source,rt_ad',
-        ?int $per = 1000,
+        ?string $group = 'source,rt_campaign,rt_ad',
+        ?int $per = 100,
         ?array $extra = []
     ) {
-        $page = 1;
-        $maxRetries = 3;
-        $totalItems = 0;
+        $page        = 1;
+        $maxRetries  = 3;
+        $totalItems  = 0;
 
         Log::info('RedTrack → Iniciando fetchReport', [
-            'from' => $dateFrom,
-            'to'   => $dateTo,
+            'from'  => $dateFrom,
+            'to'    => $dateTo,
             'group' => $group,
-            'per' => $per,
+            'per'   => $per,
         ]);
 
         while (true) {
@@ -59,22 +62,27 @@ class RedtrackAPIService
                 'total'     => 'false',
             ], $extra);
 
-            try {
-                $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
+            $http = Http::timeout(90);
 
-                // Se falhar, tenta algumas vezes antes de desistir
+            if (config('app.env') === 'local') {
+                $http = $http->withoutVerifying();
+            }
+
+            try {
+                $response = $http->get($this->baseUrl . '/report', $params);
+
+                // retry logic
                 $retryCount = 0;
                 while ($response->failed() && $retryCount < $maxRetries) {
                     $retryCount++;
                     Log::warning("RedTrack → Tentando novamente ({$retryCount}/{$maxRetries})", [
-                        'page' => $page,
+                        'page'   => $page,
                         'status' => $response->status(),
                     ]);
                     sleep(2);
-                    $response = Http::timeout(90)->get($this->baseUrl . '/report', $params);
+                    $response = $http->get($this->baseUrl . '/report', $params);
                 }
 
-                // Se ainda falhou após retries
                 if ($response->failed()) {
                     Log::error('RedTrack → Falha persistente', [
                         'page'   => $page,
@@ -82,113 +90,147 @@ class RedtrackAPIService
                         'body'   => $response->body(),
                     ]);
 
-                    // Se for 404, encerra o loop; caso contrário, segue pro próximo
                     if ($response->status() === 404) {
                         break;
                     }
                     continue;
                 }
 
-                // Decodifica de forma mais leve que ->json()
-                $data = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
+                $data  = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
                 $items = $data['items'] ?? $data ?? [];
+
+                // garante que e array indexado (lista de rows)
+                if (!empty($items) && !isset($items[0])) {
+                    $items = [$items];
+                }
+
+                if (!empty($items)) {
+                    Log::info('RedTrack → Keys do primeiro item', array_keys($items[0]));
+                    Log::info('RedTrack → Valores do primeiro item', $items[0]);
+                }
+
                 if (empty($items)) {
-                    Log::info("RedTrack → Nenhum item encontrado na página {$page}");
+                    Log::info("RedTrack → Nenhum item na página {$page}");
                     break;
                 }
+
                 foreach ($items as $item) {
                     try {
-                        $adParts = explode('-', $item['rt_ad']);
-                        $rawCode = trim($adParts[0]); // Ex: MMAD123V2 ou MMAD123
 
-                        // --- LÓGICA DE SEPARAÇÃO ---
-                        $taskCode = $rawCode;
+                        // ad = row.get("rt_ad") or "(sem rt_ad)"
+                        // nao joga pro lixo o NATIVE que nao tem rt_ad 
+                        $rtAd = (isset($item['rt_ad']) && trim($item['rt_ad']) !== '')
+                            ? trim($item['rt_ad'])
+                            : '(sem rt_ad)';
+
+
+                        // revenue += float(row.get("revenue", 0) or 0)  <- campo "revenue", NAO "total_revenue"
+                        $revenue = (float) (($item['revenue'] ?? 0) ?: 0);
+                        $cost    = (float) (($item['cost']    ?? 0) ?: 0);
+
+                        // descarta apenas se absolutamente vazio 
+                        if ($revenue == 0.0 && $cost == 0.0) {
+                            continue;
+                        }
+
+                        // profit - revenue - cost
+                        $profit     = $revenue - $cost;
+                        $rtCampaign = trim($item['rt_campaign'] ?? '');
+                        $source     = trim($item['source']      ?? '');
+                        $itemDate   = $item['date']             ?? $dateFrom;
+
+                        // (ex: MMAD123V2 -> taskCode=MMAD123, variation=2)
+                        $adParts         = explode('-', $rtAd);
+                        $rawCode         = trim($adParts[0]);
+                        $taskCode        = $rawCode;
                         $variationNumber = null;
 
-                        // Se houver V + número no final, extraímos e limpamos o $taskCode
                         if (preg_match('/^(.*)V(\d+)$/i', $rawCode, $matches)) {
-                            $taskCode = $matches[1];        // Aqui fica apenas 'MMAD123'
-                            $variationNumber = (int)$matches[2]; // Aqui fica '2'
+                            $taskCode        = $matches[1];
+                            $variationNumber = (int) $matches[2];
                         }
-                        // ---------------------------
 
+                        // date + name (rt_ad) + source + rt_campaign
+                        // garante que o mesmo criativo em campanhas diferentes nao colide
                         RedtrackReport::updateOrCreate(
                             [
-                                'name'   => $item['rt_ad'],
-                                'source' => $item['source'],
-                                'alias'  => $item['source_alias'],
-                                'date'   => $dateFrom
+                                'date'        => $itemDate,
+                                'name'        => $rtAd,
+                                'source'      => $source,
+                                'rt_campaign' => $rtCampaign,
                             ],
                             [
-                                'normalized_rt_ad' => strtolower(str_replace(' ', '', $item['rt_ad'])),
-                                'ad_code' => $taskCode, // Salva o código limpo no report também
-                                'clicks'       => $item['clicks'] ?? 0,
-                                'conversions'  => $item['conversions'] ?? 0,
-                                'cost'         => $item['cost'] ?? 0,
-                                'profit'       => $item['profit'] ?? 0,
-                                'roi'          => $item['roi'] ?? 0,
-                                'date'         => $dateFrom
+                                'alias'            => $item['source_alias'] ?? null,
+                                'normalized_rt_ad' => strtolower(str_replace(' ', '', $rtAd)),
+                                'ad_code'          => $taskCode,
+                                'clicks'           => (int) (($item['clicks']      ?? 0) ?: 0),
+                                'conversions'      => (int) (($item['conversions'] ?? 0) ?: 0),
+                                'cost'             => $cost,
+                                'revenue'          => $revenue,
+                                'profit'           => $profit,
+                                'roi'              => $cost > 0 ? round($profit / $cost, 6) : 0,
                             ]
                         );
 
-                        if (preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $item['rt_ad'])) {
-
+                        // cria task/subTask apenas para criativos com codigo no padrao TITAN
+                        // e que tenham rt_ad real (nao "(sem rt_ad)")
+                        if (
+                            $rtAd !== '(sem rt_ad)' &&
+                            preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $rtAd)
+                        ) {
                             $cleanParts = array_values(array_filter(array_map('trim', $adParts)));
-                            $lastParts = array_slice($cleanParts, -2);
+                            $lastParts  = array_slice($cleanParts, -2);
 
                             $agents = TagUsers::whereIn('tag', $lastParts)->get()
                                 ->map(fn($agent) => $agent->user);
 
                             try {
                                 $codeAdNumeric = null;
-                                if (preg_match('/AD(\d+)/i', $taskCode, $matches)) {
-                                    $codeAdNumeric = (int) $matches[1];
+                                if (preg_match('/AD(\d+)/i', $taskCode, $m2)) {
+                                    $codeAdNumeric = (int) $m2[1];
                                 }
 
-                                // A TASK sempre será criada/buscada com o nome limpo (MMAD123)
                                 $task = Task::updateOrCreate(
                                     ['code' => $taskCode],
                                     [
-                                        'created_by' => 81,
-                                        'title' => 'nova tarefa',
-                                        'nicho' => Nicho::where('sigla', strtoupper(substr($taskCode, 0, 2)))->first()?->id,
+                                        'created_by'      => 81,
+                                        'title'           => 'nova tarefa',
+                                        'nicho'           => Nicho::where('sigla', strtoupper(substr($taskCode, 0, 2)))->first()?->id,
                                         'normalized_code' => strtolower(str_replace(' ', '', $taskCode)),
-                                        'ad' => $codeAdNumeric,
+                                        'ad'              => $codeAdNumeric,
                                     ]
                                 );
 
-                                // A SUBTASK gerencia se é a V2, V3 ou a principal (null/0)
                                 $subTask = SubTask::where('task_id', $task->id)
                                     ->where('variation_number', $variationNumber)
                                     ->first();
 
                                 if ($subTask) {
-                                    $subTask->update([
-                                        'status' => SubTask::STATUS['CONCLUDED'],
-                                    ]);
+                                    $subTask->update(['status' => SubTask::STATUS['CONCLUDED']]);
                                 } else {
                                     $subTask = SubTask::create([
-                                        'task_id' => $task->id,
-                                        'description' => $variationNumber ? "Variação {$variationNumber}" : 'Subtask Inicial',
-                                        'status' => SubTask::STATUS['CONCLUDED'],
-                                        'variation' => $variationNumber ? 1 : 0,
+                                        'task_id'          => $task->id,
+                                        'description'      => $variationNumber ? "Variação {$variationNumber}" : 'Subtask Inicial',
+                                        'status'           => SubTask::STATUS['CONCLUDED'],
+                                        'variation'        => $variationNumber ? 1 : 0,
                                         'variation_number' => $variationNumber,
-                                        'hook' => 'H1',
+                                        'hook'             => 'H1',
                                     ]);
                                 }
 
                                 foreach ($agents as $agent) {
                                     if ($agent) {
-                                        UserTask::updateOrCreate(
-                                            [
-                                                'user_id' => $agent->id,
-                                                'sub_task_id' => $subTask->id
-                                            ]
-                                        );
+                                        UserTask::updateOrCreate([
+                                            'user_id'     => $agent->id,
+                                            'sub_task_id' => $subTask->id,
+                                        ]);
                                     }
                                 }
                             } catch (Exception $e) {
-                                Log::error("Erro ao salvar task Criativo. " . $e->getMessage(), ['ad' => $taskCode]);
+                                Log::error('RedTrack → Erro ao salvar Task/SubTask', [
+                                    'ad'   => $taskCode,
+                                    'erro' => $e->getMessage(),
+                                ]);
                             }
                         }
 
@@ -196,7 +238,6 @@ class RedtrackAPIService
                     } catch (Exception $innerEx) {
                         Log::warning('RedTrack → Falha ao salvar item', [
                             'page' => $page,
-                            // 'item' => json_encode($item),
                             'file' => $innerEx->getFile(),
                             'line' => $innerEx->getLine(),
                             'erro' => $innerEx->getMessage(),
@@ -205,45 +246,57 @@ class RedtrackAPIService
                     }
                 }
 
+                // log de ultimo item processado
+                Log::info('RedTrack → Amostra último item da página', [
+                    'rt_ad'       => $item['rt_ad']      ?? '(sem rt_ad)',
+                    'rt_campaign' => $item['rt_campaign'] ?? 'NÃO EXISTE',
+                    'revenue'     => $item['revenue']     ?? 'NÃO EXISTE',
+                    'cost'        => $item['cost']        ?? 0,
+                ]);
+
+                if (app()->runningInConsole()) {
+                    echo "Página {$page} processada\n";
+                    flush();
+                }
+
                 Log::info("RedTrack → Página {$page} processada", [
                     'itens_processados' => count($items),
                 ]);
 
-                // Se retornou menos que o limite, acabou
                 if (count($items) < $per) {
                     break;
                 }
 
                 $page++;
-                unset($items, $data); // libera memória
-                usleep(300000); // 0.3s entre chamadas
+                unset($items, $data);
+                usleep(300000); // 0.3s entre paginas
 
             } catch (Exception $e) {
                 Log::error('RedTrack → Exceção geral', [
-                    'page'  => $page,
-                    'erro'  => $e->getMessage(),
+                    'page' => $page,
+                    'erro' => $e->getMessage(),
                 ]);
-                break; // mantém dados processados e encerra
+                break;
             }
         }
 
         Log::info('RedTrack → Coleta finalizada', [
             'total_itens_processados' => $totalItems,
-            'última_página' => $page,
+            'última_página'           => $page,
         ]);
 
         return response()->json([
-            'msg' => 'Fetch de dados concluído',
-            'total_itens' => $totalItems,
-            'ultima_pagina' => $page
+            'msg'           => 'Fetch de dados concluído',
+            'total_itens'   => $totalItems,
+            'ultima_pagina' => $page,
         ], 200);
     }
 
     public function fetchReportDailyRange(string $dateFrom, string $dateTo): array
     {
-        $start = new \DateTime($dateFrom);
-        $end   = new \DateTime($dateTo);
-        $totalDays = 0;
+        $start      = new \DateTime($dateFrom);
+        $end        = new \DateTime($dateTo);
+        $totalDays  = 0;
         $totalItems = 0;
 
         Log::info("RedTrack → Iniciando fetch diário de {$dateFrom} até {$dateTo}");
@@ -255,30 +308,31 @@ class RedtrackAPIService
             try {
                 Log::info("RedTrack → Buscando dados do dia {$currentDate}");
 
-                // Chama o método já existente, mas passando o mesmo dia como range
-                $response = $this->fetchReport($currentDate, $currentDate, 'source,rt_ad');
-
-                // Se o método fetchReport retornar um Response JSON Laravel:
+                $response     = $this->fetchReport($currentDate, $currentDate, 'source,rt_campaign,rt_ad');
                 $responseData = $response->getData(true);
-                $itemsCount = $responseData['total_itens'] ?? 0;
+                $itemsCount   = $responseData['total_itens'] ?? 0;
 
                 $totalItems += $itemsCount;
+
+                Log::info("RedTrack → Dia {$currentDate} concluído", ['itens' => $itemsCount]);
             } catch (Exception $e) {
-                Log::error("RedTrack → Falha ao processar dia {$currentDate}: {$e->getMessage()}");
+                Log::error("RedTrack → Falha ao processar dia {$currentDate}", [
+                    'erro' => $e->getMessage(),
+                ]);
             }
 
             $start->modify('+1 day');
-            sleep(1); // evita sobrecarga de requisições
+            sleep(1);
         }
 
         Log::info('RedTrack → Coleta diária finalizada', [
-            'total_dias' => $totalDays,
+            'total_dias'              => $totalDays,
             'total_itens_processados' => $totalItems,
         ]);
 
         return [
-            'msg' => 'Coleta diária concluída',
-            'total_dias' => $totalDays,
+            'msg'         => 'Coleta diária concluída',
+            'total_dias'  => $totalDays,
             'total_itens' => $totalItems,
         ];
     }
