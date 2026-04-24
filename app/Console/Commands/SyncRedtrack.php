@@ -2,37 +2,34 @@
 
 namespace App\Console\Commands;
 
+use App\Services\RedTrack\RedtrackAPIService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SyncRedtrack extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:sync-redtrack';
+    protected $signature = 'app:sync-redtrack
+                            {--from= : Data inicial (Y-m-d). Padrão: hoje}
+                            {--to=   : Data final   (Y-m-d). Padrão: hoje}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
+    protected $description = 'Sincroniza dados do RedTrack para o período informado (padrão: hoje)';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
-        $this->info('🚀 Iniciando sync Redtrack...');
+        $from = $this->option('from') ?: Carbon::now('America/Sao_Paulo')->format('Y-m-d');
+        $to   = $this->option('to')   ?: Carbon::now('America/Sao_Paulo')->format('Y-m-d');
 
-        $service = new \App\Services\RedTrack\RedtrackAPIService();
-        $start = microtime(true);
+        $this->info("🚀 Iniciando sync RedTrack de {$from} até {$to}...");
 
-        $result = $service->fetchReportDailyRange('2026-04-01', '2026-04-17');
+        $service = app(RedtrackAPIService::class);
+        $start   = microtime(true);
 
-        $time = round(microtime(true) - $start, 2);
-        $this->info("✅ Finalizado em {$time}s — {$result['total_itens']} itens em {$result['total_dias']} dias");
+        $result = $service->fetchReportDailyRange($from, $to);
+
+        $elapsed = round(microtime(true) - $start, 2);
+
+        $this->info("✅ Finalizado em {$elapsed}s — {$result['total_itens']} itens em {$result['total_dias']} dias");
+
+        return self::SUCCESS;
     }
 }

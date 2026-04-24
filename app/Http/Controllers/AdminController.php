@@ -896,7 +896,7 @@ class AdminController extends Controller
     {
         $startDate = $request->input('date_from')
             ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
+            : Carbon::now()->startOfYear(); // <- de janeiro ate hoje
 
         $endDate = $request->input('date_to')
             ? Carbon::parse($request->input('date_to'))->endOfDay()

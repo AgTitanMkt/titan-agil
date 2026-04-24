@@ -24,14 +24,6 @@ class RedtrackAPIService
         $this->apiKey  = config('services.redtrack.api_key');
     }
 
-    /**
-     * busca relatorios de paginas da API RedTrack, com base no script Python validado que retorna os valores corretos.
-     *
-     * python:
-     *   by_ad[ad]["revenue"] += float(row.get("revenue", 0) or 0)  c
-     *   by_ad[ad]["cost"]    += float(row.get("cost", 0) or 0)
-     *   ad = row.get("rt_ad") or "(sem rt_ad)"                      
-     */
     public function fetchReport(
         string $dateFrom,
         string $dateTo,
@@ -99,7 +91,7 @@ class RedtrackAPIService
                 $data  = json_decode($response->body(), true, 512, JSON_BIGINT_AS_STRING);
                 $items = $data['items'] ?? $data ?? [];
 
-                // garante que e array indexado (lista de rows)
+                // lista de items vem como objeto quando só tem 1 item, convertendo para array
                 if (!empty($items) && !isset($items[0])) {
                     $items = [$items];
                 }
@@ -118,22 +110,19 @@ class RedtrackAPIService
                     try {
 
                         // ad = row.get("rt_ad") or "(sem rt_ad)"
-                        // nao joga pro lixo o NATIVE que nao tem rt_ad 
                         $rtAd = (isset($item['rt_ad']) && trim($item['rt_ad']) !== '')
                             ? trim($item['rt_ad'])
                             : '(sem rt_ad)';
 
-
-                        // revenue += float(row.get("revenue", 0) or 0)  <- campo "revenue", NAO "total_revenue"
+                        // revenue += float(row.get("revenue", 0) or 0)
                         $revenue = (float) (($item['revenue'] ?? 0) ?: 0);
                         $cost    = (float) (($item['cost']    ?? 0) ?: 0);
 
-                        // descarta apenas se absolutamente vazio 
+                        // descarta apenas se absolutamente vazio
                         if ($revenue == 0.0 && $cost == 0.0) {
                             continue;
                         }
 
-                        // profit - revenue - cost
                         $profit     = $revenue - $cost;
                         $rtCampaign = trim($item['rt_campaign'] ?? '');
                         $source     = trim($item['source']      ?? '');
@@ -150,30 +139,27 @@ class RedtrackAPIService
                             $variationNumber = (int) $matches[2];
                         }
 
-                        // date + name (rt_ad) + source + rt_campaign
-                        // garante que o mesmo criativo em campanhas diferentes nao colide
-                        RedtrackReport::updateOrCreate(
-                            [
-                                'date'        => $itemDate,
-                                'name'        => $rtAd,
-                                'source'      => $source,
-                                'rt_campaign' => $rtCampaign,
-                            ],
-                            [
-                                'alias'            => $item['source_alias'] ?? null,
-                                'normalized_rt_ad' => strtolower(str_replace(' ', '', $rtAd)),
-                                'ad_code'          => $taskCode,
-                                'clicks'           => (int) (($item['clicks']      ?? 0) ?: 0),
-                                'conversions'      => (int) (($item['conversions'] ?? 0) ?: 0),
-                                'cost'             => $cost,
-                                'revenue'          => $revenue,
-                                'profit'           => $profit,
-                                'roi'              => $cost > 0 ? round($profit / $cost, 6) : 0,
-                            ]
-                        );
+                        // cria report
+                        $report = RedtrackReport::firstOrNew([
+                            'date'        => $itemDate,
+                            'name'        => $rtAd,
+                            'source'      => $source,
+                            'rt_campaign' => $rtCampaign,
+                        ]);
+
+                        $report->alias            = $item['source_alias'] ?? null;
+                        $report->normalized_rt_ad = strtolower(str_replace(' ', '', $rtAd));
+                        $report->ad_code          = $taskCode;
+                        $report->clicks           = (int) (($item['clicks']      ?? 0) ?: 0);
+                        $report->conversions      = (int) (($item['conversions'] ?? 0) ?: 0);
+                        $report->cost             = $cost;
+                        $report->revenue          = $revenue;
+                        $report->profit           = $profit;
+                        $report->roi              = $cost > 0 ? round($profit / $cost, 6) : 0;
+                        $report->save();
+                        
 
                         // cria task/subTask apenas para criativos com codigo no padrao TITAN
-                        // e que tenham rt_ad real (nao "(sem rt_ad)")
                         if (
                             $rtAd !== '(sem rt_ad)' &&
                             preg_match('/^[A-Za-z0-9]+-[A-Za-z0-9]{2}-[A-Za-z0-9]{2}$/', $rtAd)
@@ -246,7 +232,7 @@ class RedtrackAPIService
                     }
                 }
 
-                // log de ultimo item processado
+                // log do ultimo item processado
                 Log::info('RedTrack → Amostra último item da página', [
                     'rt_ad'       => $item['rt_ad']      ?? '(sem rt_ad)',
                     'rt_campaign' => $item['rt_campaign'] ?? 'NÃO EXISTE',

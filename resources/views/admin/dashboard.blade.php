@@ -710,7 +710,7 @@
                 </div>
             </div>
 
-            <div class="metric-row">
+            {{-- <div class="metric-row">
                 <div>
                     <p>Neste mês</p>
                     <h4>@dollar($revenueMetrics['month'])</h4>
@@ -722,7 +722,7 @@
                 <div class="trend {{ $revenueMetrics['monthChange'] >= 0 ? 'up' : 'down' }}">
                     <i class="fas fa-arrow-{{ $revenueMetrics['monthChange'] >= 0 ? 'up' : 'down' }}"></i>
                 </div>
-            </div>
+            </div> --}}
 
         </div>
     </div>

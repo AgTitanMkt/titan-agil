@@ -9,16 +9,32 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Comand para sincrinizar dados redtrack
-Schedule::command('sync:redtrack --from="'.Carbon::now()->format('Y-m-d').'" --to="'.Carbon::now()->format('Y-m-d').'"')
+// roda a cada 10 minutos buscando dados de HOJE
+Schedule::command('app:sync-redtrack', [
+    '--from' => Carbon::now('America/Sao_Paulo')->format('Y-m-d'),
+    '--to'   => Carbon::now('America/Sao_Paulo')->format('Y-m-d'),
+])
     ->everyTenMinutes()
     ->withoutOverlapping()
     ->runInBackground()
-    ->sendOutputTo(storage_path('logs/sync_redtrack.log'));
+    ->appendOutputTo(storage_path('logs/sync_redtrack.log'));
 
-// Command para validação de criativos'
+// roda 1x por dia buscando ontem (para fechar dia anterior) 
+Schedule::command('app:sync-redtrack', [
+    '--from' => Carbon::yesterday('America/Sao_Paulo')->format('Y-m-d'),
+    '--to'   => Carbon::yesterday('America/Sao_Paulo')->format('Y-m-d'),
+])
+    ->dailyAt('01:00')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/sync_redtrack.log'));
+
+// validacao dos criativos
 Schedule::command('creatives:validate')
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->runInBackground()
-    ->sendOutputTo(storage_path('logs/creatives_validate.log'));
+    ->appendOutputTo(storage_path('logs/creatives_validate.log'));
+
+
+    
